@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <!--The viewport meta tag is used to improve the presentation and behavior of the samples
+    on iOS devices-->
+    <meta
+      name="viewport"
+      content="initial-scale=1, maximum-scale=1,user-scalable=no"
+    />
+    <title>Checkbox</title>
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/3.28/dijit/themes/nihilo/nihilo.css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/3.28/esri/css/esri.css"
+    />
+    <link rel="stylesheet" href="css/layout.css" />
+    <style>
+      html,
+      body {
+        height: 97%;
+        width: 98%;
+        margin: 1%;
+      }
+
+      #leftPane {
+        width: 30%;
+      }
+
+      #pane1 {
+        border: solid #97dcf2 1px;
+      }
+      #header {
+        border: solid #c0c0c0 2px;
+        background-color: #c0c0c0;
+      }
+      #HomeButton {
+        position: absolute;
+        top: 98px;
+        left: 26px;
+        z-index: 50;
+      }
+      #legendPane {
+        border: solid #97dcf2 1px;
+      }
+    </style>
+
+    <script src="http://js.arcgis.com/3.28/"></script>
+    <script>
+      var map;
+      require([
+        "dojo/parser",
+        "esri/map",
+        "esri/dijit/HomeButton",
+        "esri/layers/FeatureLayer",
+        "dojo/on",
+        "dojo/dom",
+        "dojo/dom-construct",
+        "esri/dijit/Legend",
+        "dojo/_base/array",
+        "dijit/form/CheckBox",
+        "esri/dijit/BasemapGallery",
+        "esri/dijit/Geocoder",
+        "esri/graphic",
+        "esri/symbols/SimpleMarkerSymbol",
+        "esri/geometry/screenUtils",
+        "dijit/layout/BorderContainer",
+        "dijit/layout/ContentPane",
+        "dijit/layout/AccordionContainer",
+        "dojo/domReady!",
+      ], function (
+        parser,
+        Map,
+        HomeButton,
+        FeatureLayer,
+        on,
+        dom,
+        domConstruct,
+        Legend,
+        array,
+        CheckBox,
+        BasemapGallery,
+        Geocoder,
+        Graphic,
+        SimpleMarkerSymbol,
+        screenUtils,
+        Color,
+        domConstract,
+        BorderContainer,
+        ContentPane,
+        AccordionContainer
+      ) {
+        parser.parse();
+        //Create the map
+        var map = new Map("map", {
+          center: [-80.734, 28.297],
+          zoom: 10,
+          basemap: "topo",
+        });
+        //Add a home button
+        var home = new HomeButton(
+          {
+            map: map,
+          },
+          "HomeButton"
+        );
+        home.startup();
+        //Add Feature Layers
+
+        var cities = new FeatureLayer(
+          "http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StatesCitiesRivers_USA/MapServer/0",
+          {
+            mode: FeatureLayer.MODE_ONDEMAND,
+            outFields: ["*"],
+          }
+        );
+        var rivers = new FeatureLayer(
+          "http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StatesCitiesRivers_USA/MapServer/1",
+          {
+            mode: FeatureLayer.MODE_ONDEMAND,
+            outFields: ["*"],
+          }
+        );
+        var states = new FeatureLayer(
+          "http://sampleserver1.arcgisonline.com/ArcGIS/rest/services/Specialty/ESRI_StatesCitiesRivers_USA/MapServer/2",
+          {
+            mode: FeatureLayer.MODE_ONDEMAND,
+            opacity: 0.5,
+            outFields: ["*"],
+          }
+        );
+
+        //add the legend
+        map.on("layers-add-result", function (evt) {
+          var layerInfo = array.map(evt.layers, function (layer, index) {
+            return {
+              layer: layer.layer,
+              title: layer.layer.name,
+            };
+          });
+          if (layerInfo.length > 0) {
+            var legendDijit = new Legend(
+              {
+                map: map,
+                layerInfos: layerInfo,
+              },
+              "legendDiv"
+            );
+            legendDijit.startup();
+          }
+          //add check boxes
+          array.forEach(
+            layerInfo,
+
+            function (layer) {
+              var layerName = layer.title;
+              if (layerName != "Cities") {
+                var checkBox = new CheckBox({
+                  name: "checkBox" + layer.layer.id,
+                  value: layer.layer.id,
+                  checked: layer.layer.visible,
+                  onChange: function (evt) {
+                    var clayer = map.getLayer(this.value);
+                    clayer.setVisibility(!clayer.visible);
+                    this.checked = clayer.visible;
+                  },
+                });
+                //add the check box and label to the TOC
+                domConstruct.place(checkBox.domNode, "layers", "after");
+                var checkLabel = domConstruct.create(
+                  "label",
+                  {
+                    for: checkBox.name,
+                    innerHTML: layerName,
+                  },
+                  checkBox.domNode,
+                  "after"
+                );
+                domConstruct.place("<br />", checkLabel, "after");
+              }
+            }
+          );
+        });
+        map.addLayers([states, rivers, cities]);
+        //Create the Basemap
+        var basemapGallery = new BasemapGallery(
+          {
+            showArcGISBasemaps: true,
+            map: map,
+          },
+          "basemapGallery"
+        );
+        basemapGallery.startup();
+        basemapGallery.on("error", function (msg) {
+          console.log("basemap gallery error:  ", msg);
+        });
+      });
+    </script>
+  </head>
+  <body class="nihilo">
+    <div
+      id="content"
+      data-dojo-type="dijit/layout/BorderContainer"
+      data-dojo-props="design:'headline', gutters:true"
+      style="width: 100%; height: 100%; margin: 0;"
+    >
+      <div
+        id="header"
+        data-dojo-type="dijit/layout/ContentPane"
+        data-dojo-props="region:'top'"
+      >
+        <strong>Layer Checkbox</strong>
+      </div>
+      <div
+        id="leftPane"
+        data-dojo-type="dijit/layout/ContentPane"
+        data-dojo-props="region:'left'"
+      >
+        <div data-dojo-type="dijit/layout/AccordionContainer">
+          <div
+            data-dojo-type="dijit/layout/ContentPane"
+            id="pane1"
+            data-dojo-props="title:'Base Maps', selected:false"
+          >
+            <div id="basemapGallery"></div>
+          </div>
+          <div
+            data-dojo-type="dijit/layout/ContentPane"
+            data-dojo-props="title:'Layers', selected:true"
+          >
+            <span style="padding: 10px 0;"
+              >Click to toggle each layer on or off</span
+            >
+            <div id="layers"></div>
+          </div>
+          <div
+            data-dojo-type="dijit/layout/ContentPane"
+            id="legendPane"
+            data-dojo-props="title:'Legend', selected:false"
+          >
+            <div id="legendDiv"></div>
+          </div>
+        </div>
+      </div>
+      <div
+        id="map"
+        data-dojo-type="dijit/layout/ContentPane"
+        data-dojo-props="region:'center'"
+        style="overflow: hidden;"
+      >
+        <div id="HomeButton"></div>
+      </div>
+    </div>
+  </body>
+</html>

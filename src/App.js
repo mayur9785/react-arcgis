@@ -1,8 +1,19 @@
-import React from 'react';
-import './App.css';
-import { MyMap } from './components/mapComonent/ArcgisMap';
-import { StarterMap } from './components/mapComonent/starterMap';
-import { MapWithLayer } from './components/mapComonent/mapWithLayer';
+import React from "react";
+import "./App.css";
+import { MyMap } from "./components/mapComonent/ArcgisMap";
+import { StarterMap } from "./components/mapComonent/starterMap";
+import { MapWithLayer } from "./components/mapComonent/mapWithLayer";
+import { MapWithLayerStyled } from "./components/mapComonent/mapWithLayerStyled";
+import { MapWithPopup } from "./components/mapComonent/mapWithPopup";
+import { MapServerSideQueryFeatureLayer } from "./components/mapComonent/mapServerSideQueryFeatureLayer";
+import { MapClientSideQueryFeatureLayer } from "./components/mapComonent/mapClientSideQueryFeatureLayer";
+import { MapFilterFeatureData } from "./components/mapComonent/mapFilterFeatureData";
+import { MapAddLayFromItem } from "./components/mapComonent/mapAddLayerFromItem";
+import { MapFeatureLayerWithLocalData } from "./components/mapComonent/mapFeatureLayerWithLocalData";
+import { MapWithLineAndPolygon } from "./components/mapComonent/mapWithLineAndPolygon";
+import { MapWithFeatureTable } from "./components/mapComonent/mapWithFeatureTable";
+import { StarterWebMap } from "./components/mapComonent/starterWebMap";
+import { MapWithShapeFile } from "./components/mapComonent/MapWithShapeFile";
 
 function App() {
   return (
@@ -10,7 +21,18 @@ function App() {
       {/* <header className="App-header"> */}
       {/* <MyMap /> */}
       {/* <StarterMap /> */}
-      <MapWithLayer />
+      {/* <MapWithLayer /> */}
+      {/* <MapWithLayerStyled /> */}
+      {/* <MapWithPopup /> */}
+      {/* <MapServerSideQueryFeatureLayer /> */}
+      {/* <MapClientSideQueryFeatureLayer /> */}
+      {/* <MapFilterFeatureData /> */}
+      {/* <MapAddLayFromItem /> */}
+      {/* <MapFeatureLayerWithLocalData /> */}
+      {/* <MapWithLineAndPolygon /> */}
+      {/* <MapWithFeatureTable /> */}
+      {/* <StarterWebMap /> */}
+      <MapWithShapeFile />
       {/* </header> */}
     </div>
   );

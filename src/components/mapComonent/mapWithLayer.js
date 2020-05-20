@@ -27,8 +27,6 @@ export const MapWithLayer = () => {
           "https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Trailheads/FeatureServer/0",
       });
 
-      map.add(trailheadsLayer);
-
       //   Trails feature layer (lines)
       var trailsLayer = new FeatureLayer({
         url:
@@ -57,14 +55,14 @@ export const MapWithLayer = () => {
         },
       });
 
-      map.add(trailsLayer, 0);
-
       // Parks and open spaces (polygons)
       var parksLayer = new FeatureLayer({
         url:
           "https://services3.arcgis.com/GVgbJbqm8hXASVYi/arcgis/rest/services/Parks_and_Open_Space/FeatureServer/0",
       });
 
+      map.add(trailheadsLayer);
+      map.add(trailsLayer, 0);
       map.add(parksLayer, 0);
 
       return () => {

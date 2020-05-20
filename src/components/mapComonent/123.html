@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="initial-scale=1, maximum-scale=1,user-scalable=no"
+    />
+    <title>FeatureTable widget with a map - 4.15</title>
+
+    <link
+      rel="stylesheet"
+      href="https://js.arcgis.com/4.15/esri/themes/light/main.css"
+    />
+    <script src="https://js.arcgis.com/4.15/"></script>
+
+    <style>
+      html,
+      body {
+        height: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+      }
+
+      #viewDiv {
+        height: 50%;
+        width: 100%;
+      }
+
+      #zoom {
+        margin-bottom: 5px;
+      }
+
+      #actions {
+        padding: 5px;
+      }
+
+      .container {
+        height: 50%;
+        width: 100%;
+      }
+    </style>
+    <script>
+      require([
+        "esri/WebMap",
+        "esri/views/MapView",
+        "esri/layers/FeatureLayer",
+        "esri/widgets/FeatureTable",
+        "esri/geometry/Point",
+        "esri/geometry/Multipoint",
+      ], function (
+        WebMap,
+        MapView,
+        FeatureLayer,
+        FeatureTable,
+        Point,
+        Multipoint
+      ) {
+        const highlights = [];
+        const webmap = new WebMap({
+          portalItem: {
+            id: "3c245fe893234d4f85e4edaa41a9e0bf",
+          },
+        });
+
+        let view = new MapView({
+          container: "viewDiv",
+          map: webmap,
+          popup: {
+            autoOpenEnabled: false,
+          }, //disable popups
+        });
+
+        view.when(function () {
+          const featureLayer = webmap.layers.getItemAt(0); //grabs the first layer in the map
+          featureLayer.title = "USFS Recreational areas";
+
+          // Create the feature table
+          const featureTable = new FeatureTable({
+            layer: featureLayer,
+            // Autocast the FieldColumnConfigs
+            fieldConfigs: [
+              {
+                name: "RECAREANAM",
+                label: "Recreation area name",
+              },
+              {
+                name: "FORESTNAME",
+                label: "Forest name",
+                direction: "asc",
+              },
+              {
+                name: "OPENSTATUS",
+                label: "Open status",
+              },
+              {
+                name: "OPEN_SEASO",
+                label: "Season begins",
+              },
+              {
+                name: "RECAREADES",
+                label: "Recreation description",
+              },
+              {
+                name: "RESTRICTIO",
+                label: "Restrictions",
+              },
+            ],
+            container: document.getElementById("tableDiv"),
+          });
+
+          // Add buttons to the mapView
+          view.ui.add(document.getElementById("actions"), "top-right");
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <div id="viewDiv"></div>
+    <div class="container">
+      <div id="tableDiv"></div>
+    </div>
+    <div id="actions" class="esri-widget">
+      <button class="esri-button" id="zoom">Zoom to selected feature</button>
+      <button class="esri-button" id="fullextent">Full extent</button>
+    </div>
+  </body>
+</html>

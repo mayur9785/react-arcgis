@@ -4,7 +4,7 @@ import { loadModules } from "esri-loader";
 import muskokaShapeFile from "../../files/shapeFiles/Muskoka_Civic_Address.shp";
 // import muskokaShapeFile from "./points.shp";
 const shapeFile = require("shapefile");
-
+const shp = require("shpjs");
 export const MapWithShapeFile = () => {
   const mapRef = useRef();
 
@@ -16,6 +16,9 @@ export const MapWithShapeFile = () => {
           basemap: "topo-vector",
         });
         const sf = [];
+        shp("files/pandr").then(function (geojson) {
+          //do something with your geojson
+        });
         shapeFile
           .open(muskokaShapeFile)
           .then((source) => {

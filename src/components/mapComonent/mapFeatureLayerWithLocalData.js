@@ -45,9 +45,9 @@ export const MapFeatureLayerWithLocalData = () => {
         return new Graphic({
           attributes: {
             ObjectId: place.id,
-            address: place.address,
-            imageUrl: place.imageUrl,
-            city: place.city,
+            address: `<h1>${place.address}</h1>`,
+            imageUrl: `<h1>${place.imageUrl}</h1>`,
+            city: `<h1>${place.city}</h1>`,
           },
           geometry: {
             type: "point",
@@ -78,24 +78,24 @@ export const MapFeatureLayerWithLocalData = () => {
           // autocasts as new PopupTemplate()
           title:
             "<img src='https://irisradgroup.maps.arcgis.com/sharing/rest/content/items/1402078d37094752a3632510e7006123/data' style='width: 25px; margin-bottom: -5px'>  <span style='font-size: 1.25rem'>Places in Los Angeles</span>",
-          // `<span  style='padding-top: 5px';"><img src='https://irisradgroup.maps.arcgis.com/sharing/rest/content/items/1402078d37094752a3632510e7006123/data' style='width: 25px; padding: 0px'></span>  <span style='font-size: 1.25rem'>Places in Los Angeles</span>`,
           content: [
+            // first column
             {
               type: "fields",
               fieldInfos: [
                 {
                   fieldName: "address",
-                  label: "Address",
+                  label: "<h1>Address</h1>",
                   visible: true,
                 },
                 {
                   fieldName: "imageUrl",
-                  label: "Image Url",
+                  label: "<h1>Image Url</h1>",
                   visible: true,
                 },
                 {
                   fieldName: "city",
-                  label: "city",
+                  label: "<h1>City</h1>",
                   visible: true,
                 },
               ],
@@ -107,7 +107,8 @@ export const MapFeatureLayerWithLocalData = () => {
                 {
                   title: "<b>Mexican Fan Palm</b>",
                   type: "image", // Autocasts as new ImageMediaInfo object
-                  caption: "tree species",
+                  caption:
+                    "<a href=https://www.sunset.com/wp-content/uploads/96006df453533f4c982212b8cc7882f5-800x0-c-default.jpg><h1>tree species</h1></a>",
                   // Autocasts as new ImageMediaInfoValue object
                   value: {
                     sourceURL:

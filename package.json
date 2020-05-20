@@ -11,7 +11,8 @@
     "react": "^16.13.0",
     "react-dom": "^16.13.0",
     "react-scripts": "3.4.0",
-    "shapefile": "^0.6.6"
+    "shapefile": "^0.6.6",
+    "shpjs": "^3.5.0"
   },
   "scripts": {
     "start": "react-scripts start",

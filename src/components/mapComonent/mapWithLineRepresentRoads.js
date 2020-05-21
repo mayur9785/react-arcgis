@@ -9,91 +9,6 @@ import {
 } from "../../containers/mapUtils/mapUtils";
 import { styleFont } from "../../containers/mapUtils/mapStyleUtils";
 
-const fontStyleTage = "h2";
-
-const fieldInfomation = [
-  {
-    fieldName: "NAME",
-    label: styleFont("Name", fontStyleTage),
-    visible: true,
-  },
-  {
-    fieldName: "SUFFIX",
-    label: styleFont("Suffix", fontStyleTage),
-    visible: true,
-  },
-  {
-    fieldName: "DIRECTION",
-    label: styleFont("direction", fontStyleTage),
-    visible: true,
-  },
-  {
-    fieldName: "L_LADD",
-    label: styleFont("L_LADD", fontStyleTage),
-    visible: true,
-  },
-  {
-    fieldName: "L_HADD",
-    label: styleFont("L_HADD", fontStyleTage),
-    visible: true,
-  },
-  {
-    fieldName: "R_LADD",
-    label: styleFont("R_LADD", fontStyleTage),
-    visible: true,
-  },
-  {
-    fieldName: "R_HADD",
-    label: styleFont("L_HADD", fontStyleTage),
-    visible: true,
-  },
-  {
-    fieldName: "L_MUNICIPA",
-    label: styleFont("L_MUNICIPA", fontStyleTage),
-    visible: true,
-  },
-  {
-    fieldName: "R_MUNICIPA",
-    label: styleFont("R_MUNICIPA", fontStyleTage),
-    visible: true,
-  },
-  {
-    fieldName: "ROAD_TYPE",
-    label: styleFont("Road Type", fontStyleTage),
-    visible: true,
-  },
-  {
-    fieldName: "NID",
-    label: styleFont("NID", fontStyleTage),
-    visible: true,
-  },
-  {
-    fieldName: "ROAD_NAME",
-    label: styleFont("Road Name", fontStyleTage),
-    visible: true,
-  },
-  {
-    fieldName: "ROAD_ALLIAS",
-    label: styleFont("Road Allias", fontStyleTage),
-    visible: true,
-  },
-  {
-    fieldName: "O_Range",
-    label: styleFont("O Range", fontStyleTage),
-    visible: true,
-  },
-  {
-    fieldName: "Urban_Area",
-    label: styleFont("Urban Area", fontStyleTage),
-    visible: true,
-  },
-  {
-    fieldName: "Oneway",
-    label: styleFont("Oneway", fontStyleTage),
-    visible: true,
-  },
-];
-
 const getFieldInfomation = (properties) => {
   const fieldInfos = [];
   for (const key in properties) {
@@ -154,12 +69,6 @@ export const MapWithLineRepresentRoads = () => {
         // const propertiesValues = Object.keys(singlePath.properties);
 
         return new Graphic({
-          // attributes: {
-          //   address: `<h1>${singlePath.address}</h1>`,
-          //   imageUrl: `<h1>${singlePath.imageUrl}</h1>`,
-          //   city: `<h1>${singlePath.city}</h1>`,
-          // },
-          // attributes: singlePath.properties,
           attributes: getTableKeyValue(singlePath.properties),
           geometry: {
             type: "polyline",
@@ -175,30 +84,9 @@ export const MapWithLineRepresentRoads = () => {
             // autocasts as new PopupTemplate()
             title: "Muskoka Road Network Shapefile: COOPERS FALLS RD",
             content: [
-              // first column
               {
                 type: "fields",
-
-                // fieldInfos: fieldInfomation,
                 fieldInfos: getFieldInfomation(boundaryPaths[0].properties),
-                // fieldInfos: [
-                //   {
-                //     fieldName: "city",
-                //     label: "<h1>City</h1>",
-                //     visible: true,
-                //   },
-                //   {
-                //     fieldName: "address",
-                //     label: "<h1>Address</h1>",
-                //     visible: true,
-                //   },
-
-                //   {
-                //     fieldName: "imageUrl",
-                //     label: "<h1>Image Url</h1>",
-                //     visible: true,
-                //   },
-                // ],
               },
             ],
           },
@@ -212,45 +100,6 @@ export const MapWithLineRepresentRoads = () => {
         graphics: boundaryGraphics,
       });
 
-      // const points = []
-      // for(let i = 0; i < 100; i++) {
-      //   points.push(new Graphic({
-      //     geometry: {
-      //       type: "point",
-      //       longitude: -118.80657463861,
-      //       latitude: 34.0005930608889,
-      //     },
-      //     symbol: {
-      //       type: "simple-marker",
-      //       color: [226, 119, 40], // orange
-      //       outline: {
-      //         color: [255, 255, 255], // white
-      //         width: 1,
-      //       },
-      //     },
-      //   }))
-      // }
-      // const boundaryGraphicsLayer = new GraphicsLayer({
-      //   id: "boundaryGraphicLayer",
-      //   graphics: [
-      //     new Graphic({
-      //       geometry: {
-      //         type: "point",
-      //         longitude: -118.80657463861,
-      //         latitude: 34.0005930608889,
-      //       },
-      //       symbol: {
-      //         type: "simple-marker",
-      //         color: [226, 119, 40], // orange
-      //         outline: {
-      //           color: [255, 255, 255], // white
-      //           width: 1,
-      //         },
-      //       },
-      //     }),
-      //   ],
-      // });
-      debugger;
       // add configured layer to map
       map.add(boundaryGraphicsLayer);
 

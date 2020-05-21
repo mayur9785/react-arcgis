@@ -111,14 +111,12 @@ const getTableKeyValue = (property) => {
     if (copiedProperty.hasOwnProperty(key)) {
       let element = copiedProperty[key];
       if (!isNaN(element) && element !== "") {
-        console.log("element", element);
         const twoDecimalString = Number(element).toFixed(2);
         element = parseFloat(twoDecimalString).toLocaleString("en");
       }
       copiedProperty[key] = styleFont(element, "h3");
     }
   }
-  debugger;
   return copiedProperty;
 };
 
@@ -127,9 +125,12 @@ export const MapWithLineRepresentRoads = () => {
 
   useEffect(() => {
     // lazy load the required ArcGIS API for JavaScript modules and CSS
-    loadModules(["esri/Graphic", "esri/layers/GraphicsLayer"], {
-      css: true,
-    }).then(async ([Graphic, GraphicsLayer]) => {
+    loadModules(
+      ["esri/Graphic", "esri/layers/GraphicsLayer", "esri/widgets/LayerList"],
+      {
+        css: true,
+      }
+    ).then(async ([Graphic, GraphicsLayer, LayerList]) => {
       // get city boundary and center point for mapView
       let boundaryPaths, boundaryCenter;
       try {
@@ -206,6 +207,7 @@ export const MapWithLineRepresentRoads = () => {
       });
 
       const boundaryGraphicsLayer = new GraphicsLayer({
+        title: "lucien demo layer",
         id: "boundaryGraphicLayer",
         graphics: boundaryGraphics,
       });
@@ -251,6 +253,20 @@ export const MapWithLineRepresentRoads = () => {
       debugger;
       // add configured layer to map
       map.add(boundaryGraphicsLayer);
+
+      // layer list
+      const layerList = new LayerList({
+        view: view,
+        listItemCreatedFunction: function (event) {
+          const item = event.item;
+          item.open = true;
+          // displays the legend for each layer list item
+          item.panel = {
+            content: ["legend"],
+          };
+        },
+      });
+      view.ui.add(layerList, "top-left");
 
       return () => {
         if (view) {

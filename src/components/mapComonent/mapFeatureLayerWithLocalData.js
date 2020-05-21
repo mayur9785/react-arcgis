@@ -160,11 +160,6 @@ export const MapFeatureLayerWithLocalData = () => {
         objectIdField: "ObjectID", // This must be defined when creating a layer from `Graphic` objects
         fields: [
           {
-            name: "ObjectID",
-            alias: "ObjectID",
-            type: "oid",
-          },
-          {
             name: "address",
             alias: "address",
             type: "string",

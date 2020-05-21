@@ -11,7 +11,12 @@ export async function getBoundaryAndCenter(zipFilePath) {
     if (geojsons) {
       geojsons.features.map((feature, index) => {
         const coordinates = feature.geometry.coordinates;
-        boundaryPaths.push([...coordinates]);
+        boundaryPaths.push({
+          coordinates: [...coordinates],
+          // address: "200 N Spring St, Los Angeles, CA 90012",
+          // imageUrl: "www.google.com",
+          // city: "Montreal",
+        });
         if (index === Math.floor(geojsons.features.length / 2)) {
           boundaryCenter = coordinates[0];
         }

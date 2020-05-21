@@ -6,13 +6,7 @@ import {
   getBaseMap,
   getMapView,
 } from "../../containers/mapUtils/mapUtils";
-
-const simpleLineSymbol = {
-  type: "simple-line",
-  color: [226, 119, 40], // orange
-  width: 2,
-};
-
+import { styleFont } from "../../containers/mapUtils/mapStyleUtils";
 const fieldInfomation = [
   {
     fieldName: "name",
@@ -95,22 +89,104 @@ const fieldInfomation = [
     visible: true,
   },
 ];
+// const fontStyleTage = "h2";
+
+// const fieldInfomation = [
+//   {
+//     fieldName: "name",
+//     label: styleFont("Name", fontStyleTage),
+//     visible: true,
+//   },
+//   {
+//     fieldName: "Suffix",
+//     label: styleFont("Suffix", fontStyleTage),
+//     visible: true,
+//   },
+//   {
+//     fieldName: "direction",
+//     label: styleFont("direction", fontStyleTage),
+//     visible: true,
+//   },
+//   {
+//     fieldName: "L_LADD",
+//     label: styleFont("L_LADD", fontStyleTage),
+//     visible: true,
+//   },
+//   {
+//     fieldName: "L_HADD",
+//     label: styleFont("L_HADD", fontStyleTage),
+//     visible: true,
+//   },
+//   {
+//     fieldName: "R_LADD",
+//     label: styleFont("R_LADD", fontStyleTage),
+//     visible: true,
+//   },
+//   {
+//     fieldName: "R_HADD",
+//     label: styleFont("L_HADD", fontStyleTage),
+//     visible: true,
+//   },
+//   {
+//     fieldName: "L_MUNICIPA",
+//     label: styleFont("L_MUNICIPA", fontStyleTage),
+//     visible: true,
+//   },
+//   {
+//     fieldName: "R_MUNICIPA",
+//     label: styleFont("R_MUNICIPA", fontStyleTage),
+//     visible: true,
+//   },
+//   {
+//     fieldName: "ROAD_TYPE",
+//     label: styleFont("Road Type", fontStyleTage),
+//     visible: true,
+//   },
+//   {
+//     fieldName: "NID",
+//     label: styleFont("NID", fontStyleTage),
+//     visible: true,
+//   },
+//   {
+//     fieldName: "ROAD_NAME",
+//     label: styleFont("Road Name", fontStyleTage),
+//     visible: true,
+//   },
+//   {
+//     fieldName: "ROAD_ALLIAS",
+//     label: styleFont("Road Allias", fontStyleTage),
+//     visible: true,
+//   },
+//   {
+//     fieldName: "O_Range",
+//     label: styleFont("O Range", fontStyleTage),
+//     visible: true,
+//   },
+//   {
+//     fieldName: "Urban_Area",
+//     label: styleFont("Urban Area", fontStyleTage),
+//     visible: true,
+//   },
+//   {
+//     fieldName: "Oneway",
+//     label: styleFont("Oneway", fontStyleTage),
+//     visible: true,
+//   },
+// ];
 
 export const MapWithLineRepresentRoads = () => {
   const mapRef = useRef();
 
   useEffect(() => {
     // lazy load the required ArcGIS API for JavaScript modules and CSS
-    loadModules(
-      ["esri/Graphic", "esri/layers/GraphicsLayer", "esri/layers/FeatureLayer"],
-      {
-        css: true,
-      }
-    ).then(async ([Graphic, GraphicsLayer, FeatureLayer]) => {
+    loadModules(["esri/Graphic", "esri/layers/GraphicsLayer"], {
+      css: true,
+    }).then(async ([Graphic, GraphicsLayer]) => {
       // get city boundary and center point for mapView
       let boundaryPaths, boundaryCenter;
       try {
         const result = await getBoundaryAndCenter(muskokaShapeFileZip);
+
         boundaryPaths = result.boundaryPaths;
         boundaryCenter = result.boundaryCenter;
       } catch (error) {
@@ -124,39 +200,109 @@ export const MapWithLineRepresentRoads = () => {
       const map = await getBaseMap();
       const view = await getMapView(map, boundaryCenter, mapRef.current);
 
-      const graphicsLayer = new GraphicsLayer();
-      map.add(graphicsLayer);
-
-      const lineAndPolyLine = new Graphic({
-        // geometry: polyline,
-        geometry: {
-          type: "polyline",
-          paths: boundaryPaths,
-        },
-        symbol: simpleLineSymbol,
+      // instantiate graphics as it is the source of graphics layer
+      debugger;
+      const boundaryGraphics = boundaryPaths.map((singlePath, index) => {
+        return new Graphic({
+          // attributes: {
+          //   ObjectId: index,
+          //   // address: `<h1>${singlePath.address}</h1>`,
+          //   // imageUrl: `<h1>${singlePath.imageUrl}</h1>`,
+          //   // city: `<h1>${singlePath.city}</h1>`,
+          // },
+          geometry: {
+            type: "polyline",
+            paths: singlePath,
+          },
+          // symbol: simpleLineSymbol0,
+          symbol: {
+            type: "simple-line",
+            color: [208, 2, 5, 0.8], // orange
+            width: 1,
+          },
+          // popupTemplate: {
+          //   // autocasts as new PopupTemplate()
+          //   title: "Muskoka Road Network Shapefile: COOPERS FALLS RD",
+          //   content: [
+          //     // first column
+          //     {
+          //       type: "fields",
+          //       fieldInfos: fieldInfomation,
+          //     },
+          //   ],
+          // },
+          // objectIdField: "ObjectID", // This must be defined when creating a layer from `Graphic` objects
+          // fields: [
+          //   {
+          //     name: "ObjectID",
+          //     alias: "ObjectID",
+          //     type: "oid",
+          //   },
+          //   {
+          //     name: "address",
+          //     alias: "address",
+          //     type: "string",
+          //   },
+          //   {
+          //     name: "imageUrl",
+          //     alias: "image url",
+          //     type: "string",
+          //   },
+          //   {
+          //     name: "city",
+          //     alias: "City",
+          //     type: "xml",
+          //   },
+          // ],
+        });
       });
 
-      const boundaryLayer = new FeatureLayer({
-        source: lineAndPolyLine,
-        popupTemplate: {
-          title: "Trail Information",
-          content: "This is {L_LADD} with {ELEV_GAIN} ft of climbing.",
-        },
-        // popupTemplate: {
-        // autocasts as new PopupTemplate()
-        //   title: "Muskoka Road Network Shapefile: COOPERS FALLS RD",
-        //   content: [
-        //     // first column
-        //     {
-        //       type: "fields",
-        //       fieldInfos: fieldInfomation,
-        //     },
-        //   ],
-        // },
+      const boundaryGraphicsLayer = new GraphicsLayer({
+        id: "boundaryGraphicLayer",
+        graphics: boundaryGraphics,
       });
 
-      // graphicsLayer.add(lineAndPolyLine);
-      map.layers.add(boundaryLayer);
+      // const points = []
+      // for(let i = 0; i < 100; i++) {
+      //   points.push(new Graphic({
+      //     geometry: {
+      //       type: "point",
+      //       longitude: -118.80657463861,
+      //       latitude: 34.0005930608889,
+      //     },
+      //     symbol: {
+      //       type: "simple-marker",
+      //       color: [226, 119, 40], // orange
+      //       outline: {
+      //         color: [255, 255, 255], // white
+      //         width: 1,
+      //       },
+      //     },
+      //   }))
+      // }
+      // const boundaryGraphicsLayer = new GraphicsLayer({
+      //   id: "boundaryGraphicLayer",
+      //   graphics: [
+      //     new Graphic({
+      //       geometry: {
+      //         type: "point",
+      //         longitude: -118.80657463861,
+      //         latitude: 34.0005930608889,
+      //       },
+      //       symbol: {
+      //         type: "simple-marker",
+      //         color: [226, 119, 40], // orange
+      //         outline: {
+      //           color: [255, 255, 255], // white
+      //           width: 1,
+      //         },
+      //       },
+      //     }),
+      //   ],
+      // });
+      debugger;
+      // add configured layer to map
+      map.add(boundaryGraphicsLayer);
 
       return () => {
         if (view) {

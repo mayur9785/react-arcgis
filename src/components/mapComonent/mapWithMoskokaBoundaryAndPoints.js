@@ -174,7 +174,7 @@ export const MapWithMoskokaBoundaryAndPoints = () => {
           },
         });
       });
-
+      debugger;
       var shapeFileLayer = new FeatureLayer({
         url:
           "https://services8.arcgis.com/JOTTuViCh6VvErd7/arcgis/rest/services/Muskoka_Road_Network_Shapefile/FeatureServer",

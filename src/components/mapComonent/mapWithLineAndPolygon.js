@@ -18,7 +18,7 @@ const simpleMarkerSymbol = {
 
 const simpleLineSymbol = {
   type: "simple-line",
-  color: [226, 119, 40], // orange
+  color: [0, 0, 0], // orange
   width: 2,
 };
 

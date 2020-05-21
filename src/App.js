@@ -33,8 +33,8 @@ function App() {
       {/* <MapWithLineAndPolygon /> */}
       {/* <MapWithFeatureTable /> */}
       {/* <StarterWebMap /> */}
-      <MapWithMoskokaBoundaryAndPoints />
-      {/* <MapWithLineRepresentRoads /> */}
+      {/* <MapWithMoskokaBoundaryAndPoints /> */}
+      <MapWithLineRepresentRoads />
       {/* </header> */}
     </div>
   );

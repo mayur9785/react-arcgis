@@ -13,7 +13,8 @@ import { MapFeatureLayerWithLocalData } from "./components/mapComonent/mapFeatur
 import { MapWithLineAndPolygon } from "./components/mapComonent/mapWithLineAndPolygon";
 import { MapWithFeatureTable } from "./components/mapComonent/mapWithFeatureTable";
 import { StarterWebMap } from "./components/mapComonent/starterWebMap";
-import { MapWithShapeFile } from "./components/mapComonent/MapWithShapeFile";
+import { MapWithMoskokaBoundaryAndPoints } from "./components/mapComonent/mapWithMoskokaBoundaryAndPoints";
+import { MapWithLineRepresentRoads } from "./components/mapComonent/mapWithLineRepresentRoads";
 
 function App() {
   return (
@@ -32,7 +33,8 @@ function App() {
       {/* <MapWithLineAndPolygon /> */}
       {/* <MapWithFeatureTable /> */}
       {/* <StarterWebMap /> */}
-      <MapWithShapeFile />
+      <MapWithMoskokaBoundaryAndPoints />
+      {/* <MapWithLineRepresentRoads /> */}
       {/* </header> */}
     </div>
   );

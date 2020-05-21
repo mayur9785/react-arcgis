@@ -5,106 +5,25 @@ import {
   getBoundaryAndCenter,
   getBaseMap,
   getMapView,
+  getFieldInfo,
 } from "../../containers/mapUtils/mapUtils";
 import { styleFont } from "../../containers/mapUtils/mapStyleUtils";
-// const fieldInfomation = [
-//   {
-//     fieldName: "name",
-//     label: "Name",
-//     visible: true,
-//   },
-//   {
-//     fieldName: "Suffix",
-//     label: "Suffix",
-//     visible: true,
-//   },
-//   {
-//     fieldName: "direction",
-//     label: "direction",
-//     visible: true,
-//   },
-//   {
-//     fieldName: "L_LADD",
-//     label: "L_LADD",
-//     visible: true,
-//   },
-//   {
-//     fieldName: "L_HADD",
-//     label: "L_HADD",
-//     visible: true,
-//   },
-//   {
-//     fieldName: "R_LADD",
-//     label: "R_LADD",
-//     visible: true,
-//   },
-//   {
-//     fieldName: "R_HADD",
-//     label: "L_HADD",
-//     visible: true,
-//   },
-//   {
-//     fieldName: "L_MUNICIPA",
-//     label: "L_MUNICIPA",
-//     visible: true,
-//   },
-//   {
-//     fieldName: "R_MUNICIPA",
-//     label: "R_MUNICIPA",
-//     visible: true,
-//   },
-//   {
-//     fieldName: "ROAD_TYPE",
-//     label: "Road Type",
-//     visible: true,
-//   },
-//   {
-//     fieldName: "NID",
-//     label: "NID",
-//     visible: true,
-//   },
-//   {
-//     fieldName: "ROAD_NAME",
-//     label: "Road Name",
-//     visible: true,
-//   },
-//   {
-//     fieldName: "ROAD_ALLIAS",
-//     label: "Road Allias",
-//     visible: true,
-//   },
-//   {
-//     fieldName: "O_Range",
-//     label: "O Range",
-//     visible: true,
-//   },
-//   {
-//     fieldName: "Urban_Area",
-//     label: "Urban Area",
-//     visible: true,
-//   },
-//   {
-//     fieldName: "Oneway",
-//     label: "Oneway",
-//     visible: true,
-//   },
-// ];
 
 const fontStyleTage = "h2";
 
 const fieldInfomation = [
   {
-    fieldName: "name",
+    fieldName: "NAME",
     label: styleFont("Name", fontStyleTage),
     visible: true,
   },
   {
-    fieldName: "Suffix",
+    fieldName: "SUFFIX",
     label: styleFont("Suffix", fontStyleTage),
     visible: true,
   },
   {
-    fieldName: "direction",
+    fieldName: "DIRECTION",
     label: styleFont("direction", fontStyleTage),
     visible: true,
   },
@@ -175,6 +94,34 @@ const fieldInfomation = [
   },
 ];
 
+const getFieldInfomation = (properties) => {
+  const fieldInfos = [];
+  for (const key in properties) {
+    if (properties.hasOwnProperty(key)) {
+      const fieldInfo = getFieldInfo(key);
+      fieldInfos.push(fieldInfo);
+    }
+  }
+  return fieldInfos;
+};
+
+const getTableKeyValue = (property) => {
+  const copiedProperty = { ...property };
+  for (const key in copiedProperty) {
+    if (copiedProperty.hasOwnProperty(key)) {
+      let element = copiedProperty[key];
+      if (!isNaN(element) && element !== "") {
+        console.log("element", element);
+        const twoDecimalString = Number(element).toFixed(2);
+        element = parseFloat(twoDecimalString).toLocaleString("en");
+      }
+      copiedProperty[key] = styleFont(element, "h3");
+    }
+  }
+  debugger;
+  return copiedProperty;
+};
+
 export const MapWithLineRepresentRoads = () => {
   const mapRef = useRef();
 
@@ -202,15 +149,17 @@ export const MapWithLineRepresentRoads = () => {
       const view = await getMapView(map, boundaryCenter, mapRef.current);
 
       // instantiate graphics as it is the source of graphics layer
-      debugger;
-      const boundaryGraphics = boundaryPaths.map((singlePath, index) => {
+      const boundaryGraphics = boundaryPaths.map((singlePath) => {
+        // const propertiesValues = Object.keys(singlePath.properties);
+
         return new Graphic({
-          attributes: {
-            ObjectId: index,
-            address: `<h1>${singlePath.address}</h1>`,
-            imageUrl: `<h1>${singlePath.imageUrl}</h1>`,
-            city: `<h1>${singlePath.city}</h1>`,
-          },
+          // attributes: {
+          //   address: `<h1>${singlePath.address}</h1>`,
+          //   imageUrl: `<h1>${singlePath.imageUrl}</h1>`,
+          //   city: `<h1>${singlePath.city}</h1>`,
+          // },
+          // attributes: singlePath.properties,
+          attributes: getTableKeyValue(singlePath.properties),
           geometry: {
             type: "polyline",
             paths: singlePath.coordinates,
@@ -228,33 +177,31 @@ export const MapWithLineRepresentRoads = () => {
               // first column
               {
                 type: "fields",
-                fieldInfos: fieldInfomation,
+
+                // fieldInfos: fieldInfomation,
+                fieldInfos: getFieldInfomation(boundaryPaths[0].properties),
+                // fieldInfos: [
+                //   {
+                //     fieldName: "city",
+                //     label: "<h1>City</h1>",
+                //     visible: true,
+                //   },
+                //   {
+                //     fieldName: "address",
+                //     label: "<h1>Address</h1>",
+                //     visible: true,
+                //   },
+
+                //   {
+                //     fieldName: "imageUrl",
+                //     label: "<h1>Image Url</h1>",
+                //     visible: true,
+                //   },
+                // ],
               },
             ],
           },
-          objectIdField: "ObjectID", // This must be defined when creating a layer from `Graphic` objects
-          fields: [
-            {
-              name: "ObjectID",
-              alias: "ObjectID",
-              type: "oid",
-            },
-            {
-              name: "address",
-              alias: "address",
-              type: "string",
-            },
-            {
-              name: "imageUrl",
-              alias: "image url",
-              type: "string",
-            },
-            {
-              name: "city",
-              alias: "City",
-              type: "xml",
-            },
-          ],
+          objectIdField: "ObjectId", // This must be defined when creating a layer from `Graphic` objects
         });
       });
 

@@ -1,4 +1,5 @@
 import { loadModules } from "esri-loader";
+import { styleFont } from "./mapStyleUtils";
 const shp = require("shpjs");
 
 export async function getBoundaryAndCenter(zipFilePath) {
@@ -9,13 +10,12 @@ export async function getBoundaryAndCenter(zipFilePath) {
       reject(error);
     });
     if (geojsons) {
+      console.log("all geojsons", geojsons);
       geojsons.features.map((feature, index) => {
         const coordinates = feature.geometry.coordinates;
         boundaryPaths.push({
-          coordinates: [...coordinates],
-          address: "200 N Spring St, Los Angeles, CA 90012",
-          imageUrl: "www.google.com",
-          city: "Montreal",
+          coordinates: feature.geometry.coordinates,
+          properties: feature.properties,
         });
         if (index === Math.floor(geojsons.features.length / 2)) {
           boundaryCenter = coordinates[0];
@@ -59,4 +59,13 @@ export async function getMapView(
     });
   }
   return mapViewInstance;
+}
+
+export function getFieldInfo(fieldTitle, fontStyleTag = "h3") {
+  let info = {
+    fieldName: fieldTitle,
+    label: fontStyleTag ? styleFont(fieldTitle, fontStyleTag) : fieldTitle,
+    visible: true,
+  };
+  return info;
 }

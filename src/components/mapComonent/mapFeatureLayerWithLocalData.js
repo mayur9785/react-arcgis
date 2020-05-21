@@ -67,7 +67,7 @@ export const MapFeatureLayerWithLocalData = () => {
       const graphics = places0.map((place, index) => {
         return new Graphic({
           attributes: {
-            ObjectId: place.id,
+            // ObjectId: place.id,
             address: `<h1>${place.address}</h1>`,
             imageUrl: `<h1>${place.imageUrl}</h1>`,
             city: `<h1>${place.city}</h1>`,
@@ -157,7 +157,7 @@ export const MapFeatureLayerWithLocalData = () => {
             },
           ],
         },
-        objectIdField: "ObjectID", // This must be defined when creating a layer from `Graphic` objects
+        objectIdField: "abc", // This must be defined when creating a layer from `Graphic` objects
         fields: [
           {
             name: "address",

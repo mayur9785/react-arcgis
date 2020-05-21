@@ -7,172 +7,173 @@ import {
   getMapView,
 } from "../../containers/mapUtils/mapUtils";
 import { styleFont } from "../../containers/mapUtils/mapStyleUtils";
-const fieldInfomation = [
-  {
-    fieldName: "name",
-    label: "Name",
-    visible: true,
-  },
-  {
-    fieldName: "Suffix",
-    label: "Suffix",
-    visible: true,
-  },
-  {
-    fieldName: "direction",
-    label: "direction",
-    visible: true,
-  },
-  {
-    fieldName: "L_LADD",
-    label: "L_LADD",
-    visible: true,
-  },
-  {
-    fieldName: "L_HADD",
-    label: "L_HADD",
-    visible: true,
-  },
-  {
-    fieldName: "R_LADD",
-    label: "R_LADD",
-    visible: true,
-  },
-  {
-    fieldName: "R_HADD",
-    label: "L_HADD",
-    visible: true,
-  },
-  {
-    fieldName: "L_MUNICIPA",
-    label: "L_MUNICIPA",
-    visible: true,
-  },
-  {
-    fieldName: "R_MUNICIPA",
-    label: "R_MUNICIPA",
-    visible: true,
-  },
-  {
-    fieldName: "ROAD_TYPE",
-    label: "Road Type",
-    visible: true,
-  },
-  {
-    fieldName: "NID",
-    label: "NID",
-    visible: true,
-  },
-  {
-    fieldName: "ROAD_NAME",
-    label: "Road Name",
-    visible: true,
-  },
-  {
-    fieldName: "ROAD_ALLIAS",
-    label: "Road Allias",
-    visible: true,
-  },
-  {
-    fieldName: "O_Range",
-    label: "O Range",
-    visible: true,
-  },
-  {
-    fieldName: "Urban_Area",
-    label: "Urban Area",
-    visible: true,
-  },
-  {
-    fieldName: "Oneway",
-    label: "Oneway",
-    visible: true,
-  },
-];
-// const fontStyleTage = "h2";
-
 // const fieldInfomation = [
 //   {
 //     fieldName: "name",
-//     label: styleFont("Name", fontStyleTage),
+//     label: "Name",
 //     visible: true,
 //   },
 //   {
 //     fieldName: "Suffix",
-//     label: styleFont("Suffix", fontStyleTage),
+//     label: "Suffix",
 //     visible: true,
 //   },
 //   {
 //     fieldName: "direction",
-//     label: styleFont("direction", fontStyleTage),
+//     label: "direction",
 //     visible: true,
 //   },
 //   {
 //     fieldName: "L_LADD",
-//     label: styleFont("L_LADD", fontStyleTage),
+//     label: "L_LADD",
 //     visible: true,
 //   },
 //   {
 //     fieldName: "L_HADD",
-//     label: styleFont("L_HADD", fontStyleTage),
+//     label: "L_HADD",
 //     visible: true,
 //   },
 //   {
 //     fieldName: "R_LADD",
-//     label: styleFont("R_LADD", fontStyleTage),
+//     label: "R_LADD",
 //     visible: true,
 //   },
 //   {
 //     fieldName: "R_HADD",
-//     label: styleFont("L_HADD", fontStyleTage),
+//     label: "L_HADD",
 //     visible: true,
 //   },
 //   {
 //     fieldName: "L_MUNICIPA",
-//     label: styleFont("L_MUNICIPA", fontStyleTage),
+//     label: "L_MUNICIPA",
 //     visible: true,
 //   },
 //   {
 //     fieldName: "R_MUNICIPA",
-//     label: styleFont("R_MUNICIPA", fontStyleTage),
+//     label: "R_MUNICIPA",
 //     visible: true,
 //   },
 //   {
 //     fieldName: "ROAD_TYPE",
-//     label: styleFont("Road Type", fontStyleTage),
+//     label: "Road Type",
 //     visible: true,
 //   },
 //   {
 //     fieldName: "NID",
-//     label: styleFont("NID", fontStyleTage),
+//     label: "NID",
 //     visible: true,
 //   },
 //   {
 //     fieldName: "ROAD_NAME",
-//     label: styleFont("Road Name", fontStyleTage),
+//     label: "Road Name",
 //     visible: true,
 //   },
 //   {
 //     fieldName: "ROAD_ALLIAS",
-//     label: styleFont("Road Allias", fontStyleTage),
+//     label: "Road Allias",
 //     visible: true,
 //   },
 //   {
 //     fieldName: "O_Range",
-//     label: styleFont("O Range", fontStyleTage),
+//     label: "O Range",
 //     visible: true,
 //   },
 //   {
 //     fieldName: "Urban_Area",
-//     label: styleFont("Urban Area", fontStyleTage),
+//     label: "Urban Area",
 //     visible: true,
 //   },
 //   {
 //     fieldName: "Oneway",
-//     label: styleFont("Oneway", fontStyleTage),
+//     label: "Oneway",
 //     visible: true,
 //   },
 // ];
+
+const fontStyleTage = "h2";
+
+const fieldInfomation = [
+  {
+    fieldName: "name",
+    label: styleFont("Name", fontStyleTage),
+    visible: true,
+  },
+  {
+    fieldName: "Suffix",
+    label: styleFont("Suffix", fontStyleTage),
+    visible: true,
+  },
+  {
+    fieldName: "direction",
+    label: styleFont("direction", fontStyleTage),
+    visible: true,
+  },
+  {
+    fieldName: "L_LADD",
+    label: styleFont("L_LADD", fontStyleTage),
+    visible: true,
+  },
+  {
+    fieldName: "L_HADD",
+    label: styleFont("L_HADD", fontStyleTage),
+    visible: true,
+  },
+  {
+    fieldName: "R_LADD",
+    label: styleFont("R_LADD", fontStyleTage),
+    visible: true,
+  },
+  {
+    fieldName: "R_HADD",
+    label: styleFont("L_HADD", fontStyleTage),
+    visible: true,
+  },
+  {
+    fieldName: "L_MUNICIPA",
+    label: styleFont("L_MUNICIPA", fontStyleTage),
+    visible: true,
+  },
+  {
+    fieldName: "R_MUNICIPA",
+    label: styleFont("R_MUNICIPA", fontStyleTage),
+    visible: true,
+  },
+  {
+    fieldName: "ROAD_TYPE",
+    label: styleFont("Road Type", fontStyleTage),
+    visible: true,
+  },
+  {
+    fieldName: "NID",
+    label: styleFont("NID", fontStyleTage),
+    visible: true,
+  },
+  {
+    fieldName: "ROAD_NAME",
+    label: styleFont("Road Name", fontStyleTage),
+    visible: true,
+  },
+  {
+    fieldName: "ROAD_ALLIAS",
+    label: styleFont("Road Allias", fontStyleTage),
+    visible: true,
+  },
+  {
+    fieldName: "O_Range",
+    label: styleFont("O Range", fontStyleTage),
+    visible: true,
+  },
+  {
+    fieldName: "Urban_Area",
+    label: styleFont("Urban Area", fontStyleTage),
+    visible: true,
+  },
+  {
+    fieldName: "Oneway",
+    label: styleFont("Oneway", fontStyleTage),
+    visible: true,
+  },
+];
 
 export const MapWithLineRepresentRoads = () => {
   const mapRef = useRef();
@@ -204,15 +205,15 @@ export const MapWithLineRepresentRoads = () => {
       debugger;
       const boundaryGraphics = boundaryPaths.map((singlePath, index) => {
         return new Graphic({
-          // attributes: {
-          //   ObjectId: index,
-          //   // address: `<h1>${singlePath.address}</h1>`,
-          //   // imageUrl: `<h1>${singlePath.imageUrl}</h1>`,
-          //   // city: `<h1>${singlePath.city}</h1>`,
-          // },
+          attributes: {
+            ObjectId: index,
+            address: `<h1>${singlePath.address}</h1>`,
+            imageUrl: `<h1>${singlePath.imageUrl}</h1>`,
+            city: `<h1>${singlePath.city}</h1>`,
+          },
           geometry: {
             type: "polyline",
-            paths: singlePath,
+            paths: singlePath.coordinates,
           },
           // symbol: simpleLineSymbol0,
           symbol: {
@@ -220,40 +221,40 @@ export const MapWithLineRepresentRoads = () => {
             color: [208, 2, 5, 0.8], // orange
             width: 1,
           },
-          // popupTemplate: {
-          //   // autocasts as new PopupTemplate()
-          //   title: "Muskoka Road Network Shapefile: COOPERS FALLS RD",
-          //   content: [
-          //     // first column
-          //     {
-          //       type: "fields",
-          //       fieldInfos: fieldInfomation,
-          //     },
-          //   ],
-          // },
-          // objectIdField: "ObjectID", // This must be defined when creating a layer from `Graphic` objects
-          // fields: [
-          //   {
-          //     name: "ObjectID",
-          //     alias: "ObjectID",
-          //     type: "oid",
-          //   },
-          //   {
-          //     name: "address",
-          //     alias: "address",
-          //     type: "string",
-          //   },
-          //   {
-          //     name: "imageUrl",
-          //     alias: "image url",
-          //     type: "string",
-          //   },
-          //   {
-          //     name: "city",
-          //     alias: "City",
-          //     type: "xml",
-          //   },
-          // ],
+          popupTemplate: {
+            // autocasts as new PopupTemplate()
+            title: "Muskoka Road Network Shapefile: COOPERS FALLS RD",
+            content: [
+              // first column
+              {
+                type: "fields",
+                fieldInfos: fieldInfomation,
+              },
+            ],
+          },
+          objectIdField: "ObjectID", // This must be defined when creating a layer from `Graphic` objects
+          fields: [
+            {
+              name: "ObjectID",
+              alias: "ObjectID",
+              type: "oid",
+            },
+            {
+              name: "address",
+              alias: "address",
+              type: "string",
+            },
+            {
+              name: "imageUrl",
+              alias: "image url",
+              type: "string",
+            },
+            {
+              name: "city",
+              alias: "City",
+              type: "xml",
+            },
+          ],
         });
       });
 

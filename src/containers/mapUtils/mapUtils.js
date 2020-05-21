@@ -13,9 +13,9 @@ export async function getBoundaryAndCenter(zipFilePath) {
         const coordinates = feature.geometry.coordinates;
         boundaryPaths.push({
           coordinates: [...coordinates],
-          // address: "200 N Spring St, Los Angeles, CA 90012",
-          // imageUrl: "www.google.com",
-          // city: "Montreal",
+          address: "200 N Spring St, Los Angeles, CA 90012",
+          imageUrl: "www.google.com",
+          city: "Montreal",
         });
         if (index === Math.floor(geojsons.features.length / 2)) {
           boundaryCenter = coordinates[0];

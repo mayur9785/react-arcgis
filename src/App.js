@@ -15,6 +15,7 @@ import { MapWithFeatureTable } from "./components/mapComonent/mapWithFeatureTabl
 import { StarterWebMap } from "./components/mapComonent/starterWebMap";
 import { MapWithMoskokaBoundaryAndPoints } from "./components/mapComonent/mapWithMoskokaBoundaryAndPoints";
 import { MapWithLineRepresentRoads } from "./components/mapComonent/mapWithLineRepresentRoads";
+import { MapWithFeatureLayer } from "./components/mapComonent/roadWithFeatureLayer/fromFeatureLayer";
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
       {/* <StarterWebMap /> */}
       {/* <MapWithMoskokaBoundaryAndPoints /> */}
       <MapWithLineRepresentRoads />
+      {/* <MapWithFeatureLayer /> */}
       {/* </header> */}
     </div>
   );

@@ -158,6 +158,7 @@ export const MapWithMoskokaBoundaryAndPoints = () => {
       const map = new Map({
         basemap: "topo-vector",
       });
+      debugger;
       // turn places into graphics
       const graphics = places0.map((place, index) => {
         return new Graphic({

@@ -16,6 +16,12 @@ export const MapWithPopup = () => {
 
       // define popup
       const popupTrailheads = {
+        actions: [
+          {
+            title: "Measure Length",
+            id: "measure-this",
+          },
+        ],
         title: "{TRL_NAME}",
         content:
           "<b>City:</b> {CITY_JUR}<br><b>Cross Street:</b> {X_STREET}<br><b>Parking:</b> {PARKING}<br><b>Elevation:</b> {ELEV_FT} ft",
@@ -77,7 +83,7 @@ export const MapWithPopup = () => {
         popupTemplate: popupTrails,
       });
 
-      map.add(trails, 0);
+      // map.add(trails, 0);
       // define popup by function DONE
 
       // define popup to show a table
@@ -144,7 +150,7 @@ export const MapWithPopup = () => {
         popupTemplate: popupOpenspaces,
       });
 
-      map.add(openspaces, 0);
+      // map.add(openspaces, 0);
       // define popup to show a table DONE
 
       // load the map view at the ref's DOM node

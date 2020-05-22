@@ -1,13 +1,14 @@
 import React, { useEffect, useRef } from "react";
 import { loadModules } from "esri-loader";
-import muskokaShapeFileZip from "../../files/shapeFiles/Muskoka_Road_Network_Shapefile.zip";
+// import muskokaShapeFileZip from "../../../files/shapeFiles/Muskoka_Road_Network_Shapefile.zip";
+import muskokaShapeFileZip from "./Muskoka_Road_Network_Shapefile.zip";
 import {
   getBoundaryAndCenter,
   getBaseMap,
   getMapView,
   getFieldInfo,
-} from "../../containers/mapUtils/mapUtils";
-import { styleFont } from "../../containers/mapUtils/mapStyleUtils";
+} from "../../../containers/mapUtils/mapUtils";
+import { styleFont } from "../../../containers/mapUtils/mapStyleUtils";
 
 const getFieldInfomation = (properties) => {
   const fieldInfos = [];

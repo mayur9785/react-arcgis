@@ -18,7 +18,7 @@ const simpleMarkerSymbol = {
 
 const simpleLineSymbol = {
   type: "simple-line",
-  color: [0, 0, 0], // orange
+  color: [226, 119, 40], // orange
   width: 2,
 };
 
@@ -65,63 +65,93 @@ export const MapWithLineAndPolygon = () => {
         "esri/views/MapView",
         "esri/Graphic",
         "esri/layers/GraphicsLayer",
+        "esri/layers/FeatureLayer",
+        "esri/layers/GroupLayer",
       ],
       { css: true }
-    ).then(([ArcGISMap, MapView, Graphic, GraphicsLayer]) => {
-      const map = new ArcGISMap({
-        basemap: "topo-vector",
-      });
+    ).then(
+      ([
+        ArcGISMap,
+        MapView,
+        Graphic,
+        GraphicsLayer,
+        FeatureLayer,
+        GroupLayer,
+      ]) => {
+        const map = new ArcGISMap({
+          basemap: "topo-vector",
+        });
 
-      const popTemplate = () => {
-        return "<b>City:</b>";
-      };
+        const popTemplate = () => {
+          return "<b>City:</b>";
+        };
 
-      // load the map view at the ref's DOM node
-      const view = new MapView({
-        container: mapRef.current,
-        map: map,
-        center: [-118.805, 34.027],
-        zoom: 13,
-      });
+        // load the map view at the ref's DOM node
+        const view = new MapView({
+          container: mapRef.current,
+          map: map,
+          center: [-118.805, 34.027],
+          zoom: 13,
+        });
 
-      const graphicsLayer = new GraphicsLayer();
-      map.add(graphicsLayer);
+        const graphicsLayer = new GraphicsLayer();
+        // map.add(graphicsLayer);
+        const pointsAndSymbol = new Graphic({
+          geometry: point,
+          symbol: simpleMarkerSymbol,
+          popupTemplate: {
+            title: `${point.latitude}`,
+          },
+        });
+        const lineAndPolyLine = new Graphic({
+          geometry: polyline,
+          symbol: simpleLineSymbol,
+        });
+        const gl = new GroupLayer({
+          layers: [
+            new FeatureLayer({
+              title: "AAA",
+              objectIdField: "aaa",
+              source: [pointsAndSymbol],
+            }),
+            new FeatureLayer({
+              title: "AAA",
+              objectIdField: "aaa",
+              source: [lineAndPolyLine],
+            }),
+          ],
+        });
+        map.add(gl);
+        debugger;
 
-      const pointsAndSymbol = new Graphic({
-        geometry: point,
-        symbol: simpleMarkerSymbol,
-        popupTemplate: {
-          title: `${point.latitude}`,
-        },
-      });
+        // const lineAndPolyLine = new Graphic({
+        //   geometry: polyline,
+        //   symbol: simpleLineSymbol,
+        // });
 
-      const lineAndPolyLine = new Graphic({
-        geometry: polyline,
-        symbol: simpleLineSymbol,
-      });
+        const polygonAndSymbols = new Graphic({
+          geometry: polygon,
+          symbol: simpleFillSymbol,
+          popupTemplate: {
+            title: "{TRL_NAME}",
+            content: popTemplate,
+            // content:
+            // "<b>City:</b> {CITY_JUR}<br><b>Cross Street:</b> {X_STREET}<br><b>Parking:</b> {PARKING}<br><b>Elevation:</b> {ELEV_FT} ft",
+          },
+        });
 
-      const polygonAndSymbols = new Graphic({
-        geometry: polygon,
-        symbol: simpleFillSymbol,
-        popupTemplate: {
-          title: "{TRL_NAME}",
-          content: popTemplate,
-          // content:
-          // "<b>City:</b> {CITY_JUR}<br><b>Cross Street:</b> {X_STREET}<br><b>Parking:</b> {PARKING}<br><b>Elevation:</b> {ELEV_FT} ft",
-        },
-      });
+        graphicsLayer.add(pointsAndSymbol);
+        graphicsLayer.add(lineAndPolyLine);
+        graphicsLayer.add(polygonAndSymbols);
 
-      graphicsLayer.add(pointsAndSymbol);
-      graphicsLayer.add(lineAndPolyLine);
-      graphicsLayer.add(polygonAndSymbols);
-
-      return () => {
-        if (view) {
-          // destroy the map view
-          view.container = null;
-        }
-      };
-    });
+        return () => {
+          if (view) {
+            // destroy the map view
+            view.container = null;
+          }
+        };
+      }
+    );
   });
 
   return <div className="webmap" style={{ height: "100vh" }} ref={mapRef} />;

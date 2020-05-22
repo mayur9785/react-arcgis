@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from "react";
 import { loadModules } from "esri-loader";
 
 import muskokaShapeFileZip from "../../files/shapeFiles/Muskoka_Road_Network_Shapefile.zip";
+import styles from "./mapFeatureLayerWithLocalData.module.css";
 const shp = require("shpjs");
 
 const places = [
@@ -27,7 +28,24 @@ const getPlaceFromGeojson = (geojson) => {};
 
 export const MapFeatureLayerWithLocalData = () => {
   const mapRef = useRef();
+  const myFunction = (event) => {
+    event.preventDefault();
+    console.log("asdlfjasdklfjasdl");
+  };
+  const MyButton = () => {
+    return (
+      <a href="#" onClick={myFunction}>
+        JSX button
+      </a>
+    );
+  };
 
+  const renderJSX = () => {
+    console.log("function called");
+
+    // return "<a href='#'>this is a jsx title</a>";
+    return `<div style='display:flex; justify-content:center'><span><a href='#' target=''>this is a jsx title</a></span><span><a a href='#' target=''><h1>h1 Resolve </h1></a></span></div>`;
+  };
   useEffect(() => {
     // lazy load the required ArcGIS API for JavaScript modules and CSS
     loadModules(
@@ -41,6 +59,10 @@ export const MapFeatureLayerWithLocalData = () => {
       ],
       { css: true }
     ).then(async ([Map, MapView, Graphic, FeatureLayer, LayerList, Legend]) => {
+      function handleClickFunction() {
+        console.log("clicked me");
+        return false;
+      }
       const places0 = [];
 
       await shp(muskokaShapeFileZip).then((geojsons) => {
@@ -68,6 +90,7 @@ export const MapFeatureLayerWithLocalData = () => {
         return new Graphic({
           attributes: {
             // ObjectId: place.id,
+            index: `${index}`,
             address: `<h1>${place.address}</h1>`,
             imageUrl: `<h1>${place.imageUrl}</h1>`,
             city: `<h1>${place.city}</h1>`,
@@ -84,13 +107,24 @@ export const MapFeatureLayerWithLocalData = () => {
         url:
           "https://services8.arcgis.com/JOTTuViCh6VvErd7/arcgis/rest/services/Muskoka_Road_Network_Shapefile/FeatureServer",
       });
+
+      var createWorkOrder = {
+        title: "create work order",
+        id: "create-work-order",
+      };
+
+      var resolve = {
+        title: "Resolved",
+        id: "measure-this",
+      };
+
       const featureLayer = new FeatureLayer({
         title: "Lucien Layer",
+
         renderer: {
           type: "simple",
           symbol: {
             type: "simple-marker",
-            style: "esriSLSSolid",
             color: [165, 83, 183, 255],
             width: 1,
           },
@@ -114,13 +148,33 @@ export const MapFeatureLayerWithLocalData = () => {
         // },
         popupTemplate: {
           // autocasts as new PopupTemplate()
+
+          actions: [createWorkOrder, resolve],
           title:
             "<img src='https://irisradgroup.maps.arcgis.com/sharing/rest/content/items/1402078d37094752a3632510e7006123/data' style='width: 25px; margin-bottom: -5px'>  <span style='font-size: 1.25rem'>Places in Los Angeles</span>",
+          // content: renderJSX,
           content: [
             // first column
             {
+              type: "text",
+              text: "<ul><li>{index} people are married</li>",
+              // fieldInfos: [
+              //   {
+              //     fieldName: "index",
+              //     label: "<h1>Index</h1>",
+              //     visible: true,
+              //   },
+              // ],
+            },
+
+            {
               type: "fields",
               fieldInfos: [
+                // {
+                //   fieldName: "index",
+                //   label: "<h1>Index</h1>",
+                //   visible: true,
+                // },
                 {
                   fieldName: "address",
                   label: "<h1>Address</h1>",
@@ -138,6 +192,11 @@ export const MapFeatureLayerWithLocalData = () => {
                 },
               ],
             },
+            // {
+            //   type: "text",
+            //   text: `<a href='#' target=''>this is a jsx title</a>
+            //   <a a href='#' target=''><h1>h1 Resolve </h1></a>`,
+            // },
             {
               type: "media",
               // Autocasts as array of MediaInfo objects
@@ -146,7 +205,7 @@ export const MapFeatureLayerWithLocalData = () => {
                   title: "<b>Mexican Fan Palm</b>",
                   type: "image", // Autocasts as new ImageMediaInfo object
                   caption:
-                    "<a href=https://www.sunset.com/wp-content/uploads/96006df453533f4c982212b8cc7882f5-800x0-c-default.jpg><h1>tree species</h1></a>",
+                    "<a href=https://www.sunset.com/wp-content/uploads/96006df453533f4c982212b8cc7882f5-800x0-c-default.jpg target='_blank'><h1 onclick='handleClickFunction()'>tree species</h1></a>",
                   // Autocasts as new ImageMediaInfoValue object
                   value: {
                     sourceURL:
@@ -159,6 +218,11 @@ export const MapFeatureLayerWithLocalData = () => {
         },
         objectIdField: "abc", // This must be defined when creating a layer from `Graphic` objects
         fields: [
+          {
+            name: "index",
+            alias: "Index",
+            type: "string",
+          },
           {
             name: "address",
             alias: "address",
@@ -212,6 +276,18 @@ export const MapFeatureLayerWithLocalData = () => {
         ],
       });
 
+      // view listener
+      view.popup.on("trigger-action", function (event) {
+        // Execute the measureThis() function if the measure-this action is clicked
+        if (event.action.id === "create-work-order") {
+          alert("create-work-order should be executed");
+          var geom = view.popup.selectedFeature.geometry;
+          const c = view.popup.content.viewModel;
+          console.log(view.popup.content.viewModel);
+          debugger;
+          // console.log("create-work-order should be executed");
+        }
+      });
       view.ui.add(legend, "bottom-right");
       // alert(map.layers.length);
       return () => {
@@ -223,5 +299,9 @@ export const MapFeatureLayerWithLocalData = () => {
     });
   });
 
-  return <div className="webmap" style={{ height: "100vh" }} ref={mapRef} />;
+  return (
+    <div className="webmap" style={{ height: "100vh" }} ref={mapRef}>
+      <MyButton />
+    </div>
+  );
 };

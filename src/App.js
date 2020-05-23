@@ -32,13 +32,13 @@ function App() {
       {/* <MapClientSideQueryFeatureLayer /> */}
       {/* <MapFilterFeatureData /> */}
       {/* <MapAddLayFromItem /> */}
-      <MapFeatureLayerWithLocalData />
+      {/* <MapFeatureLayerWithLocalData /> */}
       {/* <MapWithLineAndPolygon /> */}
       {/* <MapWithFeatureTable /> */}
       {/* <StarterWebMap /> */}
       {/* <MapWithMoskokaBoundaryAndPoints /> */}
       {/* <MapWithLineRepresentRoads /> */}
-      {/* <MapWithFeatureLayer /> */}
+      <MapWithFeatureLayer />
       {/* <MapWithLayers /> */}
       {/* </header> */}
     </div>

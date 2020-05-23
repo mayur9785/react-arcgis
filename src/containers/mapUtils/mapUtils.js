@@ -15,7 +15,7 @@ export async function getBoundaryAndCenter(zipFilePath) {
         const coordinates = feature.geometry.coordinates;
         boundaryPaths.push({
           coordinates: feature.geometry.coordinates,
-          properties: feature.properties,
+          properties: { ID: index, ...feature.properties },
         });
         if (index === Math.floor(geojsons.features.length / 2)) {
           boundaryCenter = coordinates[0];
@@ -68,4 +68,15 @@ export function getFieldInfo(fieldTitle, fontStyleTag = "h3") {
     visible: true,
   };
   return info;
+}
+
+export function getReducedPaths(pathsArray, keyToBeReduced) {
+  const reducedPaths = pathsArray.reduce((acc, element) => {
+    const key = element.properties[keyToBeReduced];
+    const value = acc[key] || [];
+    value.push(element);
+    return { ...acc, [key]: value };
+  }, {});
+
+  return reducedPaths;
 }

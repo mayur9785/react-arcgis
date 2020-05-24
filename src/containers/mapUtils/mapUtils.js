@@ -1,5 +1,6 @@
 import { loadModules } from "esri-loader";
 import { styleFont } from "./mapStyleUtils";
+import { isValidObj } from "../../utils/utilFunctions/utilFunctions";
 const shp = require("shpjs");
 
 export async function getBoundaryAndCenter(zipFilePath) {
@@ -79,4 +80,61 @@ export function getReducedPaths(pathsArray, keyToBeReduced) {
   }, {});
 
   return reducedPaths;
+}
+
+function getTableKeyValue(property) {
+  const copiedProperty = { ...property };
+  for (const key in copiedProperty) {
+    if (copiedProperty.hasOwnProperty(key)) {
+      let element = copiedProperty[key];
+      if (!isNaN(element) && element !== "") {
+        const twoDecimalString = Number(element).toFixed(2);
+        element = parseFloat(twoDecimalString).toLocaleString("en");
+      }
+      copiedProperty[key] = styleFont(element, "h3");
+    }
+  }
+  return copiedProperty;
+}
+
+// get graphic from data
+export function getGraphic(data, GraphicsClass, graphicsOptions) {
+  if (!isValidObj(GraphicsClass)) {
+    return null;
+  }
+
+  const { type, symbol } = graphicsOptions;
+  const arcgisGraphic = data.map((d) => {
+    return new GraphicsClass({
+      attributes: getTableKeyValue(d.properties),
+      geometry: {
+        type: type,
+        paths: d.coordinates,
+      },
+      symbol: symbol,
+    });
+  });
+  return arcgisGraphic;
+}
+
+export function getGraphicObj(pathsObject, GraphicsClass) {
+  const graphicsObject = {};
+  if (!isValidObj(GraphicsClass)) {
+    return graphicsObject;
+  }
+  for (const roadTypeKey in pathsObject) {
+    if (pathsObject.hasOwnProperty(roadTypeKey)) {
+      const paths = pathsObject[roadTypeKey];
+      const pathsGraphics = getGraphic(paths, GraphicsClass, {
+        type: "polyline",
+        symbol: {
+          type: "simple-line",
+          color: [208, 2, 5, 0.8], // orange
+          width: 2,
+        },
+      });
+      graphicsObject[roadTypeKey] = pathsGraphics;
+    }
+  }
+  return graphicsObject;
 }

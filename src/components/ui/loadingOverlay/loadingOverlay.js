@@ -1,5 +1,5 @@
 import React from "react";
-
+import Spinner from "./spinner/Spinner";
 export default function LoadingOverlay() {
   return (
     <div
@@ -12,7 +12,17 @@ export default function LoadingOverlay() {
         background: "#3b3b3b80",
       }}
     >
-      <h1
+      <div
+        style={{
+          position: "absolute",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+        }}
+      >
+        <Spinner />
+      </div>
+      {/* <h1
         style={{
           color: "#d00205CC",
           position: "absolute",
@@ -21,8 +31,9 @@ export default function LoadingOverlay() {
           transform: "translate(-50%, -50%)",
         }}
       >
+        {" "}
         Loading ...
-      </h1>
+      </h1> */}
     </div>
   );
 }

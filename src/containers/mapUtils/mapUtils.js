@@ -117,24 +117,46 @@ export function getGraphic(data, GraphicsClass, graphicsOptions) {
   return arcgisGraphic;
 }
 
-export function getGraphicObj(pathsObject, GraphicsClass) {
+// convert pathsObject
+// from key: paths
+// to   key: graphics
+export function getGraphicObj(pathsObject, GraphicsClass, graphicOptions) {
   const graphicsObject = {};
   if (!isValidObj(GraphicsClass)) {
     return graphicsObject;
   }
+  const { graphicType, graphicSymbol } = graphicOptions;
   for (const roadTypeKey in pathsObject) {
     if (pathsObject.hasOwnProperty(roadTypeKey)) {
       const paths = pathsObject[roadTypeKey];
       const pathsGraphics = getGraphic(paths, GraphicsClass, {
-        type: "polyline",
-        symbol: {
-          type: "simple-line",
-          color: [208, 2, 5, 0.8], // orange
-          width: 2,
-        },
+        type: graphicType,
+        symbol: graphicSymbol,
       });
       graphicsObject[roadTypeKey] = pathsGraphics;
     }
   }
   return graphicsObject;
+}
+
+export function getLayer(
+  LayerClass,
+  graphicData,
+  stringForTitleAndId,
+  layerRenderer,
+  layerPopupTemplate,
+  fieldsValue
+) {
+  if (!isValidObj(LayerClass) || !isValidObj(graphicData)) {
+    return null;
+  }
+  return new LayerClass({
+    title: stringForTitleAndId,
+    id: stringForTitleAndId,
+    source: graphicData,
+    renderer: layerRenderer,
+    popupTemplate: layerPopupTemplate,
+    objectIdField: "ObjectId",
+    fields: fieldsValue,
+  });
 }

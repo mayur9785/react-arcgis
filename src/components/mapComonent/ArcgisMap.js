@@ -12,6 +12,15 @@ import {
   getGraphicObj,
 } from "../../containers/mapUtils/mapUtils.js";
 
+const roadGraphicOptions = {
+  graphicType: "polyline",
+  graphicSymbol: {
+    type: "simple-line",
+    color: [208, 2, 5, 0.8], // orange
+    width: 2,
+  },
+};
+
 const getFieldTitles = (properties) => {
   const fieldInfos = [];
   for (const key in properties) {
@@ -21,21 +30,6 @@ const getFieldTitles = (properties) => {
     }
   }
   return fieldInfos;
-};
-
-const getTableKeyValue = (property) => {
-  const copiedProperty = { ...property };
-  for (const key in copiedProperty) {
-    if (copiedProperty.hasOwnProperty(key)) {
-      let element = copiedProperty[key];
-      if (!isNaN(element) && element !== "") {
-        const twoDecimalString = Number(element).toFixed(2);
-        element = parseFloat(twoDecimalString).toLocaleString("en");
-      }
-      copiedProperty[key] = styleFont(element, "h3");
-    }
-  }
-  return copiedProperty;
 };
 
 const getFieldValue = (property) => {
@@ -52,6 +46,19 @@ const getFieldValue = (property) => {
   }
   return values;
 };
+
+function getRoadFeatureLayerRenderer(legendName) {
+  return {
+    type: "simple", // autocasts as new SimpleRenderer()
+    symbol: {
+      // autocasts as new SimpleMarkerSymbol()
+      type: "simple-line",
+      color: [208, 2, 5, 0.8],
+      size: 2,
+    },
+    label: legendName, // lagend name for renderer (legend)
+  };
+}
 
 // function for property listItemCreatedFunction
 // of layer list
@@ -170,12 +177,30 @@ export const ArcgisMap = (props) => {
 
       // key-value pair object as
       // roadType: paths
-      const roadsGraphicsObj = getGraphicObj(reducedPathsObj, Graphic);
+      const roadsGraphicsObj = getGraphicObj(
+        reducedPathsObj,
+        Graphic,
+        roadGraphicOptions
+      );
 
       // get fields titles for table
       const fieldTitleKeys = getFieldTitles(roadsPaths[0].properties);
       // get values type for fields
       const fieldTitleValues = getFieldValue(fieldTitleKeys);
+
+      const roadLayerPopupTemplate = {
+        // autocasts as new PopupTemplate()
+        title:
+          "<img src='https://irisradgroup.maps.arcgis.com/sharing/rest/content/items/1402078d37094752a3632510e7006123/data' style='width: 25px; margin-bottom: -5px'>  <span style='font-size: 1.25rem'>Places in Los Angeles</span>",
+        content: [
+          // first column
+          {
+            type: "fields",
+            fieldInfos: fieldTitleKeys,
+          },
+        ],
+        actions: [createWorkOrder, resolve],
+      };
 
       // contains all road type feature layers
       const layers = [];
@@ -190,29 +215,8 @@ export const ArcgisMap = (props) => {
             id: roadType,
             source: pathsGraphics,
 
-            renderer: {
-              type: "simple", // autocasts as new SimpleRenderer()
-              symbol: {
-                // autocasts as new SimpleMarkerSymbol()
-                type: "simple-line",
-                color: [208, 2, 5, 0.8],
-                size: 2,
-              },
-              label: roadType, // lagend name for renderer (legend)
-            },
-            popupTemplate: {
-              // autocasts as new PopupTemplate()
-              title:
-                "<img src='https://irisradgroup.maps.arcgis.com/sharing/rest/content/items/1402078d37094752a3632510e7006123/data' style='width: 25px; margin-bottom: -5px'>  <span style='font-size: 1.25rem'>Places in Los Angeles</span>",
-              content: [
-                // first column
-                {
-                  type: "fields",
-                  fieldInfos: fieldTitleKeys,
-                },
-              ],
-              actions: [createWorkOrder, resolve],
-            },
+            renderer: getRoadFeatureLayerRenderer(roadType),
+            popupTemplate: roadLayerPopupTemplate,
             objectIdField: "ObjectID", // This must be defined when creating a layer from `Graphic` objects
             fields: fieldTitleValues,
           });

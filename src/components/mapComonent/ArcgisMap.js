@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { loadModules } from "esri-loader";
 import shapeGeoJson from "../mapComonent/hamiltonDataFilterDemo/Muskoka_Road_Network.json";
+import dataPointJson from "../mapComonent/hamiltonDataFilterDemo/data.json";
 
+import { DATE_FILTER_TYPE } from "../../constants/mapConstants";
 import { styleFont } from "../../containers/mapUtils/mapStyleUtils";
 import {
   getBaseMap,
@@ -10,6 +12,7 @@ import {
   getReducedPaths,
   getGraphic,
   getGraphicObj,
+  reduceDataByDate,
 } from "../../containers/mapUtils/mapUtils.js";
 
 const roadGraphicOptions = {
@@ -126,9 +129,11 @@ const resolve = {
 };
 
 export const ArcgisMap = (props) => {
+  const [isHeavingLoading, setIsHeavingLoading] = useState(true);
+
   const mapRef = useRef();
   const [map, setMap] = useState(null);
-  const [view, setView] = useState(null);
+  const [mapView, setMapView] = useState(null);
   const [roadGroupLayer, setRoadGroupLayer] = useState(null);
   const [pointLayer, setPointLayer] = useState(null);
 
@@ -152,10 +157,11 @@ export const ArcgisMap = (props) => {
       const view = await getMapView(map, undefined, mapRef.current);
 
       setMap(map);
-      setView(view);
+      setMapView(view);
 
       // instantiate mapView with instantiated center;
 
+      // ==================================================== first layer ===============================================================
       let roadsPaths = []; // roads paths from shapefiele.zip
 
       // key value pairs as "ROAD_TYPE" : [ROADS]
@@ -236,6 +242,78 @@ export const ArcgisMap = (props) => {
       // assign raod type group layer
       setRoadGroupLayer(roadTypesGroupLayer);
       // layer list for road types
+
+      // ==================================================== second layer ===============================================================
+      const dataPoints = reduceDataByDate(
+        dataPointJson,
+        "create_time",
+        DATE_FILTER_TYPE.DATE
+      );
+
+      const dataPointGraphicsObj = getGraphicObj(dataPoints, Graphic, {
+        graphicType: "point",
+        graphicSymbol: {
+          type: "simple-marker",
+          color: [0, 0, 0], // orange
+          outline: {
+            color: [255, 255, 255], // white
+            width: 1,
+          },
+        },
+      });
+
+      debugger;
+
+      const dataPointLayers = [];
+      for (const roadType in dataPointGraphicsObj) {
+        if (dataPointGraphicsObj.hasOwnProperty(roadType)) {
+          const pathsGraphics = dataPointGraphicsObj[roadType];
+          // generate feature layer by given road type
+          const roadTypeFeatureLayer = new FeatureLayer({
+            title: roadType,
+            source: pathsGraphics,
+            renderer: {
+              type: "simple",
+              symbol: {
+                type: "simple-marker",
+                color: [165, 83, 183, 255],
+                width: 1,
+              },
+              label: roadType,
+            },
+            // title: roadType,
+
+            // renderer: {
+            //   type: "simple",
+            //   symbol: {
+            //     type: "simple-marker",
+            //     color: [165, 83, 183, 255],
+            //     width: 1,
+            //   },
+            // },
+            // transparency: 0,
+            // labelingInfo: null,
+            // source: pathsGraphics,
+
+            // renderer: getRoadFeatureLayerRenderer(roadType),
+            // popupTemplate: roadLayerPopupTemplate,
+            objectIdField: "dataPointObjectID", // This must be defined when creating a layer from `Graphic` objects
+            // fields: fieldTitleValues,
+          });
+
+          dataPointLayers.push(roadTypeFeatureLayer);
+        }
+      }
+      debugger;
+
+      const dataPointGroupLayer = new GroupLayer({
+        id: "dataPointGroupLayer",
+        title: "Data Point Layers",
+        layers: dataPointLayers,
+      });
+
+      map.add(dataPointGroupLayer);
+
       const roadTypesLayerList = new LayerList({
         view: view,
         listItemCreatedFunction: panelFunction,
@@ -262,9 +340,19 @@ export const ArcgisMap = (props) => {
       });
 
       // updating map ui animation
-      view.watch("updating", function (evt) {
-        props.setLoading(evt === true);
-      });
+      // view.watch("updating", function (evt) {
+      //   debugger;
+
+      //   if (evt) {
+      //     if (isHeavingLoading) {
+      //       props.setLoading(isHeavingLoading);
+      //       setIsHeavingLoading(false);
+      //     }
+      //   } else if (!evt && isHeavingLoading) {
+      //     props.setLoading(false);
+      //     setIsHeavingLoading(false);
+      //   }
+      // });
 
       return () => {
         if (view) {
@@ -278,11 +366,14 @@ export const ArcgisMap = (props) => {
     if (map) {
       const { layerList } = props;
       if (layerList.length === 0) {
+        setIsHeavingLoading(true);
         map.remove(roadGroupLayer);
         console.log("map.layers", map.layers);
         console.log("layer is removed");
       } else if (layerList.length === 1) {
         if (map.layers.items.length === 0) {
+          setIsHeavingLoading(true);
+          debugger;
           map.add(roadGroupLayer);
         } else {
           let isLayerExist = false;
@@ -292,6 +383,7 @@ export const ArcgisMap = (props) => {
             }
           }
           if (!isLayerExist) {
+            setIsHeavingLoading(true);
             map.add(roadGroupLayer);
           }
         }

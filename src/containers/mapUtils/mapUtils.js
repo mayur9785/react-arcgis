@@ -1,6 +1,11 @@
 import { loadModules } from "esri-loader";
 import { styleFont } from "./mapStyleUtils";
-import { isValidObj } from "../../utils/utilFunctions/utilFunctions";
+import {
+  isValidObj,
+  isDateValid,
+} from "../../utils/utilFunctions/utilFunctions";
+import { GEOMETRY_TYPE, DATE_FILTER_TYPE } from "../../constants/mapConstants";
+
 const shp = require("shpjs");
 
 export async function getBoundaryAndCenter(zipFilePath) {
@@ -103,18 +108,40 @@ export function getGraphic(data, GraphicsClass, graphicsOptions) {
     return null;
   }
 
-  const { type, symbol } = graphicsOptions;
+  const { graphicType, symbol } = graphicsOptions;
   const arcgisGraphic = data.map((d) => {
+    const geometryObject = getGeometryObject(d, graphicType);
     return new GraphicsClass({
       attributes: getTableKeyValue(d.properties),
-      geometry: {
-        type: type,
-        paths: d.coordinates,
-      },
+      geometry: geometryObject,
       symbol: symbol,
     });
   });
   return arcgisGraphic;
+}
+
+function getGeometryObject(data, gemoetryType) {
+  let geometryObject = {};
+  if (!isValidObj(data) || !isValidObj(gemoetryType)) {
+    return geometryObject;
+  }
+  geometryObject = { type: gemoetryType };
+  switch (gemoetryType) {
+    case GEOMETRY_TYPE.POINT:
+      geometryObject = {
+        ...geometryObject,
+        longitude: Number(data.longitude),
+        latitude: Number(data.latitude),
+      };
+      break;
+    case GEOMETRY_TYPE.POLY_LINE:
+      geometryObject = { ...geometryObject, paths: data.coordinates };
+      break;
+    case GEOMETRY_TYPE.POLYGON:
+      geometryObject = { ...geometryObject, rings: data.coordinates };
+      break;
+  }
+  return geometryObject;
 }
 
 // convert pathsObject
@@ -129,8 +156,10 @@ export function getGraphicObj(pathsObject, GraphicsClass, graphicOptions) {
   for (const roadTypeKey in pathsObject) {
     if (pathsObject.hasOwnProperty(roadTypeKey)) {
       const paths = pathsObject[roadTypeKey];
+      // const geometryObject = getGeometryObject(paths, graphicType);
+
       const pathsGraphics = getGraphic(paths, GraphicsClass, {
-        type: graphicType,
+        graphicType: graphicType,
         symbol: graphicSymbol,
       });
       graphicsObject[roadTypeKey] = pathsGraphics;
@@ -159,4 +188,47 @@ export function getLayer(
     objectIdField: "ObjectId",
     fields: fieldsValue,
   });
+}
+
+const getMonthShortName = (date) => {
+  let shortName = "unknown mont short name";
+  if (isDateValid(date)) {
+    const shortMonthName = new Intl.DateTimeFormat("en-US", { month: "short" })
+      .format;
+    shortName = shortMonthName(date);
+  }
+  return shortName;
+};
+
+function getDateValue(dateString, valueType) {
+  const currentDate = new Date(dateString);
+  if (isDateValid(currentDate)) {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth() + 1;
+    const date = currentDate.getDate();
+
+    const monthString = getMonthShortName(currentDate);
+    switch (valueType) {
+      case DATE_FILTER_TYPE.YEAR:
+        return year;
+      case DATE_FILTER_TYPE.MONTH:
+        return `${monthString}, ${year}`;
+      default:
+        return `${monthString} ${date}, ${year}`;
+    }
+  }
+}
+export function reduceDataByDate(
+  data,
+  category,
+  dateType = DATE_FILTER_TYPE.DATE
+) {
+  let rd = data.reduce((categoriedData, element) => {
+    const fieldValue = element[category];
+    const newKey = getDateValue(fieldValue, dateType);
+    const recentData = categoriedData[newKey] || [];
+    recentData.push(element);
+    return { ...categoriedData, [newKey]: recentData };
+  }, {});
+  return rd;
 }

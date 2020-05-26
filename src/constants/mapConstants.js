@@ -14,3 +14,13 @@ export const DATE_FILTER_TYPE = {
   MONTH: "Month",
   YEAR: "Year",
 };
+
+export const DATA_POINT_DETAILS_TITLES = [
+  { name: "PCI", keyName: "pci" },
+  { name: "RRI", keyName: "road_related_issues" },
+  { name: "Defficiency", keyName: "damage_type" },
+  { name: "Location", keyName: "Location" },
+  { name: "Address", keyName: "address" },
+  { name: "Patrollor", keyName: "patrollor" },
+  { name: "Vehicle", keyName: "device_sn" },
+];

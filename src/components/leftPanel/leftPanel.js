@@ -21,6 +21,7 @@ import {
 import DateFnsUtils from "@date-io/date-fns";
 import { DATE_FILTER_TYPE } from "../../constants/mapConstants";
 import { LAYER_TYPES } from "../../containers/mapUtils/mapUtils";
+import { DataPontDetails } from "../dataPointDetails/dataPointDetails";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -164,7 +165,7 @@ export default function PanelTabs(props) {
       </TabPanel>
 
       <TabPanel value={value} index={1}>
-        details
+        <DataPontDetails />
       </TabPanel>
     </div>
   );

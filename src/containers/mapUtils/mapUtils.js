@@ -6,7 +6,12 @@ import {
 } from "../../utils/utilFunctions/utilFunctions";
 import {
   GEOMETRY_TYPE,
-  DATA_POINT_FILTER_TYPE,
+  DATA_POINT_FILTER_TYPES,
+  DATA_POINT_MARKER_SYMBOLS,
+  PCI_VALUES,
+  DEFAULT_SYMBOL_SIZE,
+  DEFAULT_MARKER_WIDTH,
+  DEFAULT_MARKER_ALPHA,
 } from "../../constants/mapConstants";
 
 const shp = require("shpjs");
@@ -40,6 +45,25 @@ export async function getBoundaryAndCenter(zipFilePath) {
     }
   });
 }
+
+// topo
+// streets
+// satellite
+// hybrid
+
+// dark-gray
+// gray
+// national-geographic
+// oceans
+// osm
+// terrain
+// dark-gray-vector
+// gray-vector
+// streets-vector
+// streets-night-vector
+// streets-navigation-vector
+// topo-vector
+// streets-relief-vector
 
 export async function getBaseMap(mapTypeString = "topo") {
   let mapInstance;
@@ -218,9 +242,9 @@ function getDateValue(dateString, valueType) {
 
     const monthString = getMonthShortName(currentDate);
     switch (valueType) {
-      case DATA_POINT_FILTER_TYPE.YEAR:
+      case DATA_POINT_FILTER_TYPES.YEAR:
         return year;
-      case DATA_POINT_FILTER_TYPE.MONTH:
+      case DATA_POINT_FILTER_TYPES.MONTH:
         return `${monthString}, ${year}`;
       default:
         return `${monthString} ${date}, ${year}`;
@@ -230,9 +254,9 @@ function getDateValue(dateString, valueType) {
 export function reduceDataByCategory(
   data,
   category,
-  dateType = DATA_POINT_FILTER_TYPE.DATE
+  dateType = DATA_POINT_FILTER_TYPES.DATE
 ) {
-  const isPCIFilter = DATA_POINT_FILTER_TYPE.PCI.toLowerCase() === category;
+  const isPCIFilter = DATA_POINT_FILTER_TYPES.PCI.toLowerCase() === category;
   const isDateFilter = !isPCIFilter;
 
   let rd = data.reduce((categoriedData, element) => {
@@ -247,7 +271,6 @@ export function reduceDataByCategory(
     recentData.push(element);
     return { ...categoriedData, [newKey]: recentData };
   }, {});
-  debugger;
   return rd;
 }
 
@@ -259,4 +282,54 @@ export function isLayerExisted(mapObject, layerId) {
     }
   }
   return isLayerExist;
+}
+
+// random color for paths
+// since have no idea how many of them
+// would be
+
+export function getRandomRGB(alpha) {
+  const randomArcgisColor = [];
+  const r = Math.ceil(255 * Math.random());
+  for (let i = 0; i < 3; i++) {
+    randomArcgisColor.push(Math.ceil(255 * Math.random()));
+  }
+  if (isValidObj(alpha) && !isNaN(alpha)) {
+    randomArcgisColor.push(alpha);
+  }
+  return randomArcgisColor;
+}
+
+export function getRandomSimpleMarkerSymbol(symbolSiz, alpha, width) {
+  return {
+    size: symbolSiz,
+    type: "simple-marker",
+    color: getRandomRGB(alpha),
+    width: width,
+  };
+}
+
+// get simple marker symbol, color, based
+// on filter type, IE: PCI
+export function getSimpleMarkerSymbol(filterType) {
+  debugger;
+  if (isValidObj(filterType)) {
+    switch (filterType.toLowerCase()) {
+      case PCI_VALUES.GOOD:
+        return DATA_POINT_MARKER_SYMBOLS.DEFAULT;
+      case PCI_VALUES.FAIR:
+        return DATA_POINT_MARKER_SYMBOLS.SECONDARY;
+      case PCI_VALUES.POOR:
+        return DATA_POINT_MARKER_SYMBOLS.WARNNING;
+      case PCI_VALUES.VERY_POOR: {
+        return DATA_POINT_MARKER_SYMBOLS.PRIMARY;
+      }
+      default:
+        return getRandomSimpleMarkerSymbol(
+          DEFAULT_SYMBOL_SIZE,
+          DEFAULT_MARKER_ALPHA,
+          DEFAULT_MARKER_WIDTH
+        );
+    }
+  }
 }

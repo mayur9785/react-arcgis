@@ -1,9 +1,12 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useContext } from "react";
 import { loadModules } from "esri-loader";
 import shapeGeoJson from "../mapComonent/hamiltonDataFilterDemo/Muskoka_Road_Network.json";
 import dataPointJson from "../mapComonent/hamiltonDataFilterDemo/data.json";
 
-import { DATA_POINT_FILTER_TYPE } from "../../constants/mapConstants";
+import {
+  DATA_POINT_FILTER_TYPES,
+  DATA_POINT_MARKER_SYMBOLS,
+} from "../../constants/mapConstants";
 import {
   getBaseMap,
   getMapView,
@@ -13,8 +16,11 @@ import {
   getGraphicObj,
   reduceDataByCategory,
   LAYER_TYPES,
+  getRandomRGB,
+  getSimpleMarkerSymbol,
 } from "../../containers/mapUtils/mapUtils.js";
 import { isValidObj } from "../../utils/utilFunctions/utilFunctions";
+import { MapContext } from "../../context/mapContext";
 
 const roadGraphicOptions = {
   graphicType: "polyline",
@@ -24,6 +30,16 @@ const roadGraphicOptions = {
     width: 2,
   },
 };
+
+const getRoadGraphicOptions = () => ({
+  graphicType: "polyline",
+  graphicSymbol: {
+    type: "simple-line",
+    // color: [208, 2, 5, 0.8], // orange
+    color: getRandomRGB(0.8),
+    width: 2,
+  },
+});
 
 const getFieldTitles = (properties) => {
   const fieldInfos = [];
@@ -130,7 +146,23 @@ const resolve = {
 };
 
 export const ArcgisMap = (props) => {
-  const [isHeavingLoading, setIsHeavingLoading] = useState(true);
+  const { values, setters } = useContext(MapContext);
+  const {
+    mapType,
+    dataFilterType,
+    selectedData,
+    selectedDate,
+    selectedLayers,
+    zoomToSelectedData,
+  } = values;
+  const {
+    setMapType,
+    setDataFilterType,
+    setSelectedData,
+    setSelectedDate,
+    setSelectedLayers,
+    setZoomToSelectedData,
+  } = setters;
 
   const mapRef = useRef();
   const [map, setMap] = useState(null);
@@ -153,8 +185,7 @@ export const ArcgisMap = (props) => {
     }
 
     let groupedDataPoints = {};
-    if (DATA_POINT_FILTER_TYPE.PCI === filterType) {
-      debugger;
+    if (DATA_POINT_FILTER_TYPES.PCI === filterType) {
       groupedDataPoints = reduceDataByCategory(
         dataPointJson,
         "pci",
@@ -167,7 +198,6 @@ export const ArcgisMap = (props) => {
         filterType
       );
     }
-    debugger;
 
     const dataPointGraphicsObj = getGraphicObj(
       groupedDataPoints,
@@ -178,21 +208,25 @@ export const ArcgisMap = (props) => {
     );
 
     const dataPointLayers = [];
-    for (const roadType in dataPointGraphicsObj) {
-      if (dataPointGraphicsObj.hasOwnProperty(roadType)) {
-        const pathsGraphics = dataPointGraphicsObj[roadType];
+    for (const dataPointTitle in dataPointGraphicsObj) {
+      if (dataPointGraphicsObj.hasOwnProperty(dataPointTitle)) {
+        const pathsGraphics = dataPointGraphicsObj[dataPointTitle];
         // generate feature layer by given road type
+        const markerSymbol = getSimpleMarkerSymbol(dataPointTitle);
+        debugger;
         const roadTypeFeatureLayer = new FeatureLayerClass({
-          title: roadType,
+          title: dataPointTitle,
           source: pathsGraphics,
           renderer: {
             type: "simple",
-            symbol: {
-              type: "simple-marker",
-              color: [165, 83, 183, 255],
-              width: 1,
-            },
-            label: roadType,
+            // symbol: {
+            //   size: "12px",
+            //   type: "simple-marker",
+            //   color: [0, 83, 183, 255],
+            //   width: 1,
+            // },
+            symbol: markerSymbol,
+            label: dataPointTitle,
           },
           // title: roadType,
 
@@ -243,7 +277,7 @@ export const ArcgisMap = (props) => {
     ).then(async ([Graphic, FeatureLayer, LayerList, GroupLayer]) => {
       const allLayers = [];
       // instantiate map
-      const map = await getBaseMap();
+      const map = await getBaseMap(mapType);
 
       // instantiate mapView with instantiated center;
       const view = await getMapView(map, undefined, mapRef.current);
@@ -332,7 +366,7 @@ export const ArcgisMap = (props) => {
       });
 
       const dataPointGroupLayer = getDataPointGroupLayer(
-        props.selectedFilterType,
+        dataFilterType,
         Graphic,
         FeatureLayer,
         GroupLayer
@@ -368,7 +402,7 @@ export const ArcgisMap = (props) => {
         }
       });
 
-      toggleFeatureLayers(map, allLayers, props.layerList);
+      toggleFeatureLayers(map, allLayers, selectedLayers);
       // updating map ui animation
       // view.watch("updating", function (evt) {
       //   debugger;
@@ -401,7 +435,6 @@ export const ArcgisMap = (props) => {
     allAvailableLayers,
     selectedLayerIds
   ) => {
-    debugger;
     if (
       !isValidObj(mapObject) ||
       !isValidObj(allAvailableLayers) ||
@@ -446,21 +479,19 @@ export const ArcgisMap = (props) => {
   };
 
   useEffect(() => {
-    debugger;
-    toggleFeatureLayers(map, allGroupLayers, props.layerList);
-  }, [props.layerList]);
+    toggleFeatureLayers(map, allGroupLayers, selectedLayers);
+  }, [selectedLayers]);
 
   useEffect(() => {
-    const location = props.zoomLocation;
-    if (location && map) {
-      console.log("zoom to", location);
-      mapView.center = [location.longitude, location.latitude];
+    if (map && selectedData && zoomToSelectedData) {
+      mapView.center = [selectedData.longitude, selectedData.latitude];
       mapView.zoom = 18;
       // mapView.goTo({
       //   center:[location.longitude, location.latitude],
       // })
+      setZoomToSelectedData(false);
     }
-  }, [props.zoomLocation]);
+  }, [zoomToSelectedData]);
   useEffect(() => {
     if (map) {
       loadModules(
@@ -470,7 +501,7 @@ export const ArcgisMap = (props) => {
         }
       ).then(async ([Graphic, FeatureLayer, GroupLayer]) => {
         const updatedDataPointGroupLayer = getDataPointGroupLayer(
-          props.selectedFilterType,
+          dataFilterType,
           Graphic,
           FeatureLayer,
           GroupLayer
@@ -479,14 +510,19 @@ export const ArcgisMap = (props) => {
         const currentDataPointLayer = map.layers.items.find(
           (layer) => layer.id === updatedDataPointGroupLayer.id
         );
-        debugger;
         if (currentDataPointLayer) {
           map.remove(currentDataPointLayer);
         }
         map.add(updatedDataPointGroupLayer);
       });
     }
-  }, [props.selectedFilterType]);
+  }, [dataFilterType]);
+
+  useEffect(() => {
+    if (map) {
+      map.basemap = mapType;
+    }
+  }, [mapType]);
 
   return <div className="webmap" style={{ height: "93vh" }} ref={mapRef} />;
 };

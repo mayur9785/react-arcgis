@@ -13,7 +13,7 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos";
 import { ArcgisMap } from "../../components/mapComonent/ArcgisMap";
 import PanelTabs from "../../components/leftPanel/leftPanel";
-import { DATA_POINT_FILTER_TYPE } from "../../constants/mapConstants";
+import { DATA_POINT_FILTER_TYPES } from "../../constants/mapConstants";
 
 const drawerWidth = 500;
 
@@ -88,7 +88,7 @@ export default function PersistentDrawerLeft() {
 
   const [selectedLayers, setSelectedLayers] = useState([]);
   const [selectedFilterType, setSelectedFilterType] = useState(
-    DATA_POINT_FILTER_TYPE.DATE
+    DATA_POINT_FILTER_TYPES.DATE
   );
 
   const [selectedData, setSelectedData] = useState(null);

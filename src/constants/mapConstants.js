@@ -9,12 +9,12 @@ export const SYMBOL_MARKER = {
   MARKER: "simple-marker",
 };
 
-export const DATA_POINT_FILTER_TYPE = {
-  DATE: "Date",
-  MONTH: "Month",
-  YEAR: "Year",
-  PCI: "PCI",
-};
+// export const DATA_POINT_FILTER_TYPE = {
+//   DATE: "Date",
+//   MONTH: "Month",
+//   YEAR: "Year",
+//   PCI: "PCI",
+// };
 
 export const DATA_POINT_FILTER_TYPES = {
   DATE: "Date",
@@ -51,4 +51,41 @@ export const ARCGIS_MAP_TYPES = {
   STREETS_NAVIGATION_VECTOR: "streets-navigation-vector",
   TOPO_VECTOR: "topo-vector",
   STREETS_EFLIEF_VECTOR: "streets-relief-vector",
+};
+
+export const DEFAULT_SYMBOL_SIZE = "12px";
+export const DEFAULT_MARKER_WIDTH = 1;
+export const DEFAULT_MARKER_ALPHA = 0.8;
+export const DATA_POINT_MARKER_SYMBOLS = {
+  DEFAULT: {
+    size: DEFAULT_SYMBOL_SIZE,
+    type: "simple-marker",
+    color: [41, 171, 135, DEFAULT_MARKER_ALPHA],
+    width: DEFAULT_MARKER_WIDTH,
+  },
+  PRIMARY: {
+    size: DEFAULT_SYMBOL_SIZE,
+    type: "simple-marker",
+    color: [208, 2, 5, DEFAULT_MARKER_ALPHA],
+    width: DEFAULT_MARKER_WIDTH,
+  },
+  SECONDARY: {
+    size: DEFAULT_SYMBOL_SIZE,
+    type: "simple-marker",
+    color: [65, 125, 225, DEFAULT_MARKER_ALPHA],
+    width: DEFAULT_MARKER_WIDTH,
+  },
+  WARNNING: {
+    size: DEFAULT_SYMBOL_SIZE,
+    type: "simple-marker",
+    color: [255, 186, 0, DEFAULT_MARKER_ALPHA],
+    width: DEFAULT_MARKER_WIDTH,
+  },
+};
+
+export const PCI_VALUES = {
+  GOOD: "good",
+  FAIR: "fair",
+  POOR: "poor",
+  VERY_POOR: "very poor",
 };

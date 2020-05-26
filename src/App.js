@@ -21,6 +21,7 @@ import { MapWithLayers } from "./components/mapComonent/roadWithFeatureLayer/fro
 
 import roadData from "./components/mapComonent/hamiltonDataFilterDemo/data.json";
 import IrisArcgisHome from "./containers/home/home";
+import { MapContextProvider } from "./context/mapContext";
 
 const DATE_FILTER_TYPE = {
   YEAR: "year",
@@ -76,28 +77,30 @@ function App() {
   const reducedByDate = reduceDataByDate(roadData, "change_time");
   console.log(reducedByDate);
   return (
-    <div className="App">
-      {/* <header className="App-header"> */}
-      {/* <MyMap /> */}
-      {/* <StarterMap /> */}
-      {/* <MapWithLayer /> */}
-      {/* <MapWithLayerStyled /> */}
-      {/* <MapWithPopup /> */}
-      {/* <MapServerSideQueryFeatureLayer /> */}
-      {/* <MapClientSideQueryFeatureLayer /> */}
-      {/* <MapFilterFeatureData /> */}
-      {/* <MapAddLayFromItem /> */}
-      {/* <MapFeatureLayerWithLocalData /> */}
-      {/* <MapWithLineAndPolygon /> */}
-      {/* <MapWithFeatureTable /> */}
-      {/* <StarterWebMap /> */}
-      {/* <MapWithMoskokaBoundaryAndPoints /> */}
-      {/* <MapWithLineRepresentRoads /> */}
-      {/* <MapWithFeatureLayer /> */}
-      {/* <MapWithLayers /> */}
-      {/* </header> */}
-      <IrisArcgisHome />
-    </div>
+    <MapContextProvider>
+      <div className="App">
+        {/* <header className="App-header"> */}
+        {/* <MyMap /> */}
+        {/* <StarterMap /> */}
+        {/* <MapWithLayer /> */}
+        {/* <MapWithLayerStyled /> */}
+        {/* <MapWithPopup /> */}
+        {/* <MapServerSideQueryFeatureLayer /> */}
+        {/* <MapClientSideQueryFeatureLayer /> */}
+        {/* <MapFilterFeatureData /> */}
+        {/* <MapAddLayFromItem /> */}
+        {/* <MapFeatureLayerWithLocalData /> */}
+        {/* <MapWithLineAndPolygon /> */}
+        {/* <MapWithFeatureTable /> */}
+        {/* <StarterWebMap /> */}
+        {/* <MapWithMoskokaBoundaryAndPoints /> */}
+        {/* <MapWithLineRepresentRoads /> */}
+        {/* <MapWithFeatureLayer /> */}
+        {/* <MapWithLayers /> */}
+        {/* </header> */}
+        <IrisArcgisHome />
+      </div>
+    </MapContextProvider>
   );
 }
 

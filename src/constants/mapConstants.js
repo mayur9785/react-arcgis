@@ -10,8 +10,7 @@ export const SYMBOL_MARKER = {
 };
 
 export const DATE_FILTER_TYPE = {
-  YEAR: "year",
-  MONTH: "month",
-  WEEK: "week",
-  DATE: "date",
+  DATE: "Date",
+  MONTH: "Month",
+  YEAR: "Year",
 };

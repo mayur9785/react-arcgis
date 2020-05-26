@@ -8,6 +8,12 @@ import { GEOMETRY_TYPE, DATE_FILTER_TYPE } from "../../constants/mapConstants";
 
 const shp = require("shpjs");
 
+export const LAYER_TYPES = {
+  ROAD_LAYER: "Road Layer",
+  BOUNDARY_LAYER: "Boundary Layer",
+  DATA_POINT_LAYER: "Data Point Layer",
+};
+
 export async function getBoundaryAndCenter(zipFilePath) {
   return new Promise(async (resolve, reject) => {
     const boundaryPaths = [];
@@ -231,4 +237,14 @@ export function reduceDataByDate(
     return { ...categoriedData, [newKey]: recentData };
   }, {});
   return rd;
+}
+
+export function isLayerExisted(mapObject, layerId) {
+  let isLayerExist = false;
+  for (const layer of mapObject.layers.items) {
+    if (layer.id === layerId) {
+      isLayerExist = true;
+    }
+  }
+  return isLayerExist;
 }

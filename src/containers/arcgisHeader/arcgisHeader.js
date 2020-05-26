@@ -124,6 +124,7 @@ export default function ArcgisHeader(props) {
       <FormControl className={classes.formControl}>
         <InputLabel id="demo-mutiple-name-label">Layers</InputLabel>
         <Select
+          // fullWidth={true}
           labelId="demo-mutiple-name-label"
           id="demo-mutiple-name"
           multiple

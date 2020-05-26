@@ -3,8 +3,10 @@ import Grid from "@material-ui/core/Grid";
 import ListItem from "@material-ui/core/ListItem";
 import { DATA_POINT_DETAILS_TITLES } from "../../constants/mapConstants";
 import { isValidObj } from "../../utils/utilFunctions/utilFunctions";
+import { Button } from "@material-ui/core";
 
 export function DataPontDetails(props) {
+  const { updateZoomLocation } = props;
   const selectedData = {
     comment: "",
     edited: "Y",
@@ -32,7 +34,14 @@ export function DataPontDetails(props) {
     current_city: "Hamilton",
   };
 
-  function showImage() {}
+  function handleZoom() {
+    if (updateZoomLocation) {
+      updateZoomLocation({
+        latitude: selectedData.latitude,
+        longitude: selectedData.longitude,
+      });
+    }
+  }
   return (
     <div>
       {/* <div style={{ cursor: "pointer" }} onClick={showImage}>
@@ -49,7 +58,6 @@ export function DataPontDetails(props) {
         if (!isValidObj(value) || value.toLowerCase() === "null") {
           value = "N/A";
         }
-        debugger;
         return (
           <Grid container key={title.name}>
             <Grid item sm={4} style={{ textAlign: "start" }}>
@@ -61,6 +69,24 @@ export function DataPontDetails(props) {
           </Grid>
         );
       })}
+
+      <Grid container justify="space-around">
+        <Grid item>
+          <Button variant="outlined" color="secondary" onClick={handleZoom}>
+            Zoom to Map
+          </Button>
+        </Grid>
+        <Grid item>
+          <Button variant="contained" color="primary">
+            Create Work Flow
+          </Button>
+        </Grid>
+        <Grid item>
+          <Button variant="contained" color="secondary">
+            Resolve
+          </Button>
+        </Grid>
+      </Grid>
     </div>
   );
 }

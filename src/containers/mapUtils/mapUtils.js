@@ -4,7 +4,10 @@ import {
   isValidObj,
   isDateValid,
 } from "../../utils/utilFunctions/utilFunctions";
-import { GEOMETRY_TYPE, DATE_FILTER_TYPE } from "../../constants/mapConstants";
+import {
+  GEOMETRY_TYPE,
+  DATA_POINT_FILTER_TYPE,
+} from "../../constants/mapConstants";
 
 const shp = require("shpjs");
 
@@ -38,7 +41,7 @@ export async function getBoundaryAndCenter(zipFilePath) {
   });
 }
 
-export async function getBaseMap(mapTypeString = "topo-vector") {
+export async function getBaseMap(mapTypeString = "topo") {
   let mapInstance;
   const arcgisModules = await loadModules(["esri/Map"]).catch((error) => {
     console.log("error in getting map instance", error);
@@ -215,27 +218,36 @@ function getDateValue(dateString, valueType) {
 
     const monthString = getMonthShortName(currentDate);
     switch (valueType) {
-      case DATE_FILTER_TYPE.YEAR:
+      case DATA_POINT_FILTER_TYPE.YEAR:
         return year;
-      case DATE_FILTER_TYPE.MONTH:
+      case DATA_POINT_FILTER_TYPE.MONTH:
         return `${monthString}, ${year}`;
       default:
         return `${monthString} ${date}, ${year}`;
     }
   }
 }
-export function reduceDataByDate(
+export function reduceDataByCategory(
   data,
   category,
-  dateType = DATE_FILTER_TYPE.DATE
+  dateType = DATA_POINT_FILTER_TYPE.DATE
 ) {
+  const isPCIFilter = DATA_POINT_FILTER_TYPE.PCI.toLowerCase() === category;
+  const isDateFilter = !isPCIFilter;
+
   let rd = data.reduce((categoriedData, element) => {
     const fieldValue = element[category];
-    const newKey = getDateValue(fieldValue, dateType);
+    let newKey = "";
+    if (isPCIFilter) {
+      newKey = fieldValue;
+    } else if (isDateFilter) {
+      newKey = getDateValue(fieldValue, dateType);
+    }
     const recentData = categoriedData[newKey] || [];
     recentData.push(element);
     return { ...categoriedData, [newKey]: recentData };
   }, {});
+  debugger;
   return rd;
 }
 

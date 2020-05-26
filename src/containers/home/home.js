@@ -13,7 +13,7 @@ import ChevronRightIcon from "@material-ui/icons/ChevronRight";
 import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos";
 import { ArcgisMap } from "../../components/mapComonent/ArcgisMap";
 import PanelTabs from "../../components/leftPanel/leftPanel";
-import { DATE_FILTER_TYPE } from "../../constants/mapConstants";
+import { DATA_POINT_FILTER_TYPE } from "../../constants/mapConstants";
 
 const drawerWidth = 500;
 
@@ -88,9 +88,12 @@ export default function PersistentDrawerLeft() {
 
   const [selectedLayers, setSelectedLayers] = useState([]);
   const [selectedFilterType, setSelectedFilterType] = useState(
-    DATE_FILTER_TYPE.DATE
+    DATA_POINT_FILTER_TYPE.DATE
   );
-  const [selectedDataPoint, setSelectedDataPoint] = useState(null);
+
+  const [selectedData, setSelectedData] = useState(null);
+
+  const [zoomLocation, setZoomLocation] = useState(null);
   return (
     <div className={classes.root}>
       <CssBaseline />
@@ -138,6 +141,7 @@ export default function PersistentDrawerLeft() {
           updateSelectedLayers={setSelectedLayers}
           updateFilterType={setSelectedFilterType}
           selectedFilterType
+          updateZoomLocation={setZoomLocation}
         />
       </Drawer>
       <main
@@ -149,6 +153,7 @@ export default function PersistentDrawerLeft() {
         <ArcgisMap
           layerList={selectedLayers}
           selectedFilterType={selectedFilterType}
+          zoomLocation={zoomLocation}
         ></ArcgisMap>
       </main>
     </div>

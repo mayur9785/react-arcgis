@@ -3,7 +3,7 @@ import { loadModules } from "esri-loader";
 import shapeGeoJson from "../mapComonent/hamiltonDataFilterDemo/Muskoka_Road_Network.json";
 import dataPointJson from "../mapComonent/hamiltonDataFilterDemo/data.json";
 
-import { DATE_FILTER_TYPE } from "../../constants/mapConstants";
+import { DATA_POINT_FILTER_TYPE } from "../../constants/mapConstants";
 import {
   getBaseMap,
   getMapView,
@@ -11,7 +11,7 @@ import {
   getReducedPaths,
   getGraphic,
   getGraphicObj,
-  reduceDataByDate,
+  reduceDataByCategory,
   LAYER_TYPES,
 } from "../../containers/mapUtils/mapUtils.js";
 import { isValidObj } from "../../utils/utilFunctions/utilFunctions";
@@ -139,7 +139,7 @@ export const ArcgisMap = (props) => {
   const [allGroupLayers, setAllGroupLayers] = useState([]);
 
   function getDataPointGroupLayer(
-    dataPointDateFilerType,
+    filterType,
     GraphicClass,
     FeatureLayerClass,
     GroupLayerClass
@@ -151,15 +151,31 @@ export const ArcgisMap = (props) => {
     ) {
       return {};
     }
-    const dataPoints = reduceDataByDate(
-      dataPointJson,
-      "create_time",
-      dataPointDateFilerType
-    );
 
-    const dataPointGraphicsObj = getGraphicObj(dataPoints, GraphicClass, {
-      graphicType: "point",
-    });
+    let groupedDataPoints = {};
+    if (DATA_POINT_FILTER_TYPE.PCI === filterType) {
+      debugger;
+      groupedDataPoints = reduceDataByCategory(
+        dataPointJson,
+        "pci",
+        filterType
+      );
+    } else {
+      groupedDataPoints = reduceDataByCategory(
+        dataPointJson,
+        "create_time",
+        filterType
+      );
+    }
+    debugger;
+
+    const dataPointGraphicsObj = getGraphicObj(
+      groupedDataPoints,
+      GraphicClass,
+      {
+        graphicType: "point",
+      }
+    );
 
     const dataPointLayers = [];
     for (const roadType in dataPointGraphicsObj) {
@@ -434,6 +450,17 @@ export const ArcgisMap = (props) => {
     toggleFeatureLayers(map, allGroupLayers, props.layerList);
   }, [props.layerList]);
 
+  useEffect(() => {
+    const location = props.zoomLocation;
+    if (location && map) {
+      console.log("zoom to", location);
+      mapView.center = [location.longitude, location.latitude];
+      mapView.zoom = 18;
+      // mapView.goTo({
+      //   center:[location.longitude, location.latitude],
+      // })
+    }
+  }, [props.zoomLocation]);
   useEffect(() => {
     if (map) {
       loadModules(

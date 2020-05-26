@@ -1,4 +1,4 @@
-import { DATE_FILTER_TYPE } from "../../constants/mapConstants";
+import { DATA_POINT_FILTER_TYPE } from "../../constants/mapConstants";
 
 export function isValidObj(obj) {
   return obj !== null && obj !== undefined;
@@ -26,9 +26,9 @@ export function getDateValue(dateString, valueType) {
 
     const monthString = getMonthShortName(currentDate);
     switch (valueType) {
-      case DATE_FILTER_TYPE.YEAR:
+      case DATA_POINT_FILTER_TYPE.YEAR:
         return year;
-      case DATE_FILTER_TYPE.MONTH:
+      case DATA_POINT_FILTER_TYPE.MONTH:
         return `${monthString}, ${year}`;
       default:
         return `${monthString} ${date}, ${year}`;

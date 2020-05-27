@@ -73,8 +73,9 @@ function getRoadFeatureLayerRenderer(legendName) {
     symbol: {
       // autocasts as new SimpleMarkerSymbol()
       type: "simple-line",
-      color: [208, 2, 5, 0.8],
-      size: 2,
+      // color: [208, 2, 5, 0.8],
+      color: getRandomRGB(0.8),
+      width: 2,
     },
     label: legendName, // lagend name for renderer (legend)
   };

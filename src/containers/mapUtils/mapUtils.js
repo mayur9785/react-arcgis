@@ -162,17 +162,17 @@ export function getDataPointGraphic(data, GraphicsClass, graphicsOptions) {
   const { graphicType, symbol } = graphicsOptions;
   const arcgisGraphic = data.map((d, index) => {
     const geometryObject = getGeometryObject(d, graphicType);
-
-    for (const key in d) {
-      if (d.hasOwnProperty(key)) {
-        const element = d[key];
+    const updatedData = { ...d };
+    for (const key in updatedData) {
+      if (updatedData.hasOwnProperty(key)) {
+        const element = updatedData[key];
         if (element === "null") {
-          d[key] = "N / A";
+          updatedData[key] = "N / A";
         }
       }
     }
     return new GraphicsClass({
-      attributes: d,
+      attributes: updatedData,
       geometry: geometryObject,
       symbol: symbol,
     });
@@ -306,7 +306,7 @@ export function reduceDataByCategory(data, category, dateType) {
     rd = data.reduce((categoriedData, element) => {
       const fieldValue = element[category];
       let newKey = fieldValue;
-      if (fieldValue === "null" || fieldValue === "N / A") {
+      if (fieldValue === "null") {
         return { ...categoriedData };
       }
       const recentData = categoriedData[newKey] || [];
@@ -382,7 +382,8 @@ export function getIconRenderer(inconPath, iconTitle, iconSize) {
     symbol: {
       type: "picture-marker", // autocasts as new SimpleMarkerSymbol()
       url: inconPath,
-      size: iconSize,
+      width: `${iconSize}px`,
+      height: `${iconSize}px`,
     },
     label: iconTitle,
   };

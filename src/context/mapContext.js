@@ -24,6 +24,10 @@ export function MapContextProvider(props) {
 
   const [zoomToSelectedData, setZoomToSelectedData] = useState(false);
 
+  const [openPanel, setOpenPanel] = useState(false);
+
+  const [selectedPanelIndex, setSelectedPanelIndex] = useState(0);
+
   const contextValues = {
     mapType,
     dataFilterType,
@@ -31,6 +35,8 @@ export function MapContextProvider(props) {
     selectedDate,
     selectedLayers,
     zoomToSelectedData,
+    openPanel,
+    selectedPanelIndex,
   };
 
   const contextFunctions = {
@@ -40,6 +46,8 @@ export function MapContextProvider(props) {
     setSelectedDate,
     setSelectedLayers,
     setZoomToSelectedData,
+    setOpenPanel,
+    setSelectedPanelIndex,
   };
 
   return (

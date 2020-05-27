@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
@@ -23,6 +23,7 @@ import { DATA_POINT_FILTER_TYPES } from "../../constants/mapConstants";
 import { LAYER_TYPES } from "../../containers/mapUtils/mapUtils";
 import { DataPontDetails } from "../dataPointDetails/dataPointDetails";
 import { DataPointFilters } from "../dataPointFilters.js/dataPointFilters";
+import { MapContext } from "../../context/mapContext";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -60,20 +61,23 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 export default function PanelTabs(props) {
+  const { values, setters } = useContext(MapContext);
+  const { selectedPanelIndex } = values;
+  const { setSelectedPanelIndex } = setters;
   const { updateZoomLocation } = props;
-  const layerNames = Object.keys(LAYER_TYPES).map((key) => LAYER_TYPES[key]);
+  // const layerNames = Object.keys(LAYER_TYPES).map((key) => LAYER_TYPES[key]);
   const classes = useStyles();
-  const [value, setValue] = React.useState(0);
+  // const [selectedPanelIndex, setSelectedPanelIndex] = React.useState(0);
 
   const handleChange = (event, newValue) => {
-    setValue(newValue);
+    setSelectedPanelIndex(newValue);
   };
 
   return (
     <div className={classes.root}>
       <AppBar position="static">
         <Tabs
-          value={value}
+          value={selectedPanelIndex}
           onChange={handleChange}
           aria-label="iris arcgis map panel label"
         >
@@ -81,11 +85,11 @@ export default function PanelTabs(props) {
           <Tab label="Details" {...a11yProps(1)} />
         </Tabs>
       </AppBar>
-      <TabPanel value={value} index={0}>
+      <TabPanel value={selectedPanelIndex} index={0}>
         <DataPointFilters />
       </TabPanel>
 
-      <TabPanel value={value} index={1}>
+      <TabPanel value={selectedPanelIndex} index={1}>
         <DataPontDetails updateZoomLocation={updateZoomLocation} />
       </TabPanel>
     </div>

@@ -168,6 +168,8 @@ export const ArcgisMap = (props) => {
     setSelectedDate,
     setSelectedLayers,
     setZoomToSelectedData,
+    setOpenPanel,
+    setSelectedPanelIndex,
   } = setters;
 
   const mapRef = useRef();
@@ -218,14 +220,14 @@ export const ArcgisMap = (props) => {
             featureLayerRenderer = getIconRenderer(
               redWarningIcon,
               dataPointTitle,
-              12
+              25
             );
             break;
           case DATA_POINT_FILTER_TYPES.RRI:
             featureLayerRenderer = getIconRenderer(
               yellowWarningIcon,
               dataPointTitle,
-              12
+              25
             );
             break;
           default:
@@ -583,12 +585,14 @@ export const ArcgisMap = (props) => {
       map.basemap = mapType;
     }
   }, [mapType]);
-  function getDataIdFromPopup(popup, attributeKey) {
+  function getDataIdFromPopup(popup) {
     const id = popup.content.graphic.attributes.id || -1;
 
     const currentDataPoint = dataPointJson.find((data) => data.id === id);
     console.log("matchedData", currentDataPoint);
     setSelectedData(currentDataPoint);
+    setOpenPanel(true);
+    setSelectedPanelIndex(1);
   }
   return <div className="webmap" style={{ height: "93vh" }} ref={mapRef} />;
 };

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import clsx from "clsx";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Drawer from "@material-ui/core/Drawer";
@@ -14,6 +14,7 @@ import ArrowForwardIosIcon from "@material-ui/icons/ArrowForwardIos";
 import { ArcgisMap } from "../../components/mapComonent/ArcgisMap";
 import PanelTabs from "../../components/leftPanel/leftPanel";
 import { DATA_POINT_FILTER_TYPES } from "../../constants/mapConstants";
+import { MapContext } from "../../context/mapContext";
 
 const drawerWidth = 500;
 
@@ -76,14 +77,16 @@ const useStyles = makeStyles((theme) => ({
 export default function PersistentDrawerLeft() {
   const classes = useStyles();
   const theme = useTheme();
-  const [open, setOpen] = React.useState(false);
+  const { values, setters } = useContext(MapContext);
+  const { openPanel } = values;
+  const { setOpenPanel } = setters;
 
   const handleDrawerOpen = () => {
-    setOpen(true);
+    setOpenPanel(true);
   };
 
   const handleDrawerClose = () => {
-    setOpen(false);
+    setOpenPanel(false);
   };
 
   const [selectedLayers, setSelectedLayers] = useState([]);
@@ -100,7 +103,7 @@ export default function PersistentDrawerLeft() {
       <AppBar
         position="fixed"
         className={clsx(classes.appBar, {
-          [classes.appBarShift]: open,
+          [classes.appBarShift]: openPanel,
         })}
       >
         <Toolbar>
@@ -109,7 +112,7 @@ export default function PersistentDrawerLeft() {
             aria-label="open drawer"
             onClick={handleDrawerOpen}
             edge="start"
-            className={clsx(classes.arrowButton, open && classes.hide)}
+            className={clsx(classes.arrowButton, openPanel && classes.hide)}
           >
             <ArrowForwardIosIcon />
           </IconButton>
@@ -122,7 +125,7 @@ export default function PersistentDrawerLeft() {
         className={classes.drawer}
         variant="persistent"
         anchor="left"
-        open={open}
+        open={openPanel}
         classes={{
           paper: classes.drawerPaper,
         }}
@@ -146,7 +149,7 @@ export default function PersistentDrawerLeft() {
       </Drawer>
       <main
         className={clsx(classes.content, {
-          [classes.contentShift]: open,
+          [classes.contentShift]: openPanel,
         })}
       >
         <div className={classes.drawerHeader} />

@@ -9,13 +9,6 @@ export const SYMBOL_MARKER = {
   MARKER: "simple-marker",
 };
 
-// export const DATA_POINT_FILTER_TYPE = {
-//   DATE: "Date",
-//   MONTH: "Month",
-//   YEAR: "Year",
-//   PCI: "PCI",
-// };
-
 export const DATA_POINT_FILTER_TYPES = {
   DATE: "Date",
   MONTH: "Month",

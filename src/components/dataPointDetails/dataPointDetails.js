@@ -17,51 +17,58 @@ export function DataPontDetails(props) {
       setZoomToSelectedData(true);
     }
   }
+
   return (
     <div>
-      {/* <div style={{ cursor: "pointer" }} onClick={showImage}>
-        <img src={selectedData.image} width="100%" />
-      </div> */}
-      <a href={selectedData.image} target="_blank">
-        <img src={selectedData.image} width="100%" />
-      </a>
-      {DATA_POINT_DETAILS_TITLES.map((title) => {
-        let value = selectedData[title.keyName];
-        if (title.keyName.toLowerCase() === "location") {
-          value = `( ${selectedData.latitude}, ${selectedData.longitude} )`;
-        }
-        if (!isValidObj(value) || value.toLowerCase() === "null") {
-          value = "N/A";
-        }
-        return (
-          <Grid container key={title.name}>
-            <Grid item sm={4} style={{ textAlign: "start" }}>
-              <h2>{title.name}</h2>
+      {selectedData ? (
+        <div>
+          {/* <div style={{ cursor: "pointer" }} onClick={showImage}>
+          <img src={selectedData.image} width="100%" />
+        </div> */}
+          <a href={selectedData.image} target="_blank">
+            <img src={selectedData.image} width="100%" />
+          </a>
+          {DATA_POINT_DETAILS_TITLES.map((title) => {
+            let value = selectedData[title.keyName];
+            if (title.keyName.toLowerCase() === "location") {
+              value = `( ${selectedData.latitude}, ${selectedData.longitude} )`;
+            }
+            if (!isValidObj(value) || value.toLowerCase() === "null") {
+              value = "N/A";
+            }
+            return (
+              <Grid container key={title.name}>
+                <Grid item sm={4} style={{ textAlign: "start" }}>
+                  <h2>{title.name}</h2>
+                </Grid>
+                <Grid item sm={8} style={{ textAlign: "start" }}>
+                  <h2> {value}</h2>
+                </Grid>
+              </Grid>
+            );
+          })}
+
+          <Grid container justify="space-around">
+            <Grid item>
+              <Button variant="outlined" color="secondary" onClick={handleZoom}>
+                Zoom to Map
+              </Button>
             </Grid>
-            <Grid item sm={8} style={{ textAlign: "start" }}>
-              <h2> {value}</h2>
+            <Grid item>
+              <Button variant="contained" color="primary">
+                Create Work Flow
+              </Button>
+            </Grid>
+            <Grid item>
+              <Button variant="contained" color="secondary">
+                Resolve
+              </Button>
             </Grid>
           </Grid>
-        );
-      })}
-
-      <Grid container justify="space-around">
-        <Grid item>
-          <Button variant="outlined" color="secondary" onClick={handleZoom}>
-            Zoom to Map
-          </Button>
-        </Grid>
-        <Grid item>
-          <Button variant="contained" color="primary">
-            Create Work Flow
-          </Button>
-        </Grid>
-        <Grid item>
-          <Button variant="contained" color="secondary">
-            Resolve
-          </Button>
-        </Grid>
-      </Grid>
+        </div>
+      ) : (
+        <h1>No selected data</h1>
+      )}
     </div>
   );
 }

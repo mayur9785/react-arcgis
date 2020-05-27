@@ -135,8 +135,9 @@ function getTableKeyValue(property) {
   return copiedProperty;
 }
 
-// get graphic from data
-export function getGraphic(data, GraphicsClass, graphicsOptions) {
+// get path graphics that contains the values
+// to be display on the pop
+export function getPathGraphic(data, GraphicsClass, graphicsOptions) {
   if (!isValidObj(GraphicsClass)) {
     return null;
   }
@@ -145,7 +146,33 @@ export function getGraphic(data, GraphicsClass, graphicsOptions) {
   const arcgisGraphic = data.map((d) => {
     const geometryObject = getGeometryObject(d, graphicType);
     return new GraphicsClass({
-      attributes: getTableKeyValue(d.properties),
+      attributes: getTableKeyValue(d.properties), // corresponding values to be display
+      geometry: geometryObject,
+      symbol: symbol,
+    });
+  });
+  return arcgisGraphic;
+}
+
+export function getDataPointGraphic(data, GraphicsClass, graphicsOptions) {
+  if (!isValidObj(GraphicsClass)) {
+    return null;
+  }
+
+  const { graphicType, symbol } = graphicsOptions;
+  const arcgisGraphic = data.map((d, index) => {
+    const geometryObject = getGeometryObject(d, graphicType);
+
+    for (const key in d) {
+      if (d.hasOwnProperty(key)) {
+        const element = d[key];
+        if (element === "null") {
+          d[key] = "N / A";
+        }
+      }
+    }
+    return new GraphicsClass({
+      attributes: d,
       geometry: geometryObject,
       symbol: symbol,
     });
@@ -191,13 +218,26 @@ export function getGraphicObj(pathsObject, GraphicsClass, graphicOptions) {
       const paths = pathsObject[roadTypeKey];
       // const geometryObject = getGeometryObject(paths, graphicType);
 
-      const pathsGraphics = getGraphic(paths, GraphicsClass, {
-        graphicType: graphicType,
-        symbol: graphicSymbol,
-      });
+      // const pathsGraphics = getPathGraphic(paths, GraphicsClass, {
+      //   graphicType: graphicType,
+      //   symbol: graphicSymbol,
+      // });
+      let pathsGraphics;
+      if (graphicType === "point") {
+        pathsGraphics = getDataPointGraphic(paths, GraphicsClass, {
+          graphicType: graphicType,
+          symbol: graphicSymbol,
+        });
+      } else {
+        pathsGraphics = getPathGraphic(paths, GraphicsClass, {
+          graphicType: graphicType,
+          symbol: graphicSymbol,
+        });
+      }
       graphicsObject[roadTypeKey] = pathsGraphics;
     }
   }
+  debugger;
   return graphicsObject;
 }
 
@@ -266,8 +306,8 @@ export function reduceDataByCategory(data, category, dateType) {
     rd = data.reduce((categoriedData, element) => {
       const fieldValue = element[category];
       let newKey = fieldValue;
-      if (fieldValue === "null") {
-        newKey = "N / A";
+      if (fieldValue === "null" || fieldValue === "N / A") {
+        return { ...categoriedData };
       }
       const recentData = categoriedData[newKey] || [];
       recentData.push(element);
@@ -315,7 +355,6 @@ export function getRandomSimpleMarkerSymbol(symbolSiz, alpha, width) {
 // get simple marker symbol, color, based
 // on filter type, IE: PCI
 export function getSimpleMarkerSymbol(filterType) {
-  debugger;
   if (isValidObj(filterType)) {
     switch (filterType.toLowerCase()) {
       case PCI_VALUES.GOOD:
@@ -335,4 +374,48 @@ export function getSimpleMarkerSymbol(filterType) {
         );
     }
   }
+}
+
+export function getIconRenderer(inconPath, iconTitle, iconSize) {
+  const iconRender = {
+    type: "simple",
+    symbol: {
+      type: "picture-marker", // autocasts as new SimpleMarkerSymbol()
+      url: inconPath,
+      size: iconSize,
+    },
+    label: iconTitle,
+  };
+  return iconRender;
+}
+
+// get grouped data points based on filter type
+// in all data points would be grouped in
+// {title0: [dataPoints for titie0]}
+export function getGroupedDataPoints(filterType, data) {
+  let category = "";
+  let updatedFilterType = filterType;
+  switch (filterType) {
+    case DATA_POINT_FILTER_TYPES.PCI:
+      category = "pci";
+      updatedFilterType = null;
+      break;
+    case DATA_POINT_FILTER_TYPES.MMS:
+      category = "damage_type";
+      updatedFilterType = null;
+      break;
+    case DATA_POINT_FILTER_TYPES.RRI:
+      category = "road_related_issues";
+      updatedFilterType = null;
+      break;
+    default:
+      category = "create_time";
+  }
+  const groupedDataPoints = reduceDataByCategory(
+    data,
+    category,
+    updatedFilterType
+  );
+
+  return groupedDataPoints;
 }

@@ -12,15 +12,20 @@ import {
   getMapView,
   getFieldInfo,
   getReducedPaths,
-  getGraphic,
+  getPathGraphic,
   getGraphicObj,
   reduceDataByCategory,
   LAYER_TYPES,
   getRandomRGB,
   getSimpleMarkerSymbol,
+  getIconRenderer,
+  getGroupedDataPoints,
 } from "../../containers/mapUtils/mapUtils.js";
 import { isValidObj, leftJoin } from "../../utils/utilFunctions/utilFunctions";
 import { MapContext } from "../../context/mapContext";
+
+import redWarningIcon from "../../images/mms_warning.jpg";
+import yellowWarningIcon from "../../images/rri_warning.jpg";
 
 const roadGraphicOptions = {
   graphicType: "polyline",
@@ -177,6 +182,7 @@ export const ArcgisMap = (props) => {
     FeatureLayerClass,
     GroupLayerClass
   ) {
+    console.log("filterType", filterType);
     if (
       !isValidObj(GraphicClass) ||
       !isValidObj(FeatureLayerClass) ||
@@ -185,29 +191,13 @@ export const ArcgisMap = (props) => {
       return {};
     }
 
-    let groupedDataPoints = {};
-    if (DATA_POINT_FILTER_TYPES.PCI === filterType) {
-      groupedDataPoints = reduceDataByCategory(dataPointJson, "pci", null);
-    } else if (DATA_POINT_FILTER_TYPES.MMS === filterType) {
-      groupedDataPoints = reduceDataByCategory(
-        dataPointJson,
-        "damage_type",
-        null
-      );
-    } else if (DATA_POINT_FILTER_TYPES.RRI === filterType) {
-      groupedDataPoints = reduceDataByCategory(
-        dataPointJson,
-        "road_related_issues",
-        null
-      );
-    } else {
-      groupedDataPoints = reduceDataByCategory(
-        dataPointJson,
-        "create_time",
-        filterType
-      );
-    }
+    // let groupedDataPoints = {};
 
+    // get groupedDataPoints as
+    // { category0: data0, category1: data1 }
+    const groupedDataPoints = getGroupedDataPoints(filterType, dataPointJson);
+
+    // get graphic objects from grouped data points
     const dataPointGraphicsObj = getGraphicObj(
       groupedDataPoints,
       GraphicClass,
@@ -215,46 +205,112 @@ export const ArcgisMap = (props) => {
         graphicType: "point",
       }
     );
-
+    debugger;
+    // get feature layer for each graphic
     const dataPointLayers = [];
     for (const dataPointTitle in dataPointGraphicsObj) {
       if (dataPointGraphicsObj.hasOwnProperty(dataPointTitle)) {
         const pathsGraphics = dataPointGraphicsObj[dataPointTitle];
-        // generate feature layer by given road type
-        const markerSymbol = getSimpleMarkerSymbol(dataPointTitle);
+
+        let featureLayerRenderer = {};
+        switch (filterType) {
+          case DATA_POINT_FILTER_TYPES.MMS:
+            featureLayerRenderer = getIconRenderer(
+              redWarningIcon,
+              dataPointTitle,
+              12
+            );
+            break;
+          case DATA_POINT_FILTER_TYPES.RRI:
+            featureLayerRenderer = getIconRenderer(
+              yellowWarningIcon,
+              dataPointTitle,
+              12
+            );
+            break;
+          default:
+            let markerSymbol = getSimpleMarkerSymbol(dataPointTitle);
+            featureLayerRenderer = {
+              type: "simple",
+              symbol: markerSymbol,
+              label: dataPointTitle,
+            };
+        }
         debugger;
         const roadTypeFeatureLayer = new FeatureLayerClass({
           title: dataPointTitle,
           source: pathsGraphics,
-          renderer: {
-            type: "simple",
-            // symbol: {
-            //   size: "12px",
-            //   type: "simple-marker",
-            //   color: [0, 83, 183, 255],
-            //   width: 1,
-            // },
-            symbol: markerSymbol,
-            label: dataPointTitle,
+          renderer: featureLayerRenderer,
+          popupTemplate: {
+            title: "( {latitude}, {longitude} )",
+            content: [
+              {
+                type: "text",
+                text: `
+                <h1>id: {id}</h1>
+                <h1>damage type: {damage_type}</h1>
+                <h1>road related issues: {road_related_issues}</h1>
+                `,
+              },
+              {
+                type: "media",
+                // Autocasts as array of MediaInfo objects
+                mediaInfos: [
+                  {
+                    title: "<b>{address}</b>",
+                    type: "image", // Autocasts as new ImageMediaInfo object// Autocasts as new ImageMediaInfoValue object
+                    value: {
+                      sourceURL: "{image}",
+                    },
+                  },
+                ],
+              },
+            ],
+            actions: [
+              {
+                title: "Details",
+                id: "create-work-order",
+              },
+            ],
           },
-          // title: roadType,
-
-          // renderer: {
-          //   type: "simple",
-          //   symbol: {
-          //     type: "simple-marker",
-          //     color: [165, 83, 183, 255],
-          //     width: 1,
-          //   },
-          // },
-          // transparency: 0,
-          // labelingInfo: null,
-          // source: pathsGraphics,
-
-          // renderer: getRoadFeatureLayerRenderer(roadType),
-          // popupTemplate: roadLayerPopupTemplate,
+          fields: [
+            {
+              name: "id",
+              alias: "id",
+              type: "string",
+            },
+            {
+              name: "address",
+              alias: "address",
+              type: "string",
+            },
+            {
+              name: "image",
+              alias: "image",
+              type: "string",
+            },
+            {
+              name: "latitude",
+              alias: "latitude",
+              type: "string",
+            },
+            {
+              name: "longitude",
+              alias: "longitude",
+              type: "string",
+            },
+            {
+              name: "road_related_issues",
+              alias: "road_related_issues",
+              type: "string",
+            },
+            {
+              name: "damage_type",
+              alias: "damage_type",
+              type: "string",
+            },
+          ],
           objectIdField: "dataPointObjectID", // This must be defined when creating a layer from `Graphic` objects
-          // fields: fieldTitleValues,
         });
 
         dataPointLayers.push(roadTypeFeatureLayer);
@@ -263,7 +319,7 @@ export const ArcgisMap = (props) => {
 
     const dataPointGroupLayer = new GroupLayerClass({
       id: LAYER_TYPES.DATA_POINT_LAYER,
-      title: LAYER_TYPES.DATA_POINT_LAYER,
+      title: `${LAYER_TYPES.DATA_POINT_LAYER}:\n(filter by ${filterType})`,
       layers: dataPointLayers,
     });
     return dataPointGroupLayer;
@@ -405,8 +461,7 @@ export const ArcgisMap = (props) => {
       view.popup.on("trigger-action", function (event) {
         // Execute the measureThis() function if the measure-this action is clicked
         if (event.action.id === "create-work-order") {
-          const id = getDataIdFromPopup(view.popup, "ID");
-          alert(`creating work order for road #: ${id}`);
+          const id = getDataIdFromPopup(view.popup);
           // console.log("create-work-order should be executed");
         }
       });
@@ -465,31 +520,6 @@ export const ArcgisMap = (props) => {
       } else if (layersInMap.length === 0) {
         mapObject.addMany(selectedLayers);
       } else {
-        // const layersToBeRemoved = layersInMap.filter((existedLayer) => {
-        //   for (const selectedLayer of selectedLayers) {
-        //     if (existedLayer.id !== selectedLayer.id) {
-        //       return existedLayer;
-        //     }
-        //   }
-        // });
-        // const layersToBeRemoved = [];
-        // layersInMap.map((existedLayer) => {
-        //   const matchedLayer = selectedLayers.find((layer) => {
-        //     return existedLayer.id === layer.id;
-        //   });
-        //   if (matchedLayer === undefined) {
-        //     layersToBeRemoved.push(existedLayer);
-        //   }
-        // });
-
-        // const layersToBeAdded = selectedLayers.filter((selectedLayer) => {
-        //   for (const existedLayer of layersInMap) {
-        //     if (selectedLayer.id !== existedLayer.id) {
-        //       return selectedLayer;
-        //     }
-        //   }
-        // });
-
         const layersToBeRemoved = leftJoin(layersInMap, selectedLayers);
         const layersToBeAdded = leftJoin(selectedLayers, layersInMap);
 
@@ -553,20 +583,12 @@ export const ArcgisMap = (props) => {
       map.basemap = mapType;
     }
   }, [mapType]);
+  function getDataIdFromPopup(popup, attributeKey) {
+    const id = popup.content.graphic.attributes.id || -1;
 
+    const currentDataPoint = dataPointJson.find((data) => data.id === id);
+    console.log("matchedData", currentDataPoint);
+    setSelectedData(currentDataPoint);
+  }
   return <div className="webmap" style={{ height: "93vh" }} ref={mapRef} />;
 };
-
-function getDataIdFromPopup(popup, attributeKey) {
-  let id = -1;
-  const idHTMLValue = popup.content.graphic.attributes[attributeKey];
-  if (idHTMLValue) {
-    const startIndex = idHTMLValue.indexOf(">");
-    const endIndex = idHTMLValue.lastIndexOf("<");
-    const tempString = idHTMLValue.substring(startIndex + 1, endIndex);
-    const numberString = tempString.split(",").join("");
-    id = isNaN(Number(numberString)) ? -1 : Number(numberString);
-  }
-
-  return id;
-}

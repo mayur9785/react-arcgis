@@ -21,6 +21,8 @@ export const DATA_POINT_FILTER_TYPES = {
   MONTH: "Month",
   YEAR: "Year",
   PCI: "PCI",
+  MMS: "MMS Defects",
+  RRI: "Roate Related Issues",
 };
 
 export const DATA_POINT_DETAILS_TITLES = [

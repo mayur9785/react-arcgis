@@ -35,3 +35,14 @@ export function getDateValue(dateString, valueType) {
     }
   }
 }
+
+export function leftJoin(left, right) {
+  const inLeftButNotRight = [];
+  left.map((l) => {
+    const matched = right.find((r) => r === l);
+    if (matched === undefined) {
+      inLeftButNotRight.push(l);
+    }
+  });
+  return inLeftButNotRight;
+}

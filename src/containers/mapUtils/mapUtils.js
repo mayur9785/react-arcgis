@@ -251,26 +251,29 @@ function getDateValue(dateString, valueType) {
     }
   }
 }
-export function reduceDataByCategory(
-  data,
-  category,
-  dateType = DATA_POINT_FILTER_TYPES.DATE
-) {
-  const isPCIFilter = DATA_POINT_FILTER_TYPES.PCI.toLowerCase() === category;
-  const isDateFilter = !isPCIFilter;
-
-  let rd = data.reduce((categoriedData, element) => {
-    const fieldValue = element[category];
-    let newKey = "";
-    if (isPCIFilter) {
-      newKey = fieldValue;
-    } else if (isDateFilter) {
-      newKey = getDateValue(fieldValue, dateType);
-    }
-    const recentData = categoriedData[newKey] || [];
-    recentData.push(element);
-    return { ...categoriedData, [newKey]: recentData };
-  }, {});
+export function reduceDataByCategory(data, category, dateType) {
+  let rd = {};
+  // reduced data by date value
+  if (dateType) {
+    rd = data.reduce((categoriedData, element) => {
+      const fieldValue = element[category];
+      let newKey = getDateValue(fieldValue, dateType);
+      const recentData = categoriedData[newKey] || [];
+      recentData.push(element);
+      return { ...categoriedData, [newKey]: recentData };
+    }, {});
+  } else {
+    rd = data.reduce((categoriedData, element) => {
+      const fieldValue = element[category];
+      let newKey = fieldValue;
+      if (fieldValue === "null") {
+        newKey = "N / A";
+      }
+      const recentData = categoriedData[newKey] || [];
+      recentData.push(element);
+      return { ...categoriedData, [newKey]: recentData };
+    }, {});
+  }
   return rd;
 }
 

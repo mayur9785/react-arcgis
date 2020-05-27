@@ -19,7 +19,7 @@ import {
   getRandomRGB,
   getSimpleMarkerSymbol,
 } from "../../containers/mapUtils/mapUtils.js";
-import { isValidObj } from "../../utils/utilFunctions/utilFunctions";
+import { isValidObj, leftJoin } from "../../utils/utilFunctions/utilFunctions";
 import { MapContext } from "../../context/mapContext";
 
 const roadGraphicOptions = {
@@ -102,38 +102,38 @@ const panelFunction = (event) => {
     content: ["legend"],
   };
 
-  if (item.title === "Roads Layer") {
-    // An array of objects defining actions to place in the LayerList.
-    // By making this array two-dimensional, you can separate similar
-    // actions into separate groups with a breaking line.
+  // if (item.title === "Roads Layer") {
+  //   // An array of objects defining actions to place in the LayerList.
+  //   // By making this array two-dimensional, you can separate similar
+  //   // actions into separate groups with a breaking line.
 
-    item.actionsSections = [
-      [
-        {
-          title: "Go to full extent",
-          className: "esri-icon-zoom-out-fixed",
-          id: "full-extent",
-        },
-        {
-          title: "Layer information",
-          className: "esri-icon-description",
-          id: "information",
-        },
-      ],
-      [
-        {
-          title: "Increase opacity",
-          className: "esri-icon-up",
-          id: "increase-opacity",
-        },
-        {
-          title: "Decrease opacity",
-          className: "esri-icon-down",
-          id: "decrease-opacity",
-        },
-      ],
-    ];
-  }
+  //   item.actionsSections = [
+  //     [
+  //       {
+  //         title: "Go to full extent",
+  //         className: "esri-icon-zoom-out-fixed",
+  //         id: "full-extent",
+  //       },
+  //       {
+  //         title: "Layer information",
+  //         className: "esri-icon-description",
+  //         id: "information",
+  //       },
+  //     ],
+  //     [
+  //       {
+  //         title: "Increase opacity",
+  //         className: "esri-icon-up",
+  //         id: "increase-opacity",
+  //       },
+  //       {
+  //         title: "Decrease opacity",
+  //         className: "esri-icon-down",
+  //         id: "decrease-opacity",
+  //       },
+  //     ],
+  //   ];
+  // }
 };
 
 const createWorkOrder = {
@@ -187,10 +187,18 @@ export const ArcgisMap = (props) => {
 
     let groupedDataPoints = {};
     if (DATA_POINT_FILTER_TYPES.PCI === filterType) {
+      groupedDataPoints = reduceDataByCategory(dataPointJson, "pci", null);
+    } else if (DATA_POINT_FILTER_TYPES.MMS === filterType) {
       groupedDataPoints = reduceDataByCategory(
         dataPointJson,
-        "pci",
-        filterType
+        "damage_type",
+        null
+      );
+    } else if (DATA_POINT_FILTER_TYPES.RRI === filterType) {
+      groupedDataPoints = reduceDataByCategory(
+        dataPointJson,
+        "road_related_issues",
+        null
       );
     } else {
       groupedDataPoints = reduceDataByCategory(
@@ -332,7 +340,7 @@ export const ArcgisMap = (props) => {
             fieldInfos: fieldTitleKeys,
           },
         ],
-        actions: [createWorkOrder, resolve],
+        // actions: [createWorkOrder, resolve],
       };
 
       // contains all road type feature layers
@@ -457,21 +465,42 @@ export const ArcgisMap = (props) => {
       } else if (layersInMap.length === 0) {
         mapObject.addMany(selectedLayers);
       } else {
-        const layersToBeRemoved = layersInMap.filter((existedLayer) => {
-          for (const selectedLayer of selectedLayers) {
-            if (existedLayer.id !== selectedLayer.id) {
-              return existedLayer;
-            }
-          }
-        });
+        // const layersToBeRemoved = layersInMap.filter((existedLayer) => {
+        //   for (const selectedLayer of selectedLayers) {
+        //     if (existedLayer.id !== selectedLayer.id) {
+        //       return existedLayer;
+        //     }
+        //   }
+        // });
+        // const layersToBeRemoved = [];
+        // layersInMap.map((existedLayer) => {
+        //   const matchedLayer = selectedLayers.find((layer) => {
+        //     return existedLayer.id === layer.id;
+        //   });
+        //   if (matchedLayer === undefined) {
+        //     layersToBeRemoved.push(existedLayer);
+        //   }
+        // });
 
-        const layersToBeAdded = selectedLayers.filter((selectedLayer) => {
-          for (const existedLayer of layersInMap) {
-            if (selectedLayer.id !== existedLayer) {
-              return selectedLayer;
-            }
-          }
-        });
+        // const layersToBeAdded = selectedLayers.filter((selectedLayer) => {
+        //   for (const existedLayer of layersInMap) {
+        //     if (selectedLayer.id !== existedLayer.id) {
+        //       return selectedLayer;
+        //     }
+        //   }
+        // });
+
+        const layersToBeRemoved = leftJoin(layersInMap, selectedLayers);
+        const layersToBeAdded = leftJoin(selectedLayers, layersInMap);
+
+        console.log("all layer ids");
+        layersInMap.map((l) => console.log(l.id));
+        console.log("selected layer ids");
+        selectedLayers.map((l) => console.log(l.id));
+        console.log("ids to be removed");
+        layersToBeRemoved.map((l) => console.log(l.id));
+        console.log("ids to be added");
+        layersToBeAdded.map((l) => console.log(l.id));
 
         mapObject.removeMany(layersToBeRemoved);
         mapObject.addMany(layersToBeAdded);
@@ -528,9 +557,6 @@ export const ArcgisMap = (props) => {
   return <div className="webmap" style={{ height: "93vh" }} ref={mapRef} />;
 };
 
-function isEqual() {
-  return true;
-}
 function getDataIdFromPopup(popup, attributeKey) {
   let id = -1;
   const idHTMLValue = popup.content.graphic.attributes[attributeKey];

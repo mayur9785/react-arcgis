@@ -7,8 +7,10 @@ export function isDateValid(date) {
   return date instanceof Date && !isNaN(date);
 }
 
+// convert month number to string
+// ie: 1 => Jan, 2 => Feb etc
 function getMonthShortName(date) {
-  let shortName = "unknown mont short name";
+  let shortName = "unknown month short name";
   if (isDateValid(date)) {
     const shortMonthName = new Intl.DateTimeFormat("en-US", { month: "short" })
       .format;
@@ -17,11 +19,15 @@ function getMonthShortName(date) {
   return shortName;
 }
 
+// get date value base on date string and value type
+// ie: valueType = Year, return 2020
+//     valueType = Month, reutrn Jan 2020
+//     valueType = date, return Jan 1, 2020
 export function getDateValue(dateString, valueType) {
   const currentDate = new Date(dateString);
   if (isDateValid(currentDate)) {
     const year = currentDate.getFullYear();
-    const month = currentDate.getMonth() + 1;
+    // const month = currentDate.getMonth() + 1;
     const date = currentDate.getDate();
 
     const monthString = getMonthShortName(currentDate);
@@ -36,6 +42,10 @@ export function getDateValue(dateString, valueType) {
   }
 }
 
+// found elements that exists in left array
+// but not in right array
+// if left = [1,2,3] and right = [2,3]
+// it should return [1]
 export function leftJoin(left, right) {
   const inLeftButNotRight = [];
   left.map((l) => {

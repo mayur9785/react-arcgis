@@ -5,7 +5,7 @@ import {
   isDateValid,
 } from "../../utils/utilFunctions/utilFunctions";
 import {
-  GEOMETRY_TYPE,
+  GEOMETRY_TYPES,
   DATA_POINT_FILTER_TYPES,
   DATA_POINT_MARKER_SYMBOLS,
   PCI_VALUES,
@@ -187,17 +187,17 @@ function getGeometryObject(data, gemoetryType) {
   }
   geometryObject = { type: gemoetryType };
   switch (gemoetryType) {
-    case GEOMETRY_TYPE.POINT:
+    case GEOMETRY_TYPES.POINT:
       geometryObject = {
         ...geometryObject,
         longitude: Number(data.longitude),
         latitude: Number(data.latitude),
       };
       break;
-    case GEOMETRY_TYPE.POLY_LINE:
+    case GEOMETRY_TYPES.POLY_LINE:
       geometryObject = { ...geometryObject, paths: data.coordinates };
       break;
-    case GEOMETRY_TYPE.POLYGON:
+    case GEOMETRY_TYPES.POLYGON:
       geometryObject = { ...geometryObject, rings: data.coordinates };
       break;
   }

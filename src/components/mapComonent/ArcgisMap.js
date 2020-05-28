@@ -26,6 +26,7 @@ import { MapContext } from "../../context/mapContext";
 
 import redWarningIcon from "../../images/mms_warning.jpg";
 import yellowWarningIcon from "../../images/rri_warning.jpg";
+import moreDetailsIcon from "../../images/more_details.png";
 
 const roadGraphicOptions = {
   graphicType: "polyline",
@@ -272,6 +273,7 @@ export const ArcgisMap = (props) => {
               {
                 title: "Details",
                 id: "create-work-order",
+                image: `${moreDetailsIcon}`,
               },
             ],
           },
@@ -524,6 +526,13 @@ export const ArcgisMap = (props) => {
       } else {
         const layersToBeRemoved = leftJoin(layersInMap, selectedLayers);
         const layersToBeAdded = leftJoin(selectedLayers, layersInMap);
+
+        // if (layersToBeAdded.length !== 0) {
+        //   const a = layersToBeAdded[0];
+        //   const fe = a.layers.items[0].fullExtent;
+        //   // mapView.fullExtent = fe;
+        //   mapView.goTo(fe);
+        // }
 
         console.log("all layer ids");
         layersInMap.map((l) => console.log(l.id));

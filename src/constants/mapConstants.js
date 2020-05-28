@@ -1,14 +1,16 @@
-export const GEOMETRY_TYPE = {
+export const GEOMETRY_TYPES = {
   POINT: "point",
   POLY_LINE: "polyline",
   POLYGON: "polygon",
 };
 
-export const SYMBOL_MARKER = {
+// simple markers for Arcgis map
+export const SYMBOL_MARKERS = {
   LINE: "polyline",
   MARKER: "simple-marker",
 };
 
+// filter types for filtering data points
 export const DATA_POINT_FILTER_TYPES = {
   DATE: "Date",
   MONTH: "Month",
@@ -28,6 +30,7 @@ export const DATA_POINT_DETAILS_TITLES = [
   { name: "Vehicle", keyName: "device_sn" },
 ];
 
+// map types of Arcgis map
 export const ARCGIS_MAP_TYPES = {
   TOPO: "topo",
   STREETS: "streets",

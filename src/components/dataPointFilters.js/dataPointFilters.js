@@ -15,7 +15,7 @@ import {
 } from "@material-ui/pickers";
 import DateFnsUtils from "@date-io/date-fns";
 import {
-  DATA_POINT_FILTER_TYPES,
+  DATA_POINT_GROUP_TYPES,
   ARCGIS_MAP_TYPES,
 } from "../../constants/mapConstants";
 import { LAYER_TYPES } from "../../containers/mapUtils/mapUtils";
@@ -152,9 +152,9 @@ export function DataPointFilters(props) {
             id: "layers",
           }}
         >
-          {Object.keys(DATA_POINT_FILTER_TYPES).map((filterKey) => (
-            <option key={filterKey} value={DATA_POINT_FILTER_TYPES[filterKey]}>
-              {DATA_POINT_FILTER_TYPES[filterKey]}
+          {Object.keys(DATA_POINT_GROUP_TYPES).map((filterKey) => (
+            <option key={filterKey} value={DATA_POINT_GROUP_TYPES[filterKey]}>
+              {DATA_POINT_GROUP_TYPES[filterKey]}
             </option>
           ))}
         </Select>

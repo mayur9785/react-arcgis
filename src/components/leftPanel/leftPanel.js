@@ -1,26 +1,10 @@
-import React, { useState, useContext } from "react";
+import React, { useContext } from "react";
 import PropTypes from "prop-types";
 import { makeStyles } from "@material-ui/core/styles";
 import AppBar from "@material-ui/core/AppBar";
 import Tabs from "@material-ui/core/Tabs";
 import Tab from "@material-ui/core/Tab";
-import Typography from "@material-ui/core/Typography";
 import Box from "@material-ui/core/Box";
-import { Divider } from "@material-ui/core";
-import Input from "@material-ui/core/Input";
-import InputLabel from "@material-ui/core/InputLabel";
-import MenuItem from "@material-ui/core/MenuItem";
-import FormControl from "@material-ui/core/FormControl";
-import ListItemText from "@material-ui/core/ListItemText";
-import Select from "@material-ui/core/Select";
-import Checkbox from "@material-ui/core/Checkbox";
-import {
-  MuiPickersUtilsProvider,
-  KeyboardDatePicker,
-} from "@material-ui/pickers";
-import DateFnsUtils from "@date-io/date-fns";
-import { DATA_POINT_FILTER_TYPES } from "../../constants/mapConstants";
-import { LAYER_TYPES } from "../../containers/mapUtils/mapUtils";
 import { DataPontDetails } from "../dataPointDetails/dataPointDetails";
 import { DataPointFilters } from "../dataPointFilters.js/dataPointFilters";
 import { MapContext } from "../../context/mapContext";

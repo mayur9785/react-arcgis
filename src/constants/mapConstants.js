@@ -11,7 +11,7 @@ export const SYMBOL_MARKERS = {
 };
 
 // filter types for filtering data points
-export const DATA_POINT_FILTER_TYPES = {
+export const DATA_POINT_GROUP_TYPES = {
   DATE: "Date",
   MONTH: "Month",
   YEAR: "Year",
@@ -19,6 +19,14 @@ export const DATA_POINT_FILTER_TYPES = {
   MMS: "MMS Defects",
   RRI: "Road Related Issues",
   FLAGS: "Flags",
+};
+
+export const DATA_POINT_FILTER_TYPES = {
+  "No Issues": { name: "No Issues", keyName: " N/ A" },
+  MMS: { name: "MMS", keyName: "damage_type" },
+  RRI: { name: "RRI", keyName: "road_related_issues" },
+  "Red flag": { name: "Red flag", keyName: "flag" },
+  "Yellow flag": { name: "Yellow flag", keyName: "flag" },
 };
 
 export const DATA_POINT_DETAILS_TITLES = [

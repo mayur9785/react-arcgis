@@ -1,4 +1,4 @@
-import { DATA_POINT_FILTER_TYPES } from "../../constants/mapConstants";
+import { DATA_POINT_GROUP_TYPES } from "../../constants/mapConstants";
 
 export function isValidObj(obj) {
   return obj !== null && obj !== undefined;
@@ -32,9 +32,9 @@ export function getDateValue(dateString, valueType) {
 
     const monthString = getMonthShortName(currentDate);
     switch (valueType) {
-      case DATA_POINT_FILTER_TYPES.YEAR:
+      case DATA_POINT_GROUP_TYPES.YEAR:
         return year;
-      case DATA_POINT_FILTER_TYPES.MONTH:
+      case DATA_POINT_GROUP_TYPES.MONTH:
         return `${monthString}, ${year}`;
       default:
         return `${monthString} ${date}, ${year}`;
@@ -55,4 +55,8 @@ export function leftJoin(left, right) {
     }
   });
   return inLeftButNotRight;
+}
+
+export function isEmptyObject(object) {
+  return Object.keys(object).length === 0 && object.constructor === Object;
 }

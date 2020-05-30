@@ -4,17 +4,17 @@ import shapeGeoJson from "../mapComonent/hamiltonDataFilterDemo/Muskoka_Road_Net
 import dataPointJson from "../mapComonent/hamiltonDataFilterDemo/data.json";
 
 import {
-  DATA_POINT_FILTER_TYPES,
-  DATA_POINT_MARKER_SYMBOLS,
+  DATA_POINT_GROUP_TYPES,
+  // DATA_POINT_MARKER_SYMBOLS,
 } from "../../constants/mapConstants";
 import {
   getBaseMap,
   getMapView,
   getFieldInfo,
   getReducedPaths,
-  getPathGraphic,
+  // getPathGraphic,
   getGraphicObj,
-  reduceDataByCategory,
+  // reduceDataByCategory,
   LAYER_TYPES,
   getRandomRGB,
   getSimpleMarkerSymbol,
@@ -218,7 +218,7 @@ export const ArcgisMap = (props) => {
 
         let featureLayerRenderer = {};
         switch (filterType) {
-          case DATA_POINT_FILTER_TYPES.FLAGS:
+          case DATA_POINT_GROUP_TYPES.FLAGS:
             if (dataPointTitle === "R") {
               featureLayerRenderer = getIconRenderer(
                 redWarningIcon,
@@ -450,38 +450,38 @@ export const ArcgisMap = (props) => {
         FeatureLayer,
         GroupLayer
       );
+      debugger;
+      // const MMSDataPointGroupLayer = getDataPointGroupLayer(
+      //   LAYER_TYPES.MMS_Layer,
+      //   DATA_POINT_GROUP_TYPES.MMS,
+      //   Graphic,
+      //   FeatureLayer,
+      //   GroupLayer
+      // );
 
-      const MMSDataPointGroupLayer = getDataPointGroupLayer(
-        LAYER_TYPES.MMS_Layer,
-        DATA_POINT_FILTER_TYPES.MMS,
-        Graphic,
-        FeatureLayer,
-        GroupLayer
-      );
+      // const RRIDataPointGroupLayer = getDataPointGroupLayer(
+      //   LAYER_TYPES.RRI_Layer,
+      //   DATA_POINT_GROUP_TYPES.RRI,
+      //   Graphic,
+      //   FeatureLayer,
+      //   GroupLayer
+      // );
 
-      const RRIDataPointGroupLayer = getDataPointGroupLayer(
-        LAYER_TYPES.RRI_Layer,
-        DATA_POINT_FILTER_TYPES.RRI,
-        Graphic,
-        FeatureLayer,
-        GroupLayer
-      );
-
-      const flagsDataPointGroupLayer = getDataPointGroupLayer(
-        LAYER_TYPES.FLAGS_LAYER,
-        DATA_POINT_FILTER_TYPES.FLAGS,
-        Graphic,
-        FeatureLayer,
-        GroupLayer
-      );
+      // const flagsDataPointGroupLayer = getDataPointGroupLayer(
+      //   LAYER_TYPES.FLAGS_LAYER,
+      //   DATA_POINT_GROUP_TYPES.FLAGS,
+      //   Graphic,
+      //   FeatureLayer,
+      //   GroupLayer
+      // );
 
       // assign raod type group layer
       // setRoadGroupLayer(roadTypesGroupLayer);
       allLayers.push(roadTypesGroupLayer);
       allLayers.push(dataPointGroupLayer);
-      allLayers.push(MMSDataPointGroupLayer);
-      allLayers.push(RRIDataPointGroupLayer);
-      allLayers.push(flagsDataPointGroupLayer);
+      // allLayers.push(MMSDataPointGroupLayer);
+      // allLayers.push(RRIDataPointGroupLayer);
+      // allLayers.push(flagsDataPointGroupLayer);
       // layer list for road types
 
       const roadTypesLayerList = new LayerList({
@@ -587,7 +587,6 @@ export const ArcgisMap = (props) => {
   };
 
   useEffect(() => {
-    debugger;
     toggleFeatureLayers(map, allGroupLayers, selectedLayers);
   }, [selectedLayers]);
 

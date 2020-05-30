@@ -3,15 +3,17 @@ import { styleFont } from "./mapStyleUtils";
 import {
   isValidObj,
   isDateValid,
+  isEmptyObject,
 } from "../../utils/utilFunctions/utilFunctions";
 import {
   GEOMETRY_TYPES,
-  DATA_POINT_FILTER_TYPES,
+  DATA_POINT_GROUP_TYPES,
   DATA_POINT_MARKER_SYMBOLS,
   PCI_VALUES,
   DEFAULT_SYMBOL_SIZE,
   DEFAULT_MARKER_WIDTH,
   DEFAULT_MARKER_ALPHA,
+  DATA_POINT_FILTER_TYPES,
 } from "../../constants/mapConstants";
 
 const shp = require("shpjs");
@@ -163,6 +165,7 @@ export function getDataPointGraphic(data, GraphicsClass, graphicsOptions) {
   }
 
   const { graphicType, symbol } = graphicsOptions;
+  debugger;
   const arcgisGraphic = data.map((d, index) => {
     const geometryObject = getGeometryObject(d, graphicType);
     const updatedData = { ...d };
@@ -284,9 +287,9 @@ function getDateValue(dateString, valueType) {
 
     const monthString = getMonthShortName(currentDate);
     switch (valueType) {
-      case DATA_POINT_FILTER_TYPES.YEAR:
+      case DATA_POINT_GROUP_TYPES.YEAR:
         return year;
-      case DATA_POINT_FILTER_TYPES.MONTH:
+      case DATA_POINT_GROUP_TYPES.MONTH:
         return `${monthString}, ${year}`;
       default:
         return `${monthString} ${date}, ${year}`;
@@ -295,7 +298,7 @@ function getDateValue(dateString, valueType) {
 }
 export function reduceDataByCategory(data, category, dateType) {
   let rd = {};
-  debugger;
+  // debugger;
   // reduced data by date value
   if (dateType) {
     rd = data.reduce((categoriedData, element) => {
@@ -305,17 +308,77 @@ export function reduceDataByCategory(data, category, dateType) {
       recentData.push(element);
       return { ...categoriedData, [newKey]: recentData };
     }, {});
-  } else if ("flag" === category.toLowerCase()) {
+  } else if (DATA_POINT_FILTER_TYPES["Red flag"].name === category) {
     rd = data.reduce((categoriedData, element) => {
-      const fieldValue = element[category];
+      const fieldValue = element["flag"];
       let newKey = fieldValue;
-      if (fieldValue === "N") {
+      if ("n" === fieldValue.toLowerCase()) {
+        return { ...categoriedData };
+      } else if ("r" === fieldValue.toLowerCase()) {
+        const recentData = categoriedData[newKey] || [];
+        recentData.push(element);
+        return { ...categoriedData, [newKey]: recentData };
+      }
+    }, {});
+
+    // rd = data.reduce((categoriedData, element) => {
+    //   const fieldValue = element[category];
+    //   let newKey = fieldValue;
+    //   if (fieldValue === "N") {
+    //     return { ...categoriedData };
+    //   }
+    //   const recentData = categoriedData[newKey] || [];
+    //   recentData.push(element);
+    //   return { ...categoriedData, [newKey]: recentData };
+    // }, {});
+  } else if (DATA_POINT_FILTER_TYPES["Yellow flag"].name === category) {
+    rd = data.reduce((categoriedData, element) => {
+      const fieldValue = element["flag"];
+      let newKey = fieldValue;
+      if ("n" === fieldValue.toLowerCase()) {
+        return { ...categoriedData };
+      } else if (
+        "ry" === fieldValue.toLowerCase() ||
+        "y" === fieldValue.toLowerCase()
+      ) {
+        const recentData = categoriedData[newKey] || [];
+        recentData.push(element);
+        return { ...categoriedData, [newKey]: recentData };
+      }
+    }, {});
+  } else if (DATA_POINT_FILTER_TYPES.MMS.name === category) {
+    rd = data.reduce((categoriedData, element) => {
+      const fieldValue = element[DATA_POINT_FILTER_TYPES.MMS.keyName];
+      if (fieldValue.toLowerCase() === "null") {
+        return { ...categoriedData };
+      }
+      const recentData = categoriedData[fieldValue] || [];
+      recentData.push(element);
+      return { ...categoriedData, [fieldValue]: recentData };
+    }, {});
+  } else if (DATA_POINT_FILTER_TYPES.RRI.name === category) {
+    rd = data.reduce((categoriedData, element) => {
+      const fieldValue = element[DATA_POINT_FILTER_TYPES.RRI.keyName];
+      let newKey = fieldValue;
+      if (fieldValue.toLowerCase() === "null") {
         return { ...categoriedData };
       }
       const recentData = categoriedData[newKey] || [];
       recentData.push(element);
       return { ...categoriedData, [newKey]: recentData };
     }, {});
+  } else if (DATA_POINT_FILTER_TYPES["No Issues"].name === category) {
+    const normalData = [];
+    for (const d of data) {
+      if (
+        d["damage_type"].toLowerCase() === "null" &&
+        d["road_related_issues"] === "null".toLowerCase() &&
+        d["flag"].toLowerCase() === "n"
+      ) {
+        normalData.push({ ...d });
+      }
+    }
+    rd["no issues"] = normalData;
   } else {
     rd = data.reduce((categoriedData, element) => {
       const fieldValue = element[category];
@@ -330,6 +393,43 @@ export function reduceDataByCategory(data, category, dateType) {
   }
   return rd;
 }
+// export function reduceDataByCategory(data, category, dateType) {
+//   let rd = {};
+//   // debugger;
+//   // reduced data by date value
+//   if (dateType) {
+//     rd = data.reduce((categoriedData, element) => {
+//       const fieldValue = element[category];
+//       let newKey = getDateValue(fieldValue, dateType);
+//       const recentData = categoriedData[newKey] || [];
+//       recentData.push(element);
+//       return { ...categoriedData, [newKey]: recentData };
+//     }, {});
+//   } else if ("flag" === category.toLowerCase()) {
+//     rd = data.reduce((categoriedData, element) => {
+//       const fieldValue = element[category];
+//       let newKey = fieldValue;
+//       if (fieldValue === "N") {
+//         return { ...categoriedData };
+//       }
+//       const recentData = categoriedData[newKey] || [];
+//       recentData.push(element);
+//       return { ...categoriedData, [newKey]: recentData };
+//     }, {});
+//   } else {
+//     rd = data.reduce((categoriedData, element) => {
+//       const fieldValue = element[category];
+//       let newKey = fieldValue;
+//       if (fieldValue === "null") {
+//         return { ...categoriedData };
+//       }
+//       const recentData = categoriedData[newKey] || [];
+//       recentData.push(element);
+//       return { ...categoriedData, [newKey]: recentData };
+//     }, {});
+//   }
+//   return rd;
+// }
 
 export function isLayerExisted(mapObject, layerId) {
   let isLayerExist = false;
@@ -408,33 +508,25 @@ export function getIconRenderer(inconPath, iconTitle, iconSize) {
 // in all data points would be grouped in
 // {title0: [dataPoints for titie0]}
 export function getGroupedDataPoints(filterType, data) {
-  let category = "";
-  let updatedFilterType = filterType;
-  switch (filterType) {
-    case DATA_POINT_FILTER_TYPES.PCI:
-      category = "pci";
-      updatedFilterType = null;
-      break;
-    case DATA_POINT_FILTER_TYPES.MMS:
-      category = "damage_type";
-      updatedFilterType = null;
-      break;
-    case DATA_POINT_FILTER_TYPES.RRI:
-      category = "road_related_issues";
-      updatedFilterType = null;
-      break;
-    case DATA_POINT_FILTER_TYPES.FLAGS:
-      category = "flag";
-      updatedFilterType = null;
-      break;
-    default:
-      category = "create_time";
-  }
   const groupedDataPoints = reduceDataByCategory(
     data,
-    category,
-    updatedFilterType
+    "create_time",
+    filterType
   );
-
-  return groupedDataPoints;
+  const updatedGroupLayer = {};
+  for (const key in groupedDataPoints) {
+    updatedGroupLayer[key] = {};
+    if (groupedDataPoints.hasOwnProperty(key)) {
+      const element = groupedDataPoints[key];
+      Object.keys(DATA_POINT_FILTER_TYPES).map((type) => {
+        const r = reduceDataByCategory(element, type, null);
+        if (isEmptyObject(r)) {
+          return;
+        }
+        updatedGroupLayer[key][type] = r;
+      });
+    }
+  }
+  debugger;
+  return updatedGroupLayer;
 }

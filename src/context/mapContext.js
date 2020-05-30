@@ -1,7 +1,7 @@
 import React, { useState, createContext } from "react";
 import {
   ARCGIS_MAP_TYPES,
-  DATA_POINT_FILTER_TYPES,
+  DATA_POINT_GROUP_TYPES,
 } from "../constants/mapConstants";
 import { LAYER_TYPES } from "../containers/mapUtils/mapUtils";
 
@@ -11,7 +11,7 @@ export function MapContextProvider(props) {
   const [mapType, setMapType] = useState(ARCGIS_MAP_TYPES.TOPO);
 
   const [dataFilterType, setDataFilterType] = useState(
-    DATA_POINT_FILTER_TYPES.DATE
+    DATA_POINT_GROUP_TYPES.DATE
   );
 
   const [selectedData, setSelectedData] = useState(null);

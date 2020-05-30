@@ -20,6 +20,9 @@ export const LAYER_TYPES = {
   ROAD_LAYER: "Road Layer",
   BOUNDARY_LAYER: "Boundary Layer",
   DATA_POINT_LAYER: "Data Point Layer",
+  MMS_Layer: "MMS Layer",
+  RRI_Layer: "RRI Layer",
+  FLAGS_LAYER: "Flags Layer",
 };
 
 export async function getBoundaryAndCenter(zipFilePath) {
@@ -237,7 +240,6 @@ export function getGraphicObj(pathsObject, GraphicsClass, graphicOptions) {
       graphicsObject[roadTypeKey] = pathsGraphics;
     }
   }
-  debugger;
   return graphicsObject;
 }
 
@@ -293,11 +295,23 @@ function getDateValue(dateString, valueType) {
 }
 export function reduceDataByCategory(data, category, dateType) {
   let rd = {};
+  debugger;
   // reduced data by date value
   if (dateType) {
     rd = data.reduce((categoriedData, element) => {
       const fieldValue = element[category];
       let newKey = getDateValue(fieldValue, dateType);
+      const recentData = categoriedData[newKey] || [];
+      recentData.push(element);
+      return { ...categoriedData, [newKey]: recentData };
+    }, {});
+  } else if ("flag" === category.toLowerCase()) {
+    rd = data.reduce((categoriedData, element) => {
+      const fieldValue = element[category];
+      let newKey = fieldValue;
+      if (fieldValue === "N") {
+        return { ...categoriedData };
+      }
       const recentData = categoriedData[newKey] || [];
       recentData.push(element);
       return { ...categoriedData, [newKey]: recentData };
@@ -407,6 +421,10 @@ export function getGroupedDataPoints(filterType, data) {
       break;
     case DATA_POINT_FILTER_TYPES.RRI:
       category = "road_related_issues";
+      updatedFilterType = null;
+      break;
+    case DATA_POINT_FILTER_TYPES.FLAGS:
+      category = "flag";
       updatedFilterType = null;
       break;
     default:

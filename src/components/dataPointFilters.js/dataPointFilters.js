@@ -6,6 +6,9 @@ import FormControl from "@material-ui/core/FormControl";
 import ListItemText from "@material-ui/core/ListItemText";
 import Select from "@material-ui/core/Select";
 import Checkbox from "@material-ui/core/Checkbox";
+import FormLabel from "@material-ui/core/FormLabel";
+import FormGroup from "@material-ui/core/FormGroup";
+import FormControlLabel from "@material-ui/core/FormControlLabel";
 import {
   MuiPickersUtilsProvider,
   KeyboardDatePicker,
@@ -69,7 +72,6 @@ export function DataPointFilters(props) {
           value={mapType}
           onChange={handleMapTypeChange}
         >
-          {/* <MenuItem value={10}>Ten</MenuItem> */}
           {Object.keys(ARCGIS_MAP_TYPES).map((mapKey) => (
             <MenuItem key={mapKey} value={ARCGIS_MAP_TYPES[mapKey]}>
               {ARCGIS_MAP_TYPES[mapKey]}
@@ -77,6 +79,24 @@ export function DataPointFilters(props) {
           ))}
         </Select>
       </FormControl>
+
+      {/* <FormControl component="fieldset">
+        <FormLabel component="legend">Select layers</FormLabel>
+        <FormGroup>
+          {Object.keys(ARCGIS_MAP_TYPES).map((mapKey) => (
+            <FormControlLabel
+              key={mapKey}
+              control={
+                <Checkbox
+                  onChange={handleMapTypeChange}
+                  name={ARCGIS_MAP_TYPES[mapKey]}
+                />
+              }
+              label="Gilad Gray"
+            />
+          ))}
+        </FormGroup>
+      </FormControl> */}
 
       <FormControl fullWidth>
         <InputLabel id="mutiple-feature-layers-label">Layers</InputLabel>

@@ -180,6 +180,7 @@ export const ArcgisMap = (props) => {
   const [allGroupLayers, setAllGroupLayers] = useState([]);
 
   function getDataPointGroupLayer(
+    id,
     filterType,
     GraphicClass,
     FeatureLayerClass,
@@ -199,7 +200,7 @@ export const ArcgisMap = (props) => {
     // get groupedDataPoints as
     // { category0: data0, category1: data1 }
     const groupedDataPoints = getGroupedDataPoints(filterType, dataPointJson);
-
+    debugger;
     // get graphic objects from grouped data points
     const dataPointGraphicsObj = getGraphicObj(
       groupedDataPoints,
@@ -208,7 +209,7 @@ export const ArcgisMap = (props) => {
         graphicType: "point",
       }
     );
-    debugger;
+    // debugger;
     // get feature layer for each graphic
     const dataPointLayers = [];
     for (const dataPointTitle in dataPointGraphicsObj) {
@@ -217,20 +218,28 @@ export const ArcgisMap = (props) => {
 
         let featureLayerRenderer = {};
         switch (filterType) {
-          case DATA_POINT_FILTER_TYPES.MMS:
-            featureLayerRenderer = getIconRenderer(
-              redWarningIcon,
-              dataPointTitle,
-              25
-            );
+          case DATA_POINT_FILTER_TYPES.FLAGS:
+            if (dataPointTitle === "R") {
+              featureLayerRenderer = getIconRenderer(
+                redWarningIcon,
+                dataPointTitle,
+                25
+              );
+            } else if (dataPointTitle === "Y") {
+              featureLayerRenderer = getIconRenderer(
+                yellowWarningIcon,
+                dataPointTitle,
+                25
+              );
+            }
             break;
-          case DATA_POINT_FILTER_TYPES.RRI:
-            featureLayerRenderer = getIconRenderer(
-              yellowWarningIcon,
-              dataPointTitle,
-              25
-            );
-            break;
+          // case DATA_POINT_FILTER_TYPES.YELLOW_FLAG:
+          //   featureLayerRenderer = getIconRenderer(
+          //     yellowWarningIcon,
+          //     dataPointTitle,
+          //     25
+          //   );
+          //   break;
           default:
             let markerSymbol = getSimpleMarkerSymbol(dataPointTitle);
             featureLayerRenderer = {
@@ -239,7 +248,7 @@ export const ArcgisMap = (props) => {
               label: dataPointTitle,
             };
         }
-        debugger;
+        // debugger;
         const roadTypeFeatureLayer = new FeatureLayerClass({
           title: dataPointTitle,
           source: pathsGraphics,
@@ -322,8 +331,8 @@ export const ArcgisMap = (props) => {
     }
 
     const dataPointGroupLayer = new GroupLayerClass({
-      id: LAYER_TYPES.DATA_POINT_LAYER,
-      title: `${LAYER_TYPES.DATA_POINT_LAYER}:\n(filter by ${filterType})`,
+      id: id,
+      title: `${id}:\n(filter by ${filterType})`,
       layers: dataPointLayers,
     });
     return dataPointGroupLayer;
@@ -370,7 +379,7 @@ export const ArcgisMap = (props) => {
           properties: { ID: index, ...feature.properties },
         });
         if (index === Math.floor(shapeGeoJson.features.length / 2)) {
-          view.center = coordinates[0];
+          view.center = [-79.8161225, 43.2473732];
         }
       });
 
@@ -435,7 +444,32 @@ export const ArcgisMap = (props) => {
       });
 
       const dataPointGroupLayer = getDataPointGroupLayer(
+        LAYER_TYPES.DATA_POINT_LAYER,
         dataFilterType,
+        Graphic,
+        FeatureLayer,
+        GroupLayer
+      );
+
+      const MMSDataPointGroupLayer = getDataPointGroupLayer(
+        LAYER_TYPES.MMS_Layer,
+        DATA_POINT_FILTER_TYPES.MMS,
+        Graphic,
+        FeatureLayer,
+        GroupLayer
+      );
+
+      const RRIDataPointGroupLayer = getDataPointGroupLayer(
+        LAYER_TYPES.RRI_Layer,
+        DATA_POINT_FILTER_TYPES.RRI,
+        Graphic,
+        FeatureLayer,
+        GroupLayer
+      );
+
+      const flagsDataPointGroupLayer = getDataPointGroupLayer(
+        LAYER_TYPES.FLAGS_LAYER,
+        DATA_POINT_FILTER_TYPES.FLAGS,
         Graphic,
         FeatureLayer,
         GroupLayer
@@ -445,6 +479,9 @@ export const ArcgisMap = (props) => {
       // setRoadGroupLayer(roadTypesGroupLayer);
       allLayers.push(roadTypesGroupLayer);
       allLayers.push(dataPointGroupLayer);
+      allLayers.push(MMSDataPointGroupLayer);
+      allLayers.push(RRIDataPointGroupLayer);
+      allLayers.push(flagsDataPointGroupLayer);
       // layer list for road types
 
       const roadTypesLayerList = new LayerList({
@@ -550,6 +587,7 @@ export const ArcgisMap = (props) => {
   };
 
   useEffect(() => {
+    debugger;
     toggleFeatureLayers(map, allGroupLayers, selectedLayers);
   }, [selectedLayers]);
 
@@ -572,6 +610,7 @@ export const ArcgisMap = (props) => {
         }
       ).then(async ([Graphic, FeatureLayer, GroupLayer]) => {
         const updatedDataPointGroupLayer = getDataPointGroupLayer(
+          LAYER_TYPES.DATA_POINT_LAYER,
           dataFilterType,
           Graphic,
           FeatureLayer,

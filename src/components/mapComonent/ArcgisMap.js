@@ -158,6 +158,7 @@ export const ArcgisMap = (props) => {
   const {
     mapType,
     dataGroupType,
+    layerFilterTypes,
     selectedData,
     selectedDate,
     selectedLayers,
@@ -261,6 +262,7 @@ export const ArcgisMap = (props) => {
             }
 
             const roadTypeFeatureLayer = new FeatureLayerClass({
+              id: dataPointTitle,
               title: dataPointTitle,
               source: pathsGraphics,
               renderer: featureLayerRenderer,
@@ -477,6 +479,7 @@ export const ArcgisMap = (props) => {
         FeatureLayer,
         GroupLayer
       );
+      debugger;
       // const MMSDataPointGroupLayer = getDataPointGroupLayer(
       //   LAYER_TYPES.MMS_Layer,
       //   DATA_POINT_GROUP_TYPES.MMS,
@@ -616,6 +619,7 @@ export const ArcgisMap = (props) => {
 
   useEffect(() => {
     toggleFeatureLayers(map, allGroupLayers, selectedLayers);
+    debugger;
   }, [selectedLayers]);
 
   useEffect(() => {
@@ -660,6 +664,10 @@ export const ArcgisMap = (props) => {
       map.basemap = mapType;
     }
   }, [mapType]);
+
+  useEffect(() => {
+    toggleSublayers(layerFilterTypes);
+  }, [layerFilterTypes]);
   function getDataIdFromPopup(popup) {
     const id = popup.content.graphic.attributes.id || -1;
 
@@ -668,6 +676,43 @@ export const ArcgisMap = (props) => {
     setSelectedData(currentDataPoint);
     setOpenPanel(true);
     setSelectedPanelIndex(1);
+  }
+
+  function toggleSublayers(selectedLayers) {
+    // const a = Object.keys(LAYER_FILTER_TYPES);
+    const hiddenSublayersIds = leftJoin(
+      Object.keys(LAYER_FILTER_TYPES),
+      selectedLayers
+    );
+    console.log("hiddenSublayersIds", hiddenSublayersIds);
+
+    const dataPointGroupLayer = allGroupLayers.find(
+      (layer) => layer.id === LAYER_TYPES.DATA_POINT_LAYER
+    );
+
+    if (dataPointGroupLayer) {
+      if (hiddenSublayersIds.length === 0) {
+        for (const firstSublayer of dataPointGroupLayer.layers.items) {
+          for (const secondSublayer of firstSublayer.layers.items) {
+            secondSublayer.visible = true;
+            console.log("secondSubLayer.id", secondSublayer.id);
+            console.log("visible", secondSublayer.visible);
+          }
+        }
+      }
+      for (const subLayerId of hiddenSublayersIds) {
+        for (const firstSublayer of dataPointGroupLayer.layers.items) {
+          for (const secondSublayer of firstSublayer.layers.items) {
+            if (secondSublayer.id === subLayerId) {
+              secondSublayer.visible = secondSublayer.id !== subLayerId;
+            }
+            if (!secondSublayer.visible) {
+              console.log(secondSublayer.id, "should be hidden");
+            }
+          }
+        }
+      }
+    }
   }
   return <div className="webmap" style={{ height: "93vh" }} ref={mapRef} />;
 };

@@ -13,7 +13,7 @@ import {
   DEFAULT_SYMBOL_SIZE,
   DEFAULT_MARKER_WIDTH,
   DEFAULT_MARKER_ALPHA,
-  DATA_POINT_FILTER_TYPES,
+  LAYER_FILTER_TYPES,
 } from "../../constants/mapConstants";
 
 const shp = require("shpjs");
@@ -22,9 +22,6 @@ export const LAYER_TYPES = {
   ROAD_LAYER: "Road Layer",
   BOUNDARY_LAYER: "Boundary Layer",
   DATA_POINT_LAYER: "Data Point Layer",
-  MMS_Layer: "MMS Layer",
-  RRI_Layer: "RRI Layer",
-  FLAGS_LAYER: "Flags Layer",
 };
 
 export async function getBoundaryAndCenter(zipFilePath) {
@@ -50,25 +47,6 @@ export async function getBoundaryAndCenter(zipFilePath) {
     }
   });
 }
-
-// topo
-// streets
-// satellite
-// hybrid
-
-// dark-gray
-// gray
-// national-geographic
-// oceans
-// osm
-// terrain
-// dark-gray-vector
-// gray-vector
-// streets-vector
-// streets-night-vector
-// streets-navigation-vector
-// topo-vector
-// streets-relief-vector
 
 export async function getBaseMap(mapTypeString = "topo") {
   let mapInstance;
@@ -165,24 +143,55 @@ export function getDataPointGraphic(data, GraphicsClass, graphicsOptions) {
   }
 
   const { graphicType, symbol } = graphicsOptions;
-  debugger;
-  const arcgisGraphic = data.map((d, index) => {
-    const geometryObject = getGeometryObject(d, graphicType);
-    const updatedData = { ...d };
-    for (const key in updatedData) {
-      if (updatedData.hasOwnProperty(key)) {
-        const element = updatedData[key];
-        if (element === "null") {
-          updatedData[key] = "N / A";
+  let arcgisGraphic = {};
+
+  if (Array.isArray(data)) {
+    arcgisGraphic = data.map((d, index) => {
+      const geometryObject = getGeometryObject(d, graphicType);
+      const updatedData = { ...d };
+      for (const key in updatedData) {
+        if (updatedData.hasOwnProperty(key)) {
+          const element = updatedData[key];
+          if (element === "null") {
+            updatedData[key] = "N / A";
+          }
         }
       }
-    }
-    return new GraphicsClass({
-      attributes: updatedData,
-      geometry: geometryObject,
-      symbol: symbol,
+      return new GraphicsClass({
+        attributes: updatedData,
+        geometry: geometryObject,
+        symbol: symbol,
+      });
     });
-  });
+  } else {
+    debugger;
+    Object.keys(data).map((keyType) => {
+      // if (
+      //   keyType === DATA_POINT_FILTER_TYPES["No Issues"].name ||
+      //   keyType === DATA_POINT_FILTER_TYPES["red flag"].name ||
+      //   keyType === DATA_POINT_FILTER_TYPES["yellow flag"].name
+      // ) {
+      arcgisGraphic = data[keyType].map((d, index) => {
+        const geometryObject = getGeometryObject(d, graphicType);
+        const updatedData = { ...d };
+        for (const key in updatedData) {
+          if (updatedData.hasOwnProperty(key)) {
+            const element = updatedData[key];
+            if (element === "null") {
+              updatedData[key] = "N / A";
+            }
+          }
+        }
+        return new GraphicsClass({
+          attributes: updatedData,
+          geometry: geometryObject,
+          symbol: symbol,
+        });
+      });
+      // }
+    });
+  }
+
   return arcgisGraphic;
 }
 
@@ -222,12 +231,6 @@ export function getGraphicObj(pathsObject, GraphicsClass, graphicOptions) {
   for (const roadTypeKey in pathsObject) {
     if (pathsObject.hasOwnProperty(roadTypeKey)) {
       const paths = pathsObject[roadTypeKey];
-      // const geometryObject = getGeometryObject(paths, graphicType);
-
-      // const pathsGraphics = getPathGraphic(paths, GraphicsClass, {
-      //   graphicType: graphicType,
-      //   symbol: graphicSymbol,
-      // });
       let pathsGraphics;
       if (graphicType === "point") {
         pathsGraphics = getDataPointGraphic(paths, GraphicsClass, {
@@ -308,47 +311,27 @@ export function reduceDataByCategory(data, category, dateType) {
       recentData.push(element);
       return { ...categoriedData, [newKey]: recentData };
     }, {});
-  } else if (DATA_POINT_FILTER_TYPES["Red flag"].name === category) {
-    rd = data.reduce((categoriedData, element) => {
-      const fieldValue = element["flag"];
-      let newKey = fieldValue;
-      if ("n" === fieldValue.toLowerCase()) {
-        return { ...categoriedData };
-      } else if ("r" === fieldValue.toLowerCase()) {
-        const recentData = categoriedData[newKey] || [];
-        recentData.push(element);
-        return { ...categoriedData, [newKey]: recentData };
+  } else if (LAYER_FILTER_TYPES["Red Flag"].name === category) {
+    const normalData = [];
+    for (const d of data) {
+      if (d[LAYER_FILTER_TYPES["Red Flag"].keyName].toLowerCase() === "r") {
+        normalData.push({ ...d });
       }
-    }, {});
-
-    // rd = data.reduce((categoriedData, element) => {
-    //   const fieldValue = element[category];
-    //   let newKey = fieldValue;
-    //   if (fieldValue === "N") {
-    //     return { ...categoriedData };
-    //   }
-    //   const recentData = categoriedData[newKey] || [];
-    //   recentData.push(element);
-    //   return { ...categoriedData, [newKey]: recentData };
-    // }, {});
-  } else if (DATA_POINT_FILTER_TYPES["Yellow flag"].name === category) {
-    rd = data.reduce((categoriedData, element) => {
-      const fieldValue = element["flag"];
-      let newKey = fieldValue;
-      if ("n" === fieldValue.toLowerCase()) {
-        return { ...categoriedData };
-      } else if (
-        "ry" === fieldValue.toLowerCase() ||
-        "y" === fieldValue.toLowerCase()
+    }
+    rd = normalData;
+  } else if (LAYER_FILTER_TYPES["Yellow Flag"].name === category) {
+    const normalData = [];
+    for (const d of data) {
+      if (
+        d[LAYER_FILTER_TYPES["Yellow Flag"].keyName].toLowerCase().includes("y")
       ) {
-        const recentData = categoriedData[newKey] || [];
-        recentData.push(element);
-        return { ...categoriedData, [newKey]: recentData };
+        normalData.push({ ...d });
       }
-    }, {});
-  } else if (DATA_POINT_FILTER_TYPES.MMS.name === category) {
+    }
+    rd = normalData;
+  } else if (LAYER_FILTER_TYPES.MMS.name === category) {
     rd = data.reduce((categoriedData, element) => {
-      const fieldValue = element[DATA_POINT_FILTER_TYPES.MMS.keyName];
+      const fieldValue = element[LAYER_FILTER_TYPES.MMS.keyName];
       if (fieldValue.toLowerCase() === "null") {
         return { ...categoriedData };
       }
@@ -356,9 +339,9 @@ export function reduceDataByCategory(data, category, dateType) {
       recentData.push(element);
       return { ...categoriedData, [fieldValue]: recentData };
     }, {});
-  } else if (DATA_POINT_FILTER_TYPES.RRI.name === category) {
+  } else if (LAYER_FILTER_TYPES.RRI.name === category) {
     rd = data.reduce((categoriedData, element) => {
-      const fieldValue = element[DATA_POINT_FILTER_TYPES.RRI.keyName];
+      const fieldValue = element[LAYER_FILTER_TYPES.RRI.keyName];
       let newKey = fieldValue;
       if (fieldValue.toLowerCase() === "null") {
         return { ...categoriedData };
@@ -367,7 +350,7 @@ export function reduceDataByCategory(data, category, dateType) {
       recentData.push(element);
       return { ...categoriedData, [newKey]: recentData };
     }, {});
-  } else if (DATA_POINT_FILTER_TYPES["No Issues"].name === category) {
+  } else if (LAYER_FILTER_TYPES["No Issues"].name === category) {
     const normalData = [];
     for (const d of data) {
       if (
@@ -378,7 +361,7 @@ export function reduceDataByCategory(data, category, dateType) {
         normalData.push({ ...d });
       }
     }
-    rd["no issues"] = normalData;
+    rd = normalData;
   } else {
     rd = data.reduce((categoriedData, element) => {
       const fieldValue = element[category];
@@ -393,43 +376,6 @@ export function reduceDataByCategory(data, category, dateType) {
   }
   return rd;
 }
-// export function reduceDataByCategory(data, category, dateType) {
-//   let rd = {};
-//   // debugger;
-//   // reduced data by date value
-//   if (dateType) {
-//     rd = data.reduce((categoriedData, element) => {
-//       const fieldValue = element[category];
-//       let newKey = getDateValue(fieldValue, dateType);
-//       const recentData = categoriedData[newKey] || [];
-//       recentData.push(element);
-//       return { ...categoriedData, [newKey]: recentData };
-//     }, {});
-//   } else if ("flag" === category.toLowerCase()) {
-//     rd = data.reduce((categoriedData, element) => {
-//       const fieldValue = element[category];
-//       let newKey = fieldValue;
-//       if (fieldValue === "N") {
-//         return { ...categoriedData };
-//       }
-//       const recentData = categoriedData[newKey] || [];
-//       recentData.push(element);
-//       return { ...categoriedData, [newKey]: recentData };
-//     }, {});
-//   } else {
-//     rd = data.reduce((categoriedData, element) => {
-//       const fieldValue = element[category];
-//       let newKey = fieldValue;
-//       if (fieldValue === "null") {
-//         return { ...categoriedData };
-//       }
-//       const recentData = categoriedData[newKey] || [];
-//       recentData.push(element);
-//       return { ...categoriedData, [newKey]: recentData };
-//     }, {});
-//   }
-//   return rd;
-// }
 
 export function isLayerExisted(mapObject, layerId) {
   let isLayerExist = false;
@@ -518,15 +464,22 @@ export function getGroupedDataPoints(filterType, data) {
     updatedGroupLayer[key] = {};
     if (groupedDataPoints.hasOwnProperty(key)) {
       const element = groupedDataPoints[key];
-      Object.keys(DATA_POINT_FILTER_TYPES).map((type) => {
+      Object.keys(LAYER_FILTER_TYPES).map((type) => {
         const r = reduceDataByCategory(element, type, null);
-        if (isEmptyObject(r)) {
+        if (isEmptyObject(r) || r.length === 0) {
           return;
         }
+        // if (
+        //   type === DATA_POINT_FILTER_TYPES["No Issues"].name ||
+        //   type === DATA_POINT_FILTER_TYPES["Red flag"].name ||
+        //   type === DATA_POINT_FILTER_TYPES["Yellow flag"].name
+        // ) {
+        //   updatedGroupLayer[key] = r;
+        // } else {
         updatedGroupLayer[key][type] = r;
+        // }
       });
     }
   }
-  debugger;
   return updatedGroupLayer;
 }

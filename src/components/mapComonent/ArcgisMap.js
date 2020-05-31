@@ -5,6 +5,7 @@ import dataPointJson from "../mapComonent/hamiltonDataFilterDemo/data.json";
 
 import {
   DATA_POINT_GROUP_TYPES,
+  LAYER_FILTER_TYPES,
   // DATA_POINT_MARKER_SYMBOLS,
 } from "../../constants/mapConstants";
 import {
@@ -156,7 +157,7 @@ export const ArcgisMap = (props) => {
   const { values, setters } = useContext(MapContext);
   const {
     mapType,
-    dataFilterType,
+    dataGroupType,
     selectedData,
     selectedDate,
     selectedLayers,
@@ -164,7 +165,7 @@ export const ArcgisMap = (props) => {
   } = values;
   const {
     setMapType,
-    setDataFilterType,
+    setDataGroupType,
     setSelectedData,
     setSelectedDate,
     setSelectedLayers,
@@ -200,140 +201,166 @@ export const ArcgisMap = (props) => {
     // get groupedDataPoints as
     // { category0: data0, category1: data1 }
     const groupedDataPoints = getGroupedDataPoints(filterType, dataPointJson);
-    debugger;
-    // get graphic objects from grouped data points
-    const dataPointGraphicsObj = getGraphicObj(
-      groupedDataPoints,
-      GraphicClass,
-      {
-        graphicType: "point",
-      }
-    );
-    // debugger;
-    // get feature layer for each graphic
-    const dataPointLayers = [];
-    for (const dataPointTitle in dataPointGraphicsObj) {
-      if (dataPointGraphicsObj.hasOwnProperty(dataPointTitle)) {
-        const pathsGraphics = dataPointGraphicsObj[dataPointTitle];
 
-        let featureLayerRenderer = {};
-        switch (filterType) {
-          case DATA_POINT_GROUP_TYPES.FLAGS:
-            if (dataPointTitle === "R") {
-              featureLayerRenderer = getIconRenderer(
-                redWarningIcon,
-                dataPointTitle,
-                25
-              );
-            } else if (dataPointTitle === "Y") {
-              featureLayerRenderer = getIconRenderer(
-                yellowWarningIcon,
-                dataPointTitle,
-                25
-              );
+    debugger;
+    const groupdedDataPointsGraphics = {};
+    for (const key in groupedDataPoints) {
+      if (groupedDataPoints.hasOwnProperty(key)) {
+        const element = groupedDataPoints[key];
+        Object.keys(element).map((subKey) => {
+          const obj = { [subKey]: element[subKey] };
+          const dataPointGraphicsObj = getGraphicObj(obj, GraphicClass, {
+            graphicType: "point",
+          });
+          if (!groupdedDataPointsGraphics[key]) {
+            groupdedDataPointsGraphics[key] = {};
+          }
+
+          groupdedDataPointsGraphics[key][subKey] =
+            dataPointGraphicsObj[subKey];
+        });
+      }
+    }
+
+    // get graphic objects from grouped data points
+
+    // const dataPointLayers = {};
+    const groupLayers = [];
+    for (const key in groupdedDataPointsGraphics) {
+      if (groupdedDataPointsGraphics.hasOwnProperty(key)) {
+        const element = groupdedDataPointsGraphics[key];
+        const dataPointLayers = [];
+        for (const dataPointTitle in element) {
+          if (element.hasOwnProperty(dataPointTitle)) {
+            const pathsGraphics = element[dataPointTitle];
+
+            let featureLayerRenderer = {};
+            switch (dataPointTitle) {
+              case LAYER_FILTER_TYPES["Red Flag"].name:
+                featureLayerRenderer = getIconRenderer(
+                  redWarningIcon,
+                  dataPointTitle,
+                  25
+                );
+                break;
+              case LAYER_FILTER_TYPES["Yellow Flag"].name:
+                featureLayerRenderer = getIconRenderer(
+                  yellowWarningIcon,
+                  dataPointTitle,
+                  25
+                );
+                break;
+
+              default:
+                let markerSymbol = getSimpleMarkerSymbol(dataPointTitle);
+                featureLayerRenderer = {
+                  type: "simple",
+                  symbol: markerSymbol,
+                  label: dataPointTitle,
+                };
             }
-            break;
-          // case DATA_POINT_FILTER_TYPES.YELLOW_FLAG:
-          //   featureLayerRenderer = getIconRenderer(
-          //     yellowWarningIcon,
-          //     dataPointTitle,
-          //     25
-          //   );
-          //   break;
-          default:
-            let markerSymbol = getSimpleMarkerSymbol(dataPointTitle);
-            featureLayerRenderer = {
-              type: "simple",
-              symbol: markerSymbol,
-              label: dataPointTitle,
-            };
-        }
-        // debugger;
-        const roadTypeFeatureLayer = new FeatureLayerClass({
-          title: dataPointTitle,
-          source: pathsGraphics,
-          renderer: featureLayerRenderer,
-          popupTemplate: {
-            title: "( {latitude}, {longitude} )",
-            content: [
-              {
-                type: "text",
-                text: `
+
+            const roadTypeFeatureLayer = new FeatureLayerClass({
+              title: dataPointTitle,
+              source: pathsGraphics,
+              renderer: featureLayerRenderer,
+              popupTemplate: {
+                title: "( {latitude}, {longitude} )",
+                content: [
+                  {
+                    type: "text",
+                    text: `
                 <h1>id: {id}</h1>
                 <h1>damage type: {damage_type}</h1>
                 <h1>road related issues: {road_related_issues}</h1>
                 `,
-              },
-              {
-                type: "media",
-                // Autocasts as array of MediaInfo objects
-                mediaInfos: [
+                  },
                   {
-                    title: "<b>{address}</b>",
-                    type: "image", // Autocasts as new ImageMediaInfo object// Autocasts as new ImageMediaInfoValue object
-                    value: {
-                      sourceURL: "{image}",
-                    },
+                    type: "media",
+                    // Autocasts as array of MediaInfo objects
+                    mediaInfos: [
+                      {
+                        title: "<b>{address}</b>",
+                        type: "image", // Autocasts as new ImageMediaInfo object// Autocasts as new ImageMediaInfoValue object
+                        value: {
+                          sourceURL: "{image}",
+                        },
+                      },
+                    ],
+                  },
+                ],
+                actions: [
+                  {
+                    title: "Details",
+                    id: "create-work-order",
+                    image: `${moreDetailsIcon}`,
                   },
                 ],
               },
-            ],
-            actions: [
-              {
-                title: "Details",
-                id: "create-work-order",
-                image: `${moreDetailsIcon}`,
-              },
-            ],
-          },
-          fields: [
-            {
-              name: "id",
-              alias: "id",
-              type: "string",
-            },
-            {
-              name: "address",
-              alias: "address",
-              type: "string",
-            },
-            {
-              name: "image",
-              alias: "image",
-              type: "string",
-            },
-            {
-              name: "latitude",
-              alias: "latitude",
-              type: "string",
-            },
-            {
-              name: "longitude",
-              alias: "longitude",
-              type: "string",
-            },
-            {
-              name: "road_related_issues",
-              alias: "road_related_issues",
-              type: "string",
-            },
-            {
-              name: "damage_type",
-              alias: "damage_type",
-              type: "string",
-            },
-          ],
-          objectIdField: "dataPointObjectID", // This must be defined when creating a layer from `Graphic` objects
-        });
-
-        dataPointLayers.push(roadTypeFeatureLayer);
+              fields: [
+                {
+                  name: "id",
+                  alias: "id",
+                  type: "string",
+                },
+                {
+                  name: "address",
+                  alias: "address",
+                  type: "string",
+                },
+                {
+                  name: "image",
+                  alias: "image",
+                  type: "string",
+                },
+                {
+                  name: "latitude",
+                  alias: "latitude",
+                  type: "string",
+                },
+                {
+                  name: "longitude",
+                  alias: "longitude",
+                  type: "string",
+                },
+                {
+                  name: "road_related_issues",
+                  alias: "road_related_issues",
+                  type: "string",
+                },
+                {
+                  name: "damage_type",
+                  alias: "damage_type",
+                  type: "string",
+                },
+              ],
+              objectIdField: "dataPointObjectID", // This must be defined when creating a layer from `Graphic` objects
+            });
+            debugger;
+            dataPointLayers.push(roadTypeFeatureLayer);
+          }
+        }
+        // groupLayers.push(dataPointLayers);
+        groupLayers.push(
+          new GroupLayerClass({
+            id: key,
+            title: `${key}:\n(filter by ${filterType})`,
+            layers: dataPointLayers,
+          })
+        );
       }
     }
 
+    // const dataPointGroupLayer1 = new GroupLayerClass({
+    //   id: id,
+    //   title: `${id}:\n(filter by ${filterType})`,
+    //   layers: dataPointLayers,
+    // });
+    debugger;
     const dataPointGroupLayer = new GroupLayerClass({
       id: id,
       title: `${id}:\n(filter by ${filterType})`,
-      layers: dataPointLayers,
+      layers: groupLayers,
     });
     return dataPointGroupLayer;
   }
@@ -445,12 +472,11 @@ export const ArcgisMap = (props) => {
 
       const dataPointGroupLayer = getDataPointGroupLayer(
         LAYER_TYPES.DATA_POINT_LAYER,
-        dataFilterType,
+        dataGroupType,
         Graphic,
         FeatureLayer,
         GroupLayer
       );
-      debugger;
       // const MMSDataPointGroupLayer = getDataPointGroupLayer(
       //   LAYER_TYPES.MMS_Layer,
       //   DATA_POINT_GROUP_TYPES.MMS,
@@ -479,6 +505,7 @@ export const ArcgisMap = (props) => {
       // setRoadGroupLayer(roadTypesGroupLayer);
       allLayers.push(roadTypesGroupLayer);
       allLayers.push(dataPointGroupLayer);
+      debugger;
       // allLayers.push(MMSDataPointGroupLayer);
       // allLayers.push(RRIDataPointGroupLayer);
       // allLayers.push(flagsDataPointGroupLayer);
@@ -548,6 +575,7 @@ export const ArcgisMap = (props) => {
       return;
     }
     if (mapObject) {
+      debugger;
       const layersInMap = mapObject.layers.items;
       const selectedLayers = allAvailableLayers.filter((availableLayer) => {
         for (const selectedLayerId of selectedLayerIds) {
@@ -610,7 +638,7 @@ export const ArcgisMap = (props) => {
       ).then(async ([Graphic, FeatureLayer, GroupLayer]) => {
         const updatedDataPointGroupLayer = getDataPointGroupLayer(
           LAYER_TYPES.DATA_POINT_LAYER,
-          dataFilterType,
+          dataGroupType,
           Graphic,
           FeatureLayer,
           GroupLayer
@@ -625,7 +653,7 @@ export const ArcgisMap = (props) => {
         map.add(updatedDataPointGroupLayer);
       });
     }
-  }, [dataFilterType]);
+  }, [dataGroupType]);
 
   useEffect(() => {
     if (map) {

@@ -17,6 +17,7 @@ import DateFnsUtils from "@date-io/date-fns";
 import {
   DATA_POINT_GROUP_TYPES,
   ARCGIS_MAP_TYPES,
+  LAYER_FILTER_TYPES,
 } from "../../constants/mapConstants";
 import { LAYER_TYPES } from "../../containers/mapUtils/mapUtils";
 import { MapContext } from "../../context/mapContext";
@@ -25,14 +26,16 @@ export function DataPointFilters(props) {
 
   const {
     mapType,
-    dataFilterType,
+    dataGroupType,
+    layerFilterTypes,
     selectedData,
     selectedDate,
     selectedLayers,
   } = values;
   const {
     setMapType,
-    setDataFilterType,
+    setDataGroupType,
+    setLayerFilterTypes,
     setSelectedData,
     setSelectedDate,
     setSelectedLayers,
@@ -48,9 +51,9 @@ export function DataPointFilters(props) {
   }
 
   function handleFilterTypeChange(event) {
-    if (setDataFilterType) {
+    if (setDataGroupType) {
       const updatedFilter = event.target.value;
-      setDataFilterType(updatedFilter);
+      setDataGroupType(updatedFilter);
     }
   }
 
@@ -61,6 +64,20 @@ export function DataPointFilters(props) {
       debugger;
       setMapType(updatedMaptype);
     }
+  }
+
+  function handleFilterCheck(event) {
+    let currentLayerFilters = [...layerFilterTypes];
+    const checked = event.target.checked;
+    const value = event.target.value;
+    if (checked) {
+      currentLayerFilters.push(value);
+    } else {
+      currentLayerFilters = currentLayerFilters.filter(
+        (layerFilter) => layerFilter !== value
+      );
+    }
+    setLayerFilterTypes(currentLayerFilters);
   }
   return (
     <div>
@@ -79,24 +96,6 @@ export function DataPointFilters(props) {
           ))}
         </Select>
       </FormControl>
-
-      {/* <FormControl component="fieldset">
-        <FormLabel component="legend">Select layers</FormLabel>
-        <FormGroup>
-          {Object.keys(ARCGIS_MAP_TYPES).map((mapKey) => (
-            <FormControlLabel
-              key={mapKey}
-              control={
-                <Checkbox
-                  onChange={handleMapTypeChange}
-                  name={ARCGIS_MAP_TYPES[mapKey]}
-                />
-              }
-              label="Gilad Gray"
-            />
-          ))}
-        </FormGroup>
-      </FormControl> */}
 
       <FormControl fullWidth>
         <InputLabel id="mutiple-feature-layers-label">Layers</InputLabel>
@@ -144,7 +143,7 @@ export function DataPointFilters(props) {
         <InputLabel id="filterDateTypeLabel">Filter by</InputLabel>
         <Select
           native
-          value={dataFilterType}
+          value={dataGroupType}
           disabled={selectedLayers.indexOf(LAYER_TYPES.DATA_POINT_LAYER) < 0}
           onChange={handleFilterTypeChange}
           inputProps={{
@@ -159,6 +158,22 @@ export function DataPointFilters(props) {
           ))}
         </Select>
       </FormControl>
+      <FormGroup row>
+        {Object.keys(LAYER_FILTER_TYPES).map((filterType) => (
+          <FormControlLabel
+            key={filterType}
+            control={
+              <Checkbox
+                name={LAYER_FILTER_TYPES[filterType].name}
+                value={LAYER_FILTER_TYPES[filterType].name}
+                checked={layerFilterTypes.indexOf(filterType) > -1}
+                onChange={handleFilterCheck}
+              />
+            }
+            label={LAYER_FILTER_TYPES[filterType].name}
+          />
+        ))}
+      </FormGroup>
     </div>
   );
 }

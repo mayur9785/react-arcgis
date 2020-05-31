@@ -10,9 +10,11 @@ export const MapContext = createContext();
 export function MapContextProvider(props) {
   const [mapType, setMapType] = useState(ARCGIS_MAP_TYPES.TOPO);
 
-  const [dataFilterType, setDataFilterType] = useState(
+  const [dataGroupType, setDataGroupType] = useState(
     DATA_POINT_GROUP_TYPES.DATE
   );
+
+  const [layerFilterTypes, setLayerFilterTypes] = useState([]);
 
   const [selectedData, setSelectedData] = useState(null);
 
@@ -30,7 +32,8 @@ export function MapContextProvider(props) {
 
   const contextValues = {
     mapType,
-    dataFilterType,
+    dataGroupType,
+    layerFilterTypes,
     selectedData,
     selectedDate,
     selectedLayers,
@@ -38,10 +41,10 @@ export function MapContextProvider(props) {
     openPanel,
     selectedPanelIndex,
   };
-
   const contextFunctions = {
     setMapType,
-    setDataFilterType,
+    setDataGroupType,
+    setLayerFilterTypes,
     setSelectedData,
     setSelectedDate,
     setSelectedLayers,

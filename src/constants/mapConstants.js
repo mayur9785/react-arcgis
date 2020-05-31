@@ -21,12 +21,12 @@ export const DATA_POINT_GROUP_TYPES = {
   FLAGS: "Flags",
 };
 
-export const DATA_POINT_FILTER_TYPES = {
+export const LAYER_FILTER_TYPES = {
   "No Issues": { name: "No Issues", keyName: " N/ A" },
   MMS: { name: "MMS", keyName: "damage_type" },
   RRI: { name: "RRI", keyName: "road_related_issues" },
-  "Red flag": { name: "Red flag", keyName: "flag" },
-  "Yellow flag": { name: "Yellow flag", keyName: "flag" },
+  "Red Flag": { name: "Red Flag", keyName: "flag" },
+  "Yellow Flag": { name: "Yellow Flag", keyName: "flag" },
 };
 
 export const DATA_POINT_DETAILS_TITLES = [

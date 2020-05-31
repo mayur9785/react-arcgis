@@ -21,6 +21,7 @@ import {
   getSimpleMarkerSymbol,
   getIconRenderer,
   getGroupedDataPoints,
+  getGroupedDataPointsGraphics,
 } from "../../containers/mapUtils/mapUtils.js";
 import { isValidObj, leftJoin } from "../../utils/utilFunctions/utilFunctions";
 import { MapContext } from "../../context/mapContext";
@@ -108,49 +109,6 @@ const panelFunction = (event) => {
   item.panel = {
     content: ["legend"],
   };
-
-  // if (item.title === "Roads Layer") {
-  //   // An array of objects defining actions to place in the LayerList.
-  //   // By making this array two-dimensional, you can separate similar
-  //   // actions into separate groups with a breaking line.
-
-  //   item.actionsSections = [
-  //     [
-  //       {
-  //         title: "Go to full extent",
-  //         className: "esri-icon-zoom-out-fixed",
-  //         id: "full-extent",
-  //       },
-  //       {
-  //         title: "Layer information",
-  //         className: "esri-icon-description",
-  //         id: "information",
-  //       },
-  //     ],
-  //     [
-  //       {
-  //         title: "Increase opacity",
-  //         className: "esri-icon-up",
-  //         id: "increase-opacity",
-  //       },
-  //       {
-  //         title: "Decrease opacity",
-  //         className: "esri-icon-down",
-  //         id: "decrease-opacity",
-  //       },
-  //     ],
-  //   ];
-  // }
-};
-
-const createWorkOrder = {
-  title: "create work order",
-  id: "create-work-order",
-};
-
-const resolve = {
-  title: "Resolved",
-  id: "measure-this",
 };
 
 export const ArcgisMap = (props) => {
@@ -182,13 +140,12 @@ export const ArcgisMap = (props) => {
   const [allGroupLayers, setAllGroupLayers] = useState([]);
 
   function getDataPointGroupLayer(
-    id,
+    id, // id for the root group layer
     filterType,
     GraphicClass,
     FeatureLayerClass,
     GroupLayerClass
   ) {
-    console.log("filterType", filterType);
     if (
       !isValidObj(GraphicClass) ||
       !isValidObj(FeatureLayerClass) ||
@@ -197,40 +154,40 @@ export const ArcgisMap = (props) => {
       return {};
     }
 
-    // let groupedDataPoints = {};
-
     // get groupedDataPoints as
-    // { category0: data0, category1: data1 }
+    // {
+    //   filterTypeKey0 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+    //   filterTypeKey1 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+    //   filterTypeKey2 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+    //   filterTypeKey3 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+    // }
     const groupedDataPoints = getGroupedDataPoints(filterType, dataPointJson);
 
+    // get groupedDataPointsGraphics as
+    // {
+    //   filterTypeKey0 : { no issues: [graphicObjects], rri: [graphicObjects] mms: [graphicObjects] red flag: [graphicObjects] yellow falg: [graphicObjects] },
+    //   filterTypeKey1 : { no issues: [graphicObjects], rri: [graphicObjects] mms: [graphicObjects] red flag: [graphicObjects] yellow falg: [graphicObjects] },
+    //   filterTypeKey2 : { no issues: [graphicObjects], rri: [graphicObjects] mms: [graphicObjects] red flag: [graphicObjects] yellow falg: [graphicObjects] },
+    //   filterTypeKey3 : { no issues: [graphicObjects], rri: [graphicObjects] mms: [graphicObjects] red flag: [graphicObjects] yellow falg: [graphicObjects] },
+    // }
+    const groupdedDataPointsGraphics = getGroupedDataPointsGraphics(
+      groupedDataPoints,
+      GraphicClass
+    );
     debugger;
-    const groupdedDataPointsGraphics = {};
-    for (const key in groupedDataPoints) {
-      if (groupedDataPoints.hasOwnProperty(key)) {
-        const element = groupedDataPoints[key];
-        Object.keys(element).map((subKey) => {
-          const obj = { [subKey]: element[subKey] };
-          const dataPointGraphicsObj = getGraphicObj(obj, GraphicClass, {
-            graphicType: "point",
-          });
-          if (!groupdedDataPointsGraphics[key]) {
-            groupdedDataPointsGraphics[key] = {};
-          }
-
-          groupdedDataPointsGraphics[key][subKey] =
-            dataPointGraphicsObj[subKey];
-        });
-      }
-    }
 
     // get graphic objects from grouped data points
 
+    // get groupedDataPointsGraphics as
+    // [groupLayer0, groupLayer1, ...]
+    // where each group layer consists of an array of feature layers where, again,
+    // each of them consists of an array of graphics
     // const dataPointLayers = {};
     const groupLayers = [];
     for (const key in groupdedDataPointsGraphics) {
       if (groupdedDataPointsGraphics.hasOwnProperty(key)) {
         const element = groupdedDataPointsGraphics[key];
-        const dataPointLayers = [];
+        const featureLayers = [];
         for (const dataPointTitle in element) {
           if (element.hasOwnProperty(dataPointTitle)) {
             const pathsGraphics = element[dataPointTitle];
@@ -338,27 +295,21 @@ export const ArcgisMap = (props) => {
               ],
               objectIdField: "dataPointObjectID", // This must be defined when creating a layer from `Graphic` objects
             });
-            debugger;
-            dataPointLayers.push(roadTypeFeatureLayer);
+            featureLayers.push(roadTypeFeatureLayer);
           }
         }
-        // groupLayers.push(dataPointLayers);
-        groupLayers.push(
-          new GroupLayerClass({
-            id: key,
-            title: `${key}:\n(filter by ${filterType})`,
-            layers: dataPointLayers,
-          })
-        );
+        const subgroupLayer = new GroupLayerClass({
+          id: key, // id for sub group layer
+          title: `${key}:\n(filter by ${filterType})`,
+          layers: featureLayers,
+        });
+        groupLayers.push(subgroupLayer);
       }
     }
 
-    // const dataPointGroupLayer1 = new GroupLayerClass({
-    //   id: id,
-    //   title: `${id}:\n(filter by ${filterType})`,
-    //   layers: dataPointLayers,
-    // });
-    debugger;
+    // make the root group layer consists of [groupLayer0, groupLayer1, ...]
+    // so that each groupLayer would be a sub group layer of the
+    // root group layer
     const dataPointGroupLayer = new GroupLayerClass({
       id: id,
       title: `${id}:\n(filter by ${filterType})`,
@@ -442,7 +393,7 @@ export const ArcgisMap = (props) => {
       };
 
       // contains all road type feature layers
-      const layers = [];
+      const roadLayers = [];
 
       // get a feature layer for each road type
       for (const roadType in roadsGraphicsObj) {
@@ -460,7 +411,7 @@ export const ArcgisMap = (props) => {
             fields: fieldTitleValues,
           });
 
-          layers.push(roadTypeFeatureLayer);
+          roadLayers.push(roadTypeFeatureLayer);
         }
       }
 
@@ -469,9 +420,11 @@ export const ArcgisMap = (props) => {
       const roadTypesGroupLayer = new GroupLayer({
         id: LAYER_TYPES.ROAD_LAYER,
         title: LAYER_TYPES.ROAD_LAYER,
-        layers: layers,
+        layers: roadLayers,
       });
 
+      // the root group layer that contains various
+      // sub group layers
       const dataPointGroupLayer = getDataPointGroupLayer(
         LAYER_TYPES.DATA_POINT_LAYER,
         dataGroupType,
@@ -479,41 +432,12 @@ export const ArcgisMap = (props) => {
         FeatureLayer,
         GroupLayer
       );
-      debugger;
-      // const MMSDataPointGroupLayer = getDataPointGroupLayer(
-      //   LAYER_TYPES.MMS_Layer,
-      //   DATA_POINT_GROUP_TYPES.MMS,
-      //   Graphic,
-      //   FeatureLayer,
-      //   GroupLayer
-      // );
-
-      // const RRIDataPointGroupLayer = getDataPointGroupLayer(
-      //   LAYER_TYPES.RRI_Layer,
-      //   DATA_POINT_GROUP_TYPES.RRI,
-      //   Graphic,
-      //   FeatureLayer,
-      //   GroupLayer
-      // );
-
-      // const flagsDataPointGroupLayer = getDataPointGroupLayer(
-      //   LAYER_TYPES.FLAGS_LAYER,
-      //   DATA_POINT_GROUP_TYPES.FLAGS,
-      //   Graphic,
-      //   FeatureLayer,
-      //   GroupLayer
-      // );
-
-      // assign raod type group layer
-      // setRoadGroupLayer(roadTypesGroupLayer);
       allLayers.push(roadTypesGroupLayer);
       allLayers.push(dataPointGroupLayer);
-      debugger;
-      // allLayers.push(MMSDataPointGroupLayer);
-      // allLayers.push(RRIDataPointGroupLayer);
-      // allLayers.push(flagsDataPointGroupLayer);
-      // layer list for road types
 
+      // generate layer list that shows basic info, layer's name,
+      // each layer's legend names and associated legend colors
+      // and icon for toggling visibility of each layer
       const roadTypesLayerList = new LayerList({
         view: view,
         listItemCreatedFunction: panelFunction,
@@ -526,9 +450,11 @@ export const ArcgisMap = (props) => {
         //   };
         // },
       });
+
+      // put layer list on top-left corner on the map view
       view.ui.add(roadTypesLayerList, "top-left");
 
-      // set up popup listener
+      // add custom actionable buttons on each popup
       view.popup.on("trigger-action", function (event) {
         // Execute the measureThis() function if the measure-this action is clicked
         if (event.action.id === "create-work-order") {
@@ -537,21 +463,9 @@ export const ArcgisMap = (props) => {
         }
       });
 
+      // add or remove layers from map view based on
+      // selected layers
       toggleFeatureLayers(map, allLayers, selectedLayers);
-      // updating map ui animation
-      // view.watch("updating", function (evt) {
-      //   debugger;
-
-      //   if (evt) {
-      //     if (isHeavingLoading) {
-      //       props.setLoading(isHeavingLoading);
-      //       setIsHeavingLoading(false);
-      //     }
-      //   } else if (!evt && isHeavingLoading) {
-      //     props.setLoading(false);
-      //     setIsHeavingLoading(false);
-      //   }
-      // });
 
       setAllGroupLayers(allLayers);
       return () => {
@@ -619,7 +533,6 @@ export const ArcgisMap = (props) => {
 
   useEffect(() => {
     toggleFeatureLayers(map, allGroupLayers, selectedLayers);
-    debugger;
   }, [selectedLayers]);
 
   useEffect(() => {
@@ -679,37 +592,24 @@ export const ArcgisMap = (props) => {
   }
 
   function toggleSublayers(selectedLayers) {
-    // const a = Object.keys(LAYER_FILTER_TYPES);
+    // get the filtered out layer ids
     const hiddenSublayersIds = leftJoin(
       Object.keys(LAYER_FILTER_TYPES),
       selectedLayers
     );
-    console.log("hiddenSublayersIds", hiddenSublayersIds);
 
+    // found data points layer
     const dataPointGroupLayer = allGroupLayers.find(
       (layer) => layer.id === LAYER_TYPES.DATA_POINT_LAYER
     );
 
+    // toggle visibile of each sub layer
     if (dataPointGroupLayer) {
-      if (hiddenSublayersIds.length === 0) {
-        for (const firstSublayer of dataPointGroupLayer.layers.items) {
-          for (const secondSublayer of firstSublayer.layers.items) {
-            secondSublayer.visible = true;
-            console.log("secondSubLayer.id", secondSublayer.id);
-            console.log("visible", secondSublayer.visible);
-          }
-        }
-      }
-      for (const subLayerId of hiddenSublayersIds) {
-        for (const firstSublayer of dataPointGroupLayer.layers.items) {
-          for (const secondSublayer of firstSublayer.layers.items) {
-            if (secondSublayer.id === subLayerId) {
-              secondSublayer.visible = secondSublayer.id !== subLayerId;
-            }
-            if (!secondSublayer.visible) {
-              console.log(secondSublayer.id, "should be hidden");
-            }
-          }
+      for (const firstSublayer of dataPointGroupLayer.layers.items) {
+        for (const secondSublayer of firstSublayer.layers.items) {
+          const shouldBeHidden =
+            hiddenSublayersIds.indexOf(secondSublayer.id) > -1;
+          secondSublayer.visible = !shouldBeHidden;
         }
       }
     }

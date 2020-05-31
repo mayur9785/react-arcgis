@@ -164,7 +164,6 @@ export function getDataPointGraphic(data, GraphicsClass, graphicsOptions) {
       });
     });
   } else {
-    debugger;
     Object.keys(data).map((keyType) => {
       // if (
       //   keyType === DATA_POINT_FILTER_TYPES["No Issues"].name ||
@@ -450,9 +449,16 @@ export function getIconRenderer(inconPath, iconTitle, iconSize) {
   return iconRender;
 }
 
-// get grouped data points based on filter type
-// in all data points would be grouped in
-// {title0: [dataPoints for titie0]}
+// convert dataPonts, from [dataPoints0, dataPoints1, ...]
+
+// to
+// {
+//   filterTypeKey0 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+//   filterTypeKey1 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+//   filterTypeKey2 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+//   filterTypeKey3 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+// }
+//based on filter type, ie: date, month, year, and pci
 export function getGroupedDataPoints(filterType, data) {
   const groupedDataPoints = reduceDataByCategory(
     data,
@@ -469,17 +475,50 @@ export function getGroupedDataPoints(filterType, data) {
         if (isEmptyObject(r) || r.length === 0) {
           return;
         }
-        // if (
-        //   type === DATA_POINT_FILTER_TYPES["No Issues"].name ||
-        //   type === DATA_POINT_FILTER_TYPES["Red flag"].name ||
-        //   type === DATA_POINT_FILTER_TYPES["Yellow flag"].name
-        // ) {
-        //   updatedGroupLayer[key] = r;
-        // } else {
         updatedGroupLayer[key][type] = r;
-        // }
       });
     }
   }
   return updatedGroupLayer;
+}
+
+// convert data points from
+
+// {
+//   filterTypeKey0 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+//   filterTypeKey1 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+//   filterTypeKey2 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+//   filterTypeKey3 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+// }
+
+//to graphic objects
+
+// {
+//   filterTypeKey0 : { no issues: [graphicObjects], rri: [graphicObjects] mms: [graphicObjects] red flag: [graphicObjects] yellow falg: [graphicObjects] },
+//   filterTypeKey1 : { no issues: [graphicObjects], rri: [graphicObjects] mms: [graphicObjects] red flag: [graphicObjects] yellow falg: [graphicObjects] },
+//   filterTypeKey2 : { no issues: [graphicObjects], rri: [graphicObjects] mms: [graphicObjects] red flag: [graphicObjects] yellow falg: [graphicObjects] },
+//   filterTypeKey3 : { no issues: [graphicObjects], rri: [graphicObjects] mms: [graphicObjects] red flag: [graphicObjects] yellow falg: [graphicObjects] },
+// }
+export function getGroupedDataPointsGraphics(groupedDataPoints, GraphicClass) {
+  const groupdedDataPointsGraphics = {};
+  if (!isValidObj(groupedDataPoints && !isValidObj(GraphicClass))) {
+    return groupdedDataPointsGraphics;
+  }
+  for (const key in groupedDataPoints) {
+    if (groupedDataPoints.hasOwnProperty(key)) {
+      const element = groupedDataPoints[key];
+      Object.keys(element).map((subKey) => {
+        const obj = { [subKey]: element[subKey] };
+        const dataPointGraphicsObj = getGraphicObj(obj, GraphicClass, {
+          graphicType: "point",
+        });
+        if (!groupdedDataPointsGraphics[key]) {
+          groupdedDataPointsGraphics[key] = {};
+        }
+
+        groupdedDataPointsGraphics[key][subKey] = dataPointGraphicsObj[subKey];
+      });
+    }
+  }
+  return groupdedDataPointsGraphics;
 }

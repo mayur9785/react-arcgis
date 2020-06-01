@@ -16,9 +16,9 @@ export const DATA_POINT_GROUP_TYPES = {
   MONTH: "Month",
   YEAR: "Year",
   PCI: "PCI",
-  MMS: "MMS Defects",
-  RRI: "Road Related Issues",
-  FLAGS: "Flags",
+  // MMS: "MMS Defects",
+  // RRI: "Road Related Issues",
+  // FLAGS: "Flags",
 };
 
 export const LAYER_FILTER_TYPES = {

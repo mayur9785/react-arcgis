@@ -18,6 +18,9 @@ import {
 
 const shp = require("shpjs");
 
+/**
+ * feature layers
+ */
 export const LAYER_TYPES = {
   ROAD_LAYER: "Road Layer",
   BOUNDARY_LAYER: "Boundary Layer",
@@ -48,6 +51,11 @@ export async function getBoundaryAndCenter(zipFilePath) {
   });
 }
 
+/**
+ *get base map instance
+ *
+ * @param {String} mapTypeString
+ */
 export async function getBaseMap(mapTypeString = "topo") {
   let mapInstance;
   const arcgisModules = await loadModules(["esri/Map"]).catch((error) => {
@@ -61,6 +69,12 @@ export async function getBaseMap(mapTypeString = "topo") {
   return mapInstance;
 }
 
+/**
+ *
+ * @param {Map} mapInstance
+ * @param {[Number, Number]} center
+ * @param {ReactReference} domReference
+ */
 export async function getMapView(
   mapInstance,
   center = [-118.805, 34.027],
@@ -83,6 +97,13 @@ export async function getMapView(
   return mapViewInstance;
 }
 
+/**
+ * get field info, value, for given
+ * field title
+ *
+ * @param {String} fieldTitle
+ * @param {String} fontStyleTag
+ */
 export function getFieldInfo(fieldTitle, fontStyleTag = "h3") {
   let info = {
     fieldName: fieldTitle,
@@ -92,6 +113,19 @@ export function getFieldInfo(fieldTitle, fontStyleTag = "h3") {
   return info;
 }
 
+/**
+ * reduce array of paths based on given key's value in to form
+ * of
+ * {
+ *  value0ForKeyTobeReduced0: [corresponding paths],
+ *  value1ForKeyTobeReduced0: [corresponding paths],
+ *  value2ForKeyTobeReduced0: [corresponding paths],
+ *  value3ForKeyTobeReduced0: [corresponding paths],
+ * }
+ *
+ * @param {Array} pathsArray
+ * @param {String} keyToBeReduced
+ */
 export function getReducedPaths(pathsArray, keyToBeReduced) {
   const reducedPaths = pathsArray.reduce((acc, element) => {
     const key = element.properties[keyToBeReduced];
@@ -118,8 +152,13 @@ function getTableKeyValue(property) {
   return copiedProperty;
 }
 
-// get path graphics that contains the values
-// to be display on the pop
+/**
+ * get path graphics that contains the values
+ * to be display on the pop up
+ * @param {Array} data
+ * @param {Graphic} GraphicsClass
+ * @param {Object} graphicsOptions
+ */
 export function getPathGraphic(data, GraphicsClass, graphicsOptions) {
   if (!isValidObj(GraphicsClass)) {
     return null;
@@ -137,6 +176,18 @@ export function getPathGraphic(data, GraphicsClass, graphicsOptions) {
   return arcgisGraphic;
 }
 
+/**
+ * conver data points into array of graphic objects
+ * that would be used to construct feature layers
+ *
+ * ie featureLayer = new FeatureLayers({
+ *  source: [graphic]
+ * })
+ *
+ * @param {Object} data
+ * @param {Graphic} GraphicsClass
+ * @param {Object} graphicsOptions
+ */
 export function getDataPointGraphic(data, GraphicsClass, graphicsOptions) {
   if (!isValidObj(GraphicsClass)) {
     return null;
@@ -194,6 +245,20 @@ export function getDataPointGraphic(data, GraphicsClass, graphicsOptions) {
   return arcgisGraphic;
 }
 
+/**
+ * get geometry object for given data, based on given
+ * geometryType, ie: point/ polyline/ polygon, which would
+ * be used as geometry to construct a graphic object
+ *
+ * ie
+ *
+ * graphic = new Graphic({
+ *  geometry: newGeometry
+ * })
+ *
+ * @param {Object} data
+ * @param {String} gemoetryType
+ */
 function getGeometryObject(data, gemoetryType) {
   let geometryObject = {};
   if (!isValidObj(data) || !isValidObj(gemoetryType)) {
@@ -218,9 +283,23 @@ function getGeometryObject(data, gemoetryType) {
   return geometryObject;
 }
 
-// convert pathsObject
-// from key: paths
-// to   key: graphics
+/**
+ * convert pathsObject from
+ * {
+ *  key0: [paths]
+ *  key1: [paths]
+ * }
+ *
+ * to
+ *
+ * {
+ *  key0: [graphics]
+ *  key1: [graphics]
+ * }
+ * @param {Object} pathsObject
+ * @param {Object} GraphicsClass
+ * @param {Object} graphicOptions
+ */
 export function getGraphicObj(pathsObject, GraphicsClass, graphicOptions) {
   const graphicsObject = {};
   if (!isValidObj(GraphicsClass)) {
@@ -248,43 +327,60 @@ export function getGraphicObj(pathsObject, GraphicsClass, graphicOptions) {
   return graphicsObject;
 }
 
-export function getLayer(
-  LayerClass,
-  graphicData,
-  stringForTitleAndId,
-  layerRenderer,
-  layerPopupTemplate,
-  fieldsValue
-) {
-  if (!isValidObj(LayerClass) || !isValidObj(graphicData)) {
-    return null;
-  }
-  return new LayerClass({
-    title: stringForTitleAndId,
-    id: stringForTitleAndId,
-    source: graphicData,
-    renderer: layerRenderer,
-    popupTemplate: layerPopupTemplate,
-    objectIdField: "ObjectId",
-    fields: fieldsValue,
-  });
-}
+// export function getLayer(
+//   LayerClass,
+//   graphicData,
+//   stringForTitleAndId,
+//   layerRenderer,
+//   layerPopupTemplate,
+//   fieldsValue
+// ) {
+//   if (!isValidObj(LayerClass) || !isValidObj(graphicData)) {
+//     return null;
+//   }
+//   return new LayerClass({
+//     title: stringForTitleAndId,
+//     id: stringForTitleAndId,
+//     source: graphicData,
+//     renderer: layerRenderer,
+//     popupTemplate: layerPopupTemplate,
+//     objectIdField: "ObjectId",
+//     fields: fieldsValue,
+//   });
+// }
 
-const getMonthShortName = (date) => {
+/**
+ * get month's string value from given
+ * date string
+ * ie from 01/01/2020
+ *    to   Jan 01, 2020
+ *
+ * @param {String} dateString
+ */
+function getMonthShortName(dateString) {
   let shortName = "unknown mont short name";
-  if (isDateValid(date)) {
+  if (isDateValid(dateString)) {
     const shortMonthName = new Intl.DateTimeFormat("en-US", { month: "short" })
       .format;
-    shortName = shortMonthName(date);
+    shortName = shortMonthName(dateString);
   }
   return shortName;
-};
+}
 
+/**
+ * convert database date string to
+ * more readable data string
+ * ie from 01/01/2020 to Jan 01, 2020
+ *    from 01/2020    to Jan 2020
+ *
+ * @param {String} dateString
+ * @param {String} valueType "date"/"month"/"year"
+ */
 function getDateValue(dateString, valueType) {
   const currentDate = new Date(dateString);
   if (isDateValid(currentDate)) {
     const year = currentDate.getFullYear();
-    const month = currentDate.getMonth() + 1;
+    // const month = currentDate.getMonth() + 1;
     const date = currentDate.getDate();
 
     const monthString = getMonthShortName(currentDate);
@@ -376,6 +472,13 @@ export function reduceDataByCategory(data, category, dateType) {
   return rd;
 }
 
+/**
+ * determine whehter map object contains
+ * a layer whose id matches given layer id
+ *
+ * @param {Object} mapObject
+ * @param {String} layerId
+ */
 export function isLayerExisted(mapObject, layerId) {
   let isLayerExist = false;
   for (const layer of mapObject.layers.items) {
@@ -390,6 +493,18 @@ export function isLayerExisted(mapObject, layerId) {
 // since have no idea how many of them
 // would be
 
+/**
+ * generate random rgb for feature layer render's symbol
+ * ie
+ * featureLayer = new FeatureLayer({
+ *  ...,
+ *  symbol: {
+ *    color: getRandomRGB(alpha)
+ *  }
+ * })
+ *
+ * @param {Number} alpha
+ */
 export function getRandomRGB(alpha) {
   const randomArcgisColor = [];
   const r = Math.ceil(255 * Math.random());
@@ -402,17 +517,35 @@ export function getRandomRGB(alpha) {
   return randomArcgisColor;
 }
 
-export function getRandomSimpleMarkerSymbol(symbolSiz, alpha, width) {
+/**
+ * get randome simple marker symbol for a
+ * feature layer
+ *
+ * ie
+ *
+ * featureLayer = new Feature({
+ *  symbol: getRandomSimpleMarkerSymbol(number0, number1, number2)
+ * })
+ *
+ * @param {Number} symbolSize
+ * @param {Number} alpha
+ * @param {Number} width
+ */
+export function getRandomSimpleMarkerSymbol(symbolSize, alpha, width) {
   return {
-    size: symbolSiz,
+    size: symbolSize,
     type: "simple-marker",
     color: getRandomRGB(alpha),
     width: width,
   };
 }
 
-// get simple marker symbol, color, based
-// on filter type, IE: PCI
+/**
+ * get DEFAULT simple marker symbol, color, based
+ * on filter type, IE: PCI
+ *
+ * @param {String} filterType
+ */
 export function getSimpleMarkerSymbol(filterType) {
   if (isValidObj(filterType)) {
     switch (filterType.toLowerCase()) {
@@ -435,6 +568,20 @@ export function getSimpleMarkerSymbol(filterType) {
   }
 }
 
+/**
+ * get a render for rendering icon symbol on a
+ * feature layer
+ *
+ * ie
+ *
+ * featureLayer = new FeatureLayer({
+ *  renderer: getIconRenderer(pathString, iconTitleString, iconSize)
+ * })
+ *
+ * @param {String} inconPath
+ * @param {String} iconTitle
+ * @param {Number} iconSize
+ */
 export function getIconRenderer(inconPath, iconTitle, iconSize) {
   const iconRender = {
     type: "simple",
@@ -449,16 +596,20 @@ export function getIconRenderer(inconPath, iconTitle, iconSize) {
   return iconRender;
 }
 
-// convert dataPonts, from [dataPoints0, dataPoints1, ...]
-
-// to
-// {
-//   filterTypeKey0 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
-//   filterTypeKey1 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
-//   filterTypeKey2 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
-//   filterTypeKey3 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
-// }
+/**
+* convert dataPonts, from [dataPoints0, dataPoints1, ...]
+* to
+* {
+*   filterTypeKey0 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+*   filterTypeKey1 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+*   filterTypeKey2 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+*   filterTypeKey3 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+* }
 //based on filter type, ie: date, month, year, and pci
+ * 
+ * @param {String} filterType 
+ * @param {Array} data 
+ */
 export function getGroupedDataPoints(filterType, data) {
   const groupedDataPoints = reduceDataByCategory(
     data,
@@ -499,6 +650,37 @@ export function getGroupedDataPoints(filterType, data) {
 //   filterTypeKey2 : { no issues: [graphicObjects], rri: [graphicObjects] mms: [graphicObjects] red flag: [graphicObjects] yellow falg: [graphicObjects] },
 //   filterTypeKey3 : { no issues: [graphicObjects], rri: [graphicObjects] mms: [graphicObjects] red flag: [graphicObjects] yellow falg: [graphicObjects] },
 // }
+
+/**
+ * 
+ * convert data points from
+
+ * {
+ *   filterTypeKey0 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+ *   filterTypeKey1 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+ *   filterTypeKey2 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+ *   filterTypeKey3 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+ * }
+
+ * to graphic objects
+
+ * {
+ *   filterTypeKey0 : { no issues: [graphicObjects], rri: [graphicObjects] mms: [graphicObjects] red flag: [graphicObjects] yellow falg: [graphicObjects] },
+ *   filterTypeKey1 : { no issues: [graphicObjects], rri: [graphicObjects] mms: [graphicObjects] red flag: [graphicObjects] yellow falg: [graphicObjects] },
+ *   filterTypeKey2 : { no issues: [graphicObjects], rri: [graphicObjects] mms: [graphicObjects] red flag: [graphicObjects] yellow falg: [graphicObjects] },
+ *   filterTypeKey3 : { no issues: [graphicObjects], rri: [graphicObjects] mms: [graphicObjects] red flag: [graphicObjects] yellow falg: [graphicObjects] },
+ * }
+ * 
+ * so that each [graphicObjects] could be use to geneate a faature layer
+ * 
+ * ie
+ * 
+ * featureLayer = new FeatureLayer({
+ *  source: [graphicObjects]
+ * })
+ * @param {Object} groupedDataPoints 
+ * @param {Object} GraphicClass 
+ */
 export function getGroupedDataPointsGraphics(groupedDataPoints, GraphicClass) {
   const groupdedDataPointsGraphics = {};
   if (!isValidObj(groupedDataPoints && !isValidObj(GraphicClass))) {

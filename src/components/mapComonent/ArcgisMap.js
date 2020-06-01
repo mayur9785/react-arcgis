@@ -3,19 +3,13 @@ import { loadModules } from "esri-loader";
 import shapeGeoJson from "../mapComonent/hamiltonDataFilterDemo/Muskoka_Road_Network.json";
 import dataPointJson from "../mapComonent/hamiltonDataFilterDemo/data.json";
 
-import {
-  DATA_POINT_GROUP_TYPES,
-  LAYER_FILTER_TYPES,
-  // DATA_POINT_MARKER_SYMBOLS,
-} from "../../constants/mapConstants";
+import { LAYER_FILTER_TYPES } from "../../constants/mapConstants";
 import {
   getBaseMap,
   getMapView,
   getFieldInfo,
   getReducedPaths,
-  // getPathGraphic,
   getGraphicObj,
-  // reduceDataByCategory,
   LAYER_TYPES,
   getRandomRGB,
   getSimpleMarkerSymbol,

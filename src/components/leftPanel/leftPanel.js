@@ -8,6 +8,7 @@ import Box from "@material-ui/core/Box";
 import { DataPontDetails } from "../dataPointDetails/dataPointDetails";
 import { DataPointFilters } from "../dataPointFilters.js/dataPointFilters";
 import { MapContext } from "../../context/mapContext";
+import FlagDataPoints from "../flagDataPoints/flagDataPoints";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -43,6 +44,12 @@ const useStyles = makeStyles((theme) => ({
     flexGrow: 1,
     backgroundColor: theme.palette.background.paper,
   },
+
+  tabStyle: {
+    "@media (min-width: 600px)": {
+      minWidth: "125px",
+    },
+  },
 }));
 export default function PanelTabs(props) {
   const { values, setters } = useContext(MapContext);
@@ -65,15 +72,20 @@ export default function PanelTabs(props) {
           onChange={handleChange}
           aria-label="iris arcgis map panel label"
         >
-          <Tab label="Filters" {...a11yProps(0)} />
-          <Tab label="Details" {...a11yProps(1)} />
+          <Tab label="Filters" className={classes.tabStyle} {...a11yProps(0)} />
+          <Tab label="MMS" className={classes.tabStyle} {...a11yProps(1)} />
+          <Tab label="RRI" className={classes.tabStyle} {...a11yProps(2)} />
+          <Tab label="Details" className={classes.tabStyle} {...a11yProps(3)} />
         </Tabs>
       </AppBar>
       <TabPanel value={selectedPanelIndex} index={0}>
         <DataPointFilters />
       </TabPanel>
-
       <TabPanel value={selectedPanelIndex} index={1}>
+        <FlagDataPoints />
+      </TabPanel>
+
+      <TabPanel value={selectedPanelIndex} index={3}>
         <DataPontDetails updateZoomLocation={updateZoomLocation} />
       </TabPanel>
     </div>

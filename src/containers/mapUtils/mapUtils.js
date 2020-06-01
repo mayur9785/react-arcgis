@@ -54,7 +54,7 @@ export async function getBoundaryAndCenter(zipFilePath) {
 /**
  *get base map instance
  *
- * @param {String} mapTypeString
+ * @param {String} mapTypeString Arcgis map type string
  */
 export async function getBaseMap(mapTypeString = "topo") {
   let mapInstance;
@@ -71,9 +71,9 @@ export async function getBaseMap(mapTypeString = "topo") {
 
 /**
  *
- * @param {Map} mapInstance
- * @param {[Number, Number]} center
- * @param {ReactReference} domReference
+ * @param {Map} mapInstance Arcgis Map instancwe
+ * @param {[Number, Number]} center map view's center
+ * @param {ReactReference} domReference react ref where would hold the map view element
  */
 export async function getMapView(
   mapInstance,
@@ -100,6 +100,7 @@ export async function getMapView(
 /**
  * get field info, value, for given
  * field title
+ * @see styleFont
  *
  * @param {String} fieldTitle
  * @param {String} fontStyleTag
@@ -155,6 +156,10 @@ function getTableKeyValue(property) {
 /**
  * get path graphics that contains the values
  * to be display on the pop up
+ *
+ * @see getGeometryObject
+ * @see getTableKeyValue
+ *
  * @param {Array} data
  * @param {Graphic} GraphicsClass
  * @param {Object} graphicsOptions
@@ -183,6 +188,8 @@ export function getPathGraphic(data, GraphicsClass, graphicsOptions) {
  * ie featureLayer = new FeatureLayers({
  *  source: [graphic]
  * })
+ *
+ * @see getGeometryObject
  *
  * @param {Object} data
  * @param {Graphic} GraphicsClass
@@ -296,6 +303,9 @@ function getGeometryObject(data, gemoetryType) {
  *  key0: [graphics]
  *  key1: [graphics]
  * }
+ * @see getDataPointGraphic
+ * @see getPathGraphic
+ *
  * @param {Object} pathsObject
  * @param {Object} GraphicsClass
  * @param {Object} graphicOptions
@@ -309,45 +319,23 @@ export function getGraphicObj(pathsObject, GraphicsClass, graphicOptions) {
   for (const roadTypeKey in pathsObject) {
     if (pathsObject.hasOwnProperty(roadTypeKey)) {
       const paths = pathsObject[roadTypeKey];
-      let pathsGraphics;
+      let targetGraphics;
       if (graphicType === "point") {
-        pathsGraphics = getDataPointGraphic(paths, GraphicsClass, {
+        targetGraphics = getDataPointGraphic(paths, GraphicsClass, {
           graphicType: graphicType,
           symbol: graphicSymbol,
         });
       } else {
-        pathsGraphics = getPathGraphic(paths, GraphicsClass, {
+        targetGraphics = getPathGraphic(paths, GraphicsClass, {
           graphicType: graphicType,
           symbol: graphicSymbol,
         });
       }
-      graphicsObject[roadTypeKey] = pathsGraphics;
+      graphicsObject[roadTypeKey] = targetGraphics;
     }
   }
   return graphicsObject;
 }
-
-// export function getLayer(
-//   LayerClass,
-//   graphicData,
-//   stringForTitleAndId,
-//   layerRenderer,
-//   layerPopupTemplate,
-//   fieldsValue
-// ) {
-//   if (!isValidObj(LayerClass) || !isValidObj(graphicData)) {
-//     return null;
-//   }
-//   return new LayerClass({
-//     title: stringForTitleAndId,
-//     id: stringForTitleAndId,
-//     source: graphicData,
-//     renderer: layerRenderer,
-//     popupTemplate: layerPopupTemplate,
-//     objectIdField: "ObjectId",
-//     fields: fieldsValue,
-//   });
-// }
 
 /**
  * get month's string value from given
@@ -373,8 +361,10 @@ function getMonthShortName(dateString) {
  * ie from 01/01/2020 to Jan 01, 2020
  *    from 01/2020    to Jan 2020
  *
+ * @see getMonthShortName
+ *
  * @param {String} dateString
- * @param {String} valueType "date"/"month"/"year"
+ * @param {String} valueType in one of the following: "date", "month" or "year"
  */
 function getDateValue(dateString, valueType) {
   const currentDate = new Date(dateString);
@@ -394,76 +384,44 @@ function getDateValue(dateString, valueType) {
     }
   }
 }
-export function reduceDataByCategory(data, category, dateType) {
+
+/**
+ * groupd array of data point based on either "date", "month", "year", or "pci" groupType
+ * ie
+ * based on pci
+ * {
+ *  "Good": [dataPoints]
+ *  "fair": [dataPoints],
+ * }
+ *
+ * based on month
+ * {
+ *  Jan 2020: [dataPoints],
+ *  Feb 2020: [dataPoints]
+ * }
+ * etc
+ * @see getDateValue
+ *
+ * @param {Array} data
+ * @param {String} groupType in one of the following "pci", "date", "month", "year"
+ */
+export function getGroupedData(data, groupType) {
   let rd = {};
-  // debugger;
-  // reduced data by date value
-  if (dateType) {
+  // PCI grouping
+  if (groupType === DATA_POINT_GROUP_TYPES.PCI) {
     rd = data.reduce((categoriedData, element) => {
-      const fieldValue = element[category];
-      let newKey = getDateValue(fieldValue, dateType);
+      const newKey = element["pci"];
+      // let newKey = getDateValue(fieldValue, groupType);
       const recentData = categoriedData[newKey] || [];
       recentData.push(element);
       return { ...categoriedData, [newKey]: recentData };
     }, {});
-  } else if (LAYER_FILTER_TYPES["Red Flag"].name === category) {
-    const normalData = [];
-    for (const d of data) {
-      if (d[LAYER_FILTER_TYPES["Red Flag"].keyName].toLowerCase() === "r") {
-        normalData.push({ ...d });
-      }
-    }
-    rd = normalData;
-  } else if (LAYER_FILTER_TYPES["Yellow Flag"].name === category) {
-    const normalData = [];
-    for (const d of data) {
-      if (
-        d[LAYER_FILTER_TYPES["Yellow Flag"].keyName].toLowerCase().includes("y")
-      ) {
-        normalData.push({ ...d });
-      }
-    }
-    rd = normalData;
-  } else if (LAYER_FILTER_TYPES.MMS.name === category) {
+  }
+  // date type grouping
+  else {
     rd = data.reduce((categoriedData, element) => {
-      const fieldValue = element[LAYER_FILTER_TYPES.MMS.keyName];
-      if (fieldValue.toLowerCase() === "null") {
-        return { ...categoriedData };
-      }
-      const recentData = categoriedData[fieldValue] || [];
-      recentData.push(element);
-      return { ...categoriedData, [fieldValue]: recentData };
-    }, {});
-  } else if (LAYER_FILTER_TYPES.RRI.name === category) {
-    rd = data.reduce((categoriedData, element) => {
-      const fieldValue = element[LAYER_FILTER_TYPES.RRI.keyName];
-      let newKey = fieldValue;
-      if (fieldValue.toLowerCase() === "null") {
-        return { ...categoriedData };
-      }
-      const recentData = categoriedData[newKey] || [];
-      recentData.push(element);
-      return { ...categoriedData, [newKey]: recentData };
-    }, {});
-  } else if (LAYER_FILTER_TYPES["No Issues"].name === category) {
-    const normalData = [];
-    for (const d of data) {
-      if (
-        d["damage_type"].toLowerCase() === "null" &&
-        d["road_related_issues"] === "null".toLowerCase() &&
-        d["flag"].toLowerCase() === "n"
-      ) {
-        normalData.push({ ...d });
-      }
-    }
-    rd = normalData;
-  } else {
-    rd = data.reduce((categoriedData, element) => {
-      const fieldValue = element[category];
-      let newKey = fieldValue;
-      if (fieldValue === "null") {
-        return { ...categoriedData };
-      }
+      const fieldValue = element["create_time"];
+      let newKey = getDateValue(fieldValue, groupType);
       const recentData = categoriedData[newKey] || [];
       recentData.push(element);
       return { ...categoriedData, [newKey]: recentData };
@@ -488,10 +446,6 @@ export function isLayerExisted(mapObject, layerId) {
   }
   return isLayerExist;
 }
-
-// random color for paths
-// since have no idea how many of them
-// would be
 
 /**
  * generate random rgb for feature layer render's symbol
@@ -527,6 +481,8 @@ export function getRandomRGB(alpha) {
  *  symbol: getRandomSimpleMarkerSymbol(number0, number1, number2)
  * })
  *
+ * @see getRandomRGB
+ *
  * @param {Number} symbolSize
  * @param {Number} alpha
  * @param {Number} width
@@ -543,6 +499,8 @@ export function getRandomSimpleMarkerSymbol(symbolSize, alpha, width) {
 /**
  * get DEFAULT simple marker symbol, color, based
  * on filter type, IE: PCI
+ *
+ * @see getRandomSimpleMarkerSymbol
  *
  * @param {String} filterType
  */
@@ -579,7 +537,7 @@ export function getSimpleMarkerSymbol(filterType) {
  * })
  *
  * @param {String} inconPath
- * @param {String} iconTitle
+ * @param {String} iconTitle used to be display as legend title for given renderer
  * @param {Number} iconSize
  */
 export function getIconRenderer(inconPath, iconTitle, iconSize) {
@@ -597,59 +555,41 @@ export function getIconRenderer(inconPath, iconTitle, iconSize) {
 }
 
 /**
-* convert dataPonts, from [dataPoints0, dataPoints1, ...]
-* to
-* {
-*   filterTypeKey0 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
-*   filterTypeKey1 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
-*   filterTypeKey2 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
-*   filterTypeKey3 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
-* }
-//based on filter type, ie: date, month, year, and pci
- * 
- * @param {String} filterType 
- * @param {Array} data 
+ * convert dataPonts, from [dataPoints0, dataPoints1, ...]
+ * to
+ * {
+ *   filterTypeKey0 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+ *   filterTypeKey1 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+ *   filterTypeKey2 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+ *   filterTypeKey3 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
+ * }
+ * based on filter type, ie: date, month, year, and pci
+ *
+ * @see getGroupedData
+ * @see getFilteredData
+ *
+ * @param {String} filterType
+ * @param {Array} data
  */
-export function getGroupedDataPoints(filterType, data) {
-  const groupedDataPoints = reduceDataByCategory(
-    data,
-    "create_time",
-    filterType
-  );
+export function getGroupedDataPoints(groupType, data) {
+  const groupedDataPoints = getGroupedData(data, groupType);
+  debugger;
   const updatedGroupLayer = {};
   for (const key in groupedDataPoints) {
     updatedGroupLayer[key] = {};
     if (groupedDataPoints.hasOwnProperty(key)) {
       const element = groupedDataPoints[key];
-      Object.keys(LAYER_FILTER_TYPES).map((type) => {
-        const r = reduceDataByCategory(element, type, null);
+      Object.keys(LAYER_FILTER_TYPES).map((filterType) => {
+        const r = getFilteredData(element, filterType);
         if (isEmptyObject(r) || r.length === 0) {
           return;
         }
-        updatedGroupLayer[key][type] = r;
+        updatedGroupLayer[key][filterType] = r;
       });
     }
   }
   return updatedGroupLayer;
 }
-
-// convert data points from
-
-// {
-//   filterTypeKey0 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
-//   filterTypeKey1 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
-//   filterTypeKey2 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
-//   filterTypeKey3 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
-// }
-
-//to graphic objects
-
-// {
-//   filterTypeKey0 : { no issues: [graphicObjects], rri: [graphicObjects] mms: [graphicObjects] red flag: [graphicObjects] yellow falg: [graphicObjects] },
-//   filterTypeKey1 : { no issues: [graphicObjects], rri: [graphicObjects] mms: [graphicObjects] red flag: [graphicObjects] yellow falg: [graphicObjects] },
-//   filterTypeKey2 : { no issues: [graphicObjects], rri: [graphicObjects] mms: [graphicObjects] red flag: [graphicObjects] yellow falg: [graphicObjects] },
-//   filterTypeKey3 : { no issues: [graphicObjects], rri: [graphicObjects] mms: [graphicObjects] red flag: [graphicObjects] yellow falg: [graphicObjects] },
-// }
 
 /**
  * 
@@ -678,6 +618,9 @@ export function getGroupedDataPoints(filterType, data) {
  * featureLayer = new FeatureLayer({
  *  source: [graphicObjects]
  * })
+ * 
+ * @see getGraphicObj
+ * 
  * @param {Object} groupedDataPoints 
  * @param {Object} GraphicClass 
  */
@@ -703,4 +646,52 @@ export function getGroupedDataPointsGraphics(groupedDataPoints, GraphicClass) {
     }
   }
   return groupdedDataPointsGraphics;
+}
+
+/**
+ * filter given data points base on given filter type
+ *
+ * @param {Array} data data points array
+ * @param {String} filterType in one of the following: "mms", "rri", "red falg", "yellow flag" or "no issues"
+ */
+export function getFilteredData(data, filterType) {
+  let filteredData;
+  // return array of data points whose value of "flag" property is "R"
+  switch (filterType) {
+    case LAYER_FILTER_TYPES["Red Flag"].name:
+      filteredData = data.filter(
+        (d) => d[LAYER_FILTER_TYPES["Red Flag"].keyName].toLowerCase() === "r"
+      );
+      break;
+    case LAYER_FILTER_TYPES["Yellow Flag"].name:
+      filteredData = data.filter((d) =>
+        d[LAYER_FILTER_TYPES["Yellow Flag"].keyName].toLowerCase().includes("y")
+      );
+      break;
+    case LAYER_FILTER_TYPES.MMS.name:
+      filteredData = data.filter(
+        (d) =>
+          d[LAYER_FILTER_TYPES.MMS.keyName].toLowerCase() !== "null" &&
+          d["flag"] === "null"
+      );
+      break;
+    case LAYER_FILTER_TYPES.RRI.name:
+      filteredData = data.filter(
+        (d) =>
+          d[LAYER_FILTER_TYPES.RRI.keyName].toLowerCase() !== "null" &&
+          d["flag"] === "null"
+      );
+      break;
+    case LAYER_FILTER_TYPES["No Issues"].name:
+      filteredData = data.filter(
+        (d) =>
+          d["damage_type"].toLowerCase() === "null" &&
+          d["road_related_issues"] === "null".toLowerCase() &&
+          d["flag"].toLowerCase() === "n"
+      );
+      break;
+    default:
+      filteredData = data.filter((d) => d[filterType].toLowerCase() !== "null");
+  }
+  return filteredData;
 }

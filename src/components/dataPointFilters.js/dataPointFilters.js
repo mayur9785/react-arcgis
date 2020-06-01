@@ -47,6 +47,7 @@ export function DataPointFilters(props) {
     if (setSelectedLayers) {
       const layers = event.target.value;
       setSelectedLayers(layers);
+      debugger;
     }
   }
 
@@ -80,8 +81,8 @@ export function DataPointFilters(props) {
     setLayerFilterTypes(currentLayerFilters);
   }
   return (
-    <div>
-      <FormControl fullWidth>
+    <FormGroup>
+      <FormControl fullWidth style={{ marginBottom: "1rem" }}>
         <InputLabel id="arcgis-map-type-label">Map Type</InputLabel>
         <Select
           labelId="arcgisMapSelectLabel"
@@ -139,8 +140,8 @@ export function DataPointFilters(props) {
           }}
         />
       </MuiPickersUtilsProvider>
-      <FormControl fullWidth>
-        <InputLabel id="filterDateTypeLabel">Filter by</InputLabel>
+      <FormControl fullWidth style={{ margin: "1rem 0" }}>
+        <InputLabel id="filterDateTypeLabel">Group layer by</InputLabel>
         <Select
           native
           value={dataGroupType}
@@ -158,12 +159,19 @@ export function DataPointFilters(props) {
           ))}
         </Select>
       </FormControl>
+
+      <InputLabel style={{ textAlign: "left" }} id="filterDateTypeLabel">
+        Sublayers
+      </InputLabel>
       <FormGroup row>
         {Object.keys(LAYER_FILTER_TYPES).map((filterType) => (
           <FormControlLabel
             key={filterType}
             control={
               <Checkbox
+                disabled={
+                  selectedLayers.indexOf(LAYER_TYPES.DATA_POINT_LAYER) < 0
+                }
                 name={LAYER_FILTER_TYPES[filterType].name}
                 value={LAYER_FILTER_TYPES[filterType].name}
                 checked={layerFilterTypes.indexOf(filterType) > -1}
@@ -174,6 +182,6 @@ export function DataPointFilters(props) {
           />
         ))}
       </FormGroup>
-    </div>
+    </FormGroup>
   );
 }

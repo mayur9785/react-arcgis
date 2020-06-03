@@ -25,12 +25,24 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 function DropDownList(props) {
+  const { setters } = useContext(MapContext);
+  const { setZoomToSelectedData, setSelectedData } = setters;
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
   const { title, data, filterType, logo } = props;
   const handleClick = () => {
     setOpen(!open);
   };
+
+  const zoomToDataPoint = (data, indexInList) => {
+    setSelectedIndex(indexInList);
+    if (setZoomToSelectedData && setSelectedData) {
+      setSelectedData(data);
+      setZoomToSelectedData(true);
+    }
+  };
+
   return (
     <List aria-labelledby="nested-list-subheader" className={classes.root}>
       <ListItem button onClick={handleClick}>
@@ -42,8 +54,17 @@ function DropDownList(props) {
       </ListItem>
       <Collapse in={open} timeout="auto" unmountOnExit>
         {data.map((d, index) => (
-          <List component="div" disablePadding key={index}>
-            <ListItem button className={classes.nested}>
+          <List
+            component="div"
+            disablePadding
+            key={index}
+            onClick={() => zoomToDataPoint(d, index)}
+          >
+            <ListItem
+              button
+              className={classes.nested}
+              selected={selectedIndex === index}
+            >
               <ListItemIcon>
                 <img src={logo} height={20} />
               </ListItemIcon>

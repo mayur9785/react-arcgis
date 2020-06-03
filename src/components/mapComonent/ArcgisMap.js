@@ -127,10 +127,10 @@ export const ArcgisMap = (props) => {
     setSelectedPanelIndex,
   } = setters;
 
-  const [popupFeature, setPopupFeature] = useState(null);
   const mapRef = useRef();
   const [map, setMap] = useState(null);
   const [mapView, setMapView] = useState(null);
+  const [layerList, setLayerList] = useState(null);
 
   const [allGroupLayers, setAllGroupLayers] = useState([]);
 
@@ -179,7 +179,6 @@ export const ArcgisMap = (props) => {
     // each of them consists of an array of graphics
     // const dataPointLayers = {};
     const groupLayers = [];
-    let graphicsForPopup = [];
     for (const key in groupdedDataPointsGraphics) {
       if (groupdedDataPointsGraphics.hasOwnProperty(key)) {
         const element = groupdedDataPointsGraphics[key];
@@ -187,7 +186,6 @@ export const ArcgisMap = (props) => {
         for (const dataPointTitle in element) {
           if (element.hasOwnProperty(dataPointTitle)) {
             const pathsGraphics = element[dataPointTitle];
-            graphicsForPopup = [...graphicsForPopup, ...pathsGraphics];
             let featureLayerRenderer = {};
             switch (dataPointTitle) {
               case LAYER_FILTER_TYPES["Red Flag"].name:
@@ -247,7 +245,7 @@ export const ArcgisMap = (props) => {
                 actions: [
                   {
                     title: "Details",
-                    id: "create-work-order",
+                    id: "showDataPointDetailsBtn",
                     image: `${moreDetailsIcon}`,
                   },
                 ],
@@ -302,7 +300,6 @@ export const ArcgisMap = (props) => {
         groupLayers.push(subgroupLayer);
       }
     }
-    setPopupFeature(graphicsForPopup);
 
     // make the root group layer consists of [groupLayer0, groupLayer1, ...]
     // so that each groupLayer would be a sub group layer of the
@@ -448,14 +445,16 @@ export const ArcgisMap = (props) => {
         // },
       });
 
+      setLayerList(roadTypesLayerList);
+
       // put layer list on top-left corner on the map view
       view.ui.add(roadTypesLayerList, "top-left");
 
       // add custom actionable buttons on each popup
       view.popup.on("trigger-action", function (event) {
         // Execute the measureThis() function if the measure-this action is clicked
-        if (event.action.id === "create-work-order") {
-          const id = getDataIdFromPopup(view.popup);
+        if (event.action.id === "showDataPointDetailsBtn") {
+          getDataIdFromPopup(view.popup);
           // console.log("create-work-order should be executed");
         }
       });
@@ -566,6 +565,8 @@ export const ArcgisMap = (props) => {
           });
         });
         // find grapihc DONE
+
+        const a = layerList.selectedItems;
         mapView.popup.open({
           location: location,
           features: [selectedDataGraphic],
@@ -618,7 +619,7 @@ export const ArcgisMap = (props) => {
     console.log("matchedData", currentDataPoint);
     setSelectedData(currentDataPoint);
     setOpenPanel(true);
-    setSelectedPanelIndex(1);
+    setSelectedPanelIndex(3);
   }
 
   function toggleSublayers(selectedLayers) {

@@ -672,14 +672,14 @@ export function getFilteredData(data, filterType) {
       filteredData = data.filter(
         (d) =>
           d[LAYER_FILTER_TYPES.MMS.keyName].toLowerCase() !== "null" &&
-          d["flag"] === "null"
+          d["flag"] === "N"
       );
       break;
     case LAYER_FILTER_TYPES.RRI.name:
       filteredData = data.filter(
         (d) =>
           d[LAYER_FILTER_TYPES.RRI.keyName].toLowerCase() !== "null" &&
-          d["flag"] === "null"
+          d["flag"] === "N"
       );
       break;
     case LAYER_FILTER_TYPES["No Issues"].name:

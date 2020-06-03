@@ -538,7 +538,7 @@ export const ArcgisMap = (props) => {
         longitude: selectedData.longitude,
       };
       mapView.center = location;
-      mapView.zoom = 18;
+      // mapView.zoom = 18;
 
       // open popup for selected data
       const dataPointLayer = allGroupLayers.find(

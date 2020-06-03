@@ -6,25 +6,14 @@ import { Button } from "@material-ui/core";
 import { MapContext } from "../../context/mapContext";
 
 export function DataPontDetails(props) {
-  const { values, setters } = useContext(MapContext);
+  console.log("I am here");
+  const { values } = useContext(MapContext);
   const { selectedData } = values;
-  const { setSelectedDate, setZoomToSelectedData } = setters;
-
-  const { updateZoomLocation } = props;
-
-  function handleZoom() {
-    if (setZoomToSelectedData) {
-      setZoomToSelectedData(true);
-    }
-  }
 
   return (
     <div>
       {selectedData ? (
         <div>
-          {/* <div style={{ cursor: "pointer" }} onClick={showImage}>
-          <img src={selectedData.image} width="100%" />
-        </div> */}
           <a href={selectedData.image} target="_blank">
             <img src={selectedData.image} width="100%" />
           </a>
@@ -49,11 +38,6 @@ export function DataPontDetails(props) {
           })}
 
           <Grid container justify="space-around">
-            <Grid item>
-              <Button variant="outlined" color="secondary" onClick={handleZoom}>
-                Zoom to Map
-              </Button>
-            </Grid>
             <Grid item>
               <Button variant="contained" color="primary">
                 Create Work Flow

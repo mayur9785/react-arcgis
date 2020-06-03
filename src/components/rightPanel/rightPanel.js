@@ -53,7 +53,7 @@ const useStyles = makeStyles((theme) => ({
     },
   },
 }));
-export default function PanelTabs(props) {
+export default function RightPanelTabs(props) {
   const { values, setters } = useContext(MapContext);
   const { selectedPanelIndex } = values;
   const { setSelectedPanelIndex } = setters;

@@ -8,7 +8,9 @@ import Box from "@material-ui/core/Box";
 import { DataPontDetails } from "../dataPointDetails/dataPointDetails";
 import { DataPointFilters } from "../dataPointFilters.js/dataPointFilters";
 import { MapContext } from "../../context/mapContext";
-import FlagDataPoints from "../flagDataPoints/flagDataPoints";
+import DropDownListPanel from "../flagDataPoints/dropDownListPanel";
+import redFlag from "../../assets/arcgisMapIcons/mms_warning.jpg";
+import yellowFlag from "../../assets/arcgisMapIcons/rri_warning.jpg";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -82,7 +84,10 @@ export default function PanelTabs(props) {
         <DataPointFilters />
       </TabPanel>
       <TabPanel value={selectedPanelIndex} index={1}>
-        <FlagDataPoints />
+        <DropDownListPanel logo={redFlag} filterType="damage_type" />
+      </TabPanel>
+      <TabPanel value={selectedPanelIndex} index={2}>
+        <DropDownListPanel logo={yellowFlag} filterType="road_related_issues" />
       </TabPanel>
 
       <TabPanel value={selectedPanelIndex} index={3}>

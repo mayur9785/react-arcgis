@@ -5,10 +5,11 @@ import {
   LAYER_FILTER_TYPES,
 } from "../constants/mapConstants";
 import { LAYER_TYPES } from "../containers/mapUtils/mapUtils";
-
+import data from "../components/mapComonent/hamiltonDataFilterDemo/data.json";
 export const MapContext = createContext();
 
 export function MapContextProvider(props) {
+  const [dataPoints, setDataPoints] = useState(data);
   const [mapType, setMapType] = useState(ARCGIS_MAP_TYPES.TOPO);
 
   const [dataGroupType, setDataGroupType] = useState(
@@ -35,6 +36,7 @@ export function MapContextProvider(props) {
 
   const contextValues = {
     mapType,
+    dataPoints,
     dataGroupType,
     layerFilterTypes,
     selectedData,
@@ -46,6 +48,7 @@ export function MapContextProvider(props) {
   };
   const contextFunctions = {
     setMapType,
+    setDataPoints,
     setDataGroupType,
     setLayerFilterTypes,
     setSelectedData,

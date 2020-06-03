@@ -127,6 +127,7 @@ export const ArcgisMap = (props) => {
     setSelectedPanelIndex,
   } = setters;
 
+  const [popupFeature, setPopupFeature] = useState(null);
   const mapRef = useRef();
   const [map, setMap] = useState(null);
   const [mapView, setMapView] = useState(null);
@@ -178,6 +179,7 @@ export const ArcgisMap = (props) => {
     // each of them consists of an array of graphics
     // const dataPointLayers = {};
     const groupLayers = [];
+    let graphicsForPopup = [];
     for (const key in groupdedDataPointsGraphics) {
       if (groupdedDataPointsGraphics.hasOwnProperty(key)) {
         const element = groupdedDataPointsGraphics[key];
@@ -185,7 +187,7 @@ export const ArcgisMap = (props) => {
         for (const dataPointTitle in element) {
           if (element.hasOwnProperty(dataPointTitle)) {
             const pathsGraphics = element[dataPointTitle];
-
+            graphicsForPopup = [...graphicsForPopup, ...pathsGraphics];
             let featureLayerRenderer = {};
             switch (dataPointTitle) {
               case LAYER_FILTER_TYPES["Red Flag"].name:
@@ -300,6 +302,7 @@ export const ArcgisMap = (props) => {
         groupLayers.push(subgroupLayer);
       }
     }
+    setPopupFeature(graphicsForPopup);
 
     // make the root group layer consists of [groupLayer0, groupLayer1, ...]
     // so that each groupLayer would be a sub group layer of the
@@ -530,15 +533,48 @@ export const ArcgisMap = (props) => {
   }, [selectedLayers]);
 
   useEffect(() => {
-    if (map && selectedData && zoomToSelectedData) {
-      mapView.center = [selectedData.longitude, selectedData.latitude];
+    if (map && mapView && selectedData && zoomToSelectedData) {
+      const location = {
+        latitude: selectedData.latitude,
+        longitude: selectedData.longitude,
+      };
+      mapView.center = location;
       mapView.zoom = 18;
-      // mapView.goTo({
-      //   center:[location.longitude, location.latitude],
-      // })
+
+      // open popup for selected data
+      const dataPointLayer = allGroupLayers.find(
+        (layer) => layer.id === LAYER_TYPES.DATA_POINT_LAYER
+      );
+
+      if (dataPointLayer) {
+        let selectedDataGraphic = null;
+        // find graphic
+        dataPointLayer.layers.items.map((subLayer) => {
+          subLayer.layers.items.map((subSubLayer) => {
+            const targetGraphic = subSubLayer.source.items.find((graphic) => {
+              if (graphic.attributes.id === selectedData.id) {
+                console.log("graphic.attributes.id", graphic.attributes.id);
+              }
+              return graphic.attributes.id === selectedData.id;
+            });
+            console.log("run twic");
+            if (targetGraphic) {
+              selectedDataGraphic = targetGraphic;
+              // found target graphic, return from the loop
+              return;
+            }
+          });
+        });
+        // find grapihc DONE
+        mapView.popup.open({
+          location: location,
+          features: [selectedDataGraphic],
+        });
+      }
+
       setZoomToSelectedData(false);
     }
-  }, [zoomToSelectedData]);
+  }, [zoomToSelectedData, selectedData]);
   useEffect(() => {
     if (map) {
       loadModules(
@@ -610,3 +646,26 @@ export const ArcgisMap = (props) => {
   }
   return <div className="webmap" style={{ height: "93vh" }} ref={mapRef} />;
 };
+
+// if (mapView) {
+//   debugger;
+//   const a = allGroupLayers[1];
+//   let g = null;
+//   // find graphic
+//   a.layers.items.map((subLayer) => {
+//     subLayer.layers.items.map((subSubLayer) => {
+//       const targetGraphic = subSubLayer.source.items.find(
+//         (g) => Number(g.attributes.id) === selectedData.id
+//       );
+//       g = targetGraphic;
+//     });
+//   });
+//   // find grapihc DONE
+//   mapView.popup.open({
+//     location: {
+//       latitude: 43.2430969,
+//       longitude: -79.8037704,
+//     },
+//     features: [g],
+//   });
+// }

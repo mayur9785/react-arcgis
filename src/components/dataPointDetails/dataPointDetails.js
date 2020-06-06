@@ -1,12 +1,22 @@
 import React, { useContext } from "react";
 import Grid from "@material-ui/core/Grid";
-import { DATA_POINT_DETAILS_TITLES } from "../../constants/mapConstants";
+import {
+  DATA_POINT_DETAILS_TITLES,
+  LAYER_FILTER_TYPES,
+} from "../../constants/mapConstants";
 import { isValidObj } from "../../utils/utilFunctions/utilFunctions";
 import { Button } from "@material-ui/core";
 import { MapContext } from "../../context/mapContext";
 
+const isPerfectData = (data) => {
+  return (
+    data[LAYER_FILTER_TYPES.MMS.keyName] === "N / A" &&
+    data[LAYER_FILTER_TYPES.RRI.keyName] === "N / A" &&
+    data[LAYER_FILTER_TYPES["Red Flag"].keyName].toLowerCase() === "n"
+  );
+};
+
 export function DataPontDetails(props) {
-  console.log("I am here");
   const { values } = useContext(MapContext);
   const { selectedData } = values;
 
@@ -21,8 +31,10 @@ export function DataPontDetails(props) {
             let value = selectedData[title.keyName];
             if (title.keyName.toLowerCase() === "location") {
               value = `( ${selectedData.latitude}, ${selectedData.longitude} )`;
+            } else if (title.keyName.toLowerCase() === "device_sn") {
+              value = selectedData["device_sn"]["device_sn"];
             }
-            if (!isValidObj(value) || value.toLowerCase() === "null") {
+            if (!isValidObj(value) || value === null) {
               value = "N/A";
             }
             return (
@@ -39,12 +51,20 @@ export function DataPontDetails(props) {
 
           <Grid container justify="space-around">
             <Grid item>
-              <Button variant="contained" color="primary">
+              <Button
+                variant="contained"
+                color="primary"
+                disabled={isPerfectData(selectedData)}
+              >
                 Create Work Flow
               </Button>
             </Grid>
             <Grid item>
-              <Button variant="contained" color="secondary">
+              <Button
+                variant="contained"
+                color="secondary"
+                disabled={isPerfectData(selectedData)}
+              >
                 Resolve
               </Button>
             </Grid>

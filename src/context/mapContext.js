@@ -9,7 +9,7 @@ import data from "../components/mapComonent/hamiltonDataFilterDemo/data.json";
 export const MapContext = createContext();
 
 export function MapContextProvider(props) {
-  const [dataPoints, setDataPoints] = useState(data);
+  const [dataPoints, setDataPoints] = useState([]);
   const [mapType, setMapType] = useState(ARCGIS_MAP_TYPES.TOPO);
 
   const [dataGroupType, setDataGroupType] = useState(
@@ -34,6 +34,8 @@ export function MapContextProvider(props) {
 
   const [selectedPanelIndex, setSelectedPanelIndex] = useState(0);
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState(null);
   const contextValues = {
     mapType,
     dataPoints,
@@ -45,6 +47,8 @@ export function MapContextProvider(props) {
     zoomToSelectedData,
     openPanel,
     selectedPanelIndex,
+    isLoading,
+    loadingMessage,
   };
   const contextFunctions = {
     setMapType,
@@ -57,6 +61,8 @@ export function MapContextProvider(props) {
     setZoomToSelectedData,
     setOpenPanel,
     setSelectedPanelIndex,
+    setIsLoading,
+    setLoadingMessage,
   };
 
   return (

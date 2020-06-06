@@ -10,16 +10,21 @@ export const SYMBOL_MARKERS = {
   MARKER: "simple-marker",
 };
 
-// filter types for filtering data points
+/**
+ * categories for grouping data points
+ */
 export const DATA_POINT_GROUP_TYPES = {
   DATE: "Date",
   MONTH: "Month",
   YEAR: "Year",
   PCI: "PCI",
-  // MMS: "MMS Defects",
-  // RRI: "Road Related Issues",
-  // FLAGS: "Flags",
 };
+
+/**
+ * filter data on arcgis based on whether
+ * there is deffects, road issues, marked with flas
+ * or none of them
+ */
 
 export const LAYER_FILTER_TYPES = {
   "No Issues": { name: "No Issues", keyName: " N/ A" },
@@ -29,6 +34,13 @@ export const LAYER_FILTER_TYPES = {
   "Yellow Flag": { name: "Yellow Flag", keyName: "flag" },
 };
 
+/**
+ * use to show data point details
+ * where "name" is the title and
+ * "keyName" is the property name
+ * of data point where desired value
+ * is located
+ */
 export const DATA_POINT_DETAILS_TITLES = [
   { name: "PCI", keyName: "pci" },
   { name: "RRI", keyName: "road_related_issues" },
@@ -60,9 +72,16 @@ export const ARCGIS_MAP_TYPES = {
   STREETS_EFLIEF_VECTOR: "streets-relief-vector",
 };
 
-export const DEFAULT_SYMBOL_SIZE = "12px";
+// size of marker whose symbol is "simple-marker"
+// which is a solid dot shown on map
+export const DEFAULT_SYMBOL_SIZE = "7px";
+
+// line with of marker whose symbol is line
 export const DEFAULT_MARKER_WIDTH = 1;
+
 export const DEFAULT_MARKER_ALPHA = 0.8;
+
+// some default marker for arcgis map
 export const DATA_POINT_MARKER_SYMBOLS = {
   DEFAULT: {
     size: DEFAULT_SYMBOL_SIZE,

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState, useContext } from "react";
 import { loadModules } from "esri-loader";
 import shapeGeoJson from "../mapComonent/hamiltonDataFilterDemo/Muskoka_Road_Network.json";
-import dataPointJson from "../mapComonent/hamiltonDataFilterDemo/data.json";
+// import dataPointJson from "../mapComonent/hamiltonDataFilterDemo/data.json";
 
 import { LAYER_FILTER_TYPES } from "../../constants/mapConstants";
 import {
@@ -23,6 +23,7 @@ import { MapContext } from "../../context/mapContext";
 import redWarningIcon from "../../images/mms_warning.jpg";
 import yellowWarningIcon from "../../images/rri_warning.jpg";
 import moreDetailsIcon from "../../images/more_details.png";
+const TAG = "[ArcgisMap.js]";
 
 const roadGraphicOptions = {
   graphicType: "polyline",
@@ -33,15 +34,15 @@ const roadGraphicOptions = {
   },
 };
 
-const getRoadGraphicOptions = () => ({
-  graphicType: "polyline",
-  graphicSymbol: {
-    type: "simple-line",
-    // color: [208, 2, 5, 0.8], // orange
-    color: getRandomRGB(0.8),
-    width: 2,
-  },
-});
+// const getRoadGraphicOptions = () => ({
+//   graphicType: "polyline",
+//   graphicSymbol: {
+//     type: "simple-line",
+//     // color: [208, 2, 5, 0.8], // orange
+//     color: getRandomRGB(0.8),
+//     width: 2,
+//   },
+// });
 
 const getFieldTitles = (properties) => {
   const fieldInfos = [];
@@ -105,7 +106,8 @@ const panelFunction = (event) => {
   };
 };
 
-export const ArcgisMap = (props) => {
+export const ArcgisMap = React.memo((props) => {
+  console.log(TAG, "METHOD is called");
   const { values, setters } = useContext(MapContext);
   const {
     mapType,
@@ -115,6 +117,7 @@ export const ArcgisMap = (props) => {
     selectedDate,
     selectedLayers,
     zoomToSelectedData,
+    dataPoints,
   } = values;
   const {
     setMapType,
@@ -156,8 +159,9 @@ export const ArcgisMap = (props) => {
     //   filterTypeKey2 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
     //   filterTypeKey3 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
     // }
-    const groupedDataPoints = getGroupedDataPoints(filterType, dataPointJson);
-
+    // const groupedDataPoints = getGroupedDataPoints(filterType, dataPointJson);
+    const groupedDataPoints = getGroupedDataPoints(filterType, dataPoints);
+    debugger;
     // get groupedDataPointsGraphics as
     // {
     //   filterTypeKey0 : { no issues: [graphicObjects], rri: [graphicObjects] mms: [graphicObjects] red flag: [graphicObjects] yellow falg: [graphicObjects] },
@@ -169,7 +173,6 @@ export const ArcgisMap = (props) => {
       groupedDataPoints,
       GraphicClass
     );
-    debugger;
 
     // get graphic objects from grouped data points
 
@@ -315,6 +318,7 @@ export const ArcgisMap = (props) => {
   // let GraphicClass = null;
 
   useEffect(() => {
+    console.log(TAG, "useEffect, dataPoint: ", dataPoints);
     // lazy load the required ArcGIS API for JavaScript modules and CSS
     loadModules(
       [
@@ -327,6 +331,7 @@ export const ArcgisMap = (props) => {
         css: true,
       }
     ).then(async ([Graphic, FeatureLayer, LayerList, GroupLayer]) => {
+      console.log("arcgis rendering map itselve");
       const allLayers = [];
       // instantiate map
       const map = await getBaseMap(mapType);
@@ -464,6 +469,7 @@ export const ArcgisMap = (props) => {
       toggleFeatureLayers(map, allLayers, selectedLayers);
 
       setAllGroupLayers(allLayers);
+      debugger;
       return () => {
         if (view) {
           view.container = null;
@@ -473,7 +479,7 @@ export const ArcgisMap = (props) => {
         }
       };
     });
-  }, []);
+  }, [dataPoints]);
 
   const toggleFeatureLayers = (
     mapObject,
@@ -528,10 +534,18 @@ export const ArcgisMap = (props) => {
   };
 
   useEffect(() => {
+    console.log(TAG, "useEffect, selectedLayers: ", selectedLayers);
     toggleFeatureLayers(map, allGroupLayers, selectedLayers);
   }, [selectedLayers]);
 
   useEffect(() => {
+    console.log(
+      TAG,
+      "useEffect, selectedLayers: ",
+      zoomToSelectedData,
+      "selectedData: ",
+      selectedData
+    );
     if (map && mapView && selectedData && zoomToSelectedData) {
       const location = {
         latitude: selectedData.latitude,
@@ -566,7 +580,6 @@ export const ArcgisMap = (props) => {
         });
         // find grapihc DONE
 
-        const a = layerList.selectedItems;
         mapView.popup.open({
           location: location,
           features: [selectedDataGraphic],
@@ -577,6 +590,7 @@ export const ArcgisMap = (props) => {
     }
   }, [zoomToSelectedData, selectedData]);
   useEffect(() => {
+    console.log(TAG, "useEffect, dataGroupType: ", dataGroupType);
     if (map) {
       loadModules(
         ["esri/Graphic", "esri/layers/FeatureLayer", "esri/layers/GroupLayer"],
@@ -604,20 +618,23 @@ export const ArcgisMap = (props) => {
   }, [dataGroupType]);
 
   useEffect(() => {
+    console.log(TAG, "useEffect, mapType: ", mapType);
     if (map) {
       map.basemap = mapType;
     }
   }, [mapType]);
 
   useEffect(() => {
+    console.log(TAG, "useEffect, layerFilterTypes: ", layerFilterTypes);
     toggleSublayers(layerFilterTypes);
   }, [layerFilterTypes]);
   function getDataIdFromPopup(popup) {
-    const id = popup.content.graphic.attributes.id || -1;
-
-    const currentDataPoint = dataPointJson.find((data) => data.id === id);
+    const id = popup.content.graphic.attributes.id || "-1";
+    debugger;
+    const currentDataPoint = dataPoints.find((data) => data.id === id);
     console.log("matchedData", currentDataPoint);
     setSelectedData(currentDataPoint);
+    debugger;
     setOpenPanel(true);
     setSelectedPanelIndex(3);
   }
@@ -646,27 +663,4 @@ export const ArcgisMap = (props) => {
     }
   }
   return <div className="webmap" style={{ height: "93vh" }} ref={mapRef} />;
-};
-
-// if (mapView) {
-//   debugger;
-//   const a = allGroupLayers[1];
-//   let g = null;
-//   // find graphic
-//   a.layers.items.map((subLayer) => {
-//     subLayer.layers.items.map((subSubLayer) => {
-//       const targetGraphic = subSubLayer.source.items.find(
-//         (g) => Number(g.attributes.id) === selectedData.id
-//       );
-//       g = targetGraphic;
-//     });
-//   });
-//   // find grapihc DONE
-//   mapView.popup.open({
-//     location: {
-//       latitude: 43.2430969,
-//       longitude: -79.8037704,
-//     },
-//     features: [g],
-//   });
-// }
+});

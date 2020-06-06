@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import clsx from "clsx";
 import { makeStyles, useTheme } from "@material-ui/core/styles";
 import Drawer from "@material-ui/core/Drawer";
@@ -15,6 +15,9 @@ import { ArcgisMap } from "../../components/mapComonent/ArcgisMap";
 import RightPanelTabs from "../../components/rightPanel/rightPanel";
 import { DATA_POINT_GROUP_TYPES } from "../../constants/mapConstants";
 import { MapContext } from "../../context/mapContext";
+import { getDataByDate } from "../../utils/utilFunctions/backendUtils";
+import Spinner from "../../components/ui/spinner/Spinner";
+import { convertData } from "../../utils/utilFunctions/utilFunctions";
 
 const drawerWidth = 500;
 
@@ -75,12 +78,14 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function PersistentDrawerRight() {
+export default function Home() {
   const theme = useTheme();
   const { values, setters } = useContext(MapContext);
   const { openPanel } = values;
-  const { setOpenPanel } = setters;
+  const { setOpenPanel, setDataPoints } = setters;
 
+  const [isLoading, setIsLoading] = useState(false);
+  const [loadingMessage, setLoadingMessage] = useState(null);
   const handleDrawerOpen = () => {
     setOpenPanel(true);
   };
@@ -98,8 +103,44 @@ export default function PersistentDrawerRight() {
   const classes = useStyles();
   const [open, setOpen] = React.useState(false);
 
+  useEffect(() => {
+    const getAllData = async () => {
+      setLoadingMessage("0.00%");
+      try {
+        setIsLoading(true);
+        let allDataPoints = [];
+        let result = await getDataByDate();
+        debugger;
+        const count = result.count;
+        if (count === 0) {
+          return;
+        }
+        do {
+          const transferedData = result.results.map((data) => {
+            return convertData(data);
+          });
+          allDataPoints = [...allDataPoints, ...transferedData];
+          const loadingMessage = ((allDataPoints.length * 100) / count).toFixed(
+            2
+          );
+          setLoadingMessage(loadingMessage + "%");
+          result = await getDataByDate(result.next);
+        } while (result.next);
+        setDataPoints(allDataPoints);
+      } catch (error) {
+        console.log("error in getting data", error);
+      } finally {
+        setIsLoading(false);
+        setLoadingMessage(null);
+      }
+    };
+    getAllData();
+  }, [setDataPoints]);
   return (
     <div className={classes.root}>
+      {isLoading || values.isLoading ? (
+        <Spinner loadingMessage={loadingMessage || values.loadingMessage} />
+      ) : null}
       <CssBaseline />
       <AppBar
         position="fixed"

@@ -210,7 +210,7 @@ export function getDataPointGraphic(data, GraphicsClass, graphicsOptions) {
       for (const key in updatedData) {
         if (updatedData.hasOwnProperty(key)) {
           const element = updatedData[key];
-          if (element === "null") {
+          if (element === null) {
             updatedData[key] = "N / A";
           }
         }
@@ -234,7 +234,7 @@ export function getDataPointGraphic(data, GraphicsClass, graphicsOptions) {
         for (const key in updatedData) {
           if (updatedData.hasOwnProperty(key)) {
             const element = updatedData[key];
-            if (element === "null") {
+            if (element === null) {
               updatedData[key] = "N / A";
             }
           }
@@ -659,9 +659,12 @@ export function getFilteredData(data, filterType) {
   // return array of data points whose value of "flag" property is "R"
   switch (filterType) {
     case LAYER_FILTER_TYPES["Red Flag"].name:
-      filteredData = data.filter(
-        (d) => d[LAYER_FILTER_TYPES["Red Flag"].keyName].toLowerCase() === "r"
-      );
+      filteredData = data.filter((d) => {
+        if (!d[LAYER_FILTER_TYPES["Red Flag"].keyName]) {
+          debugger;
+        }
+        return d[LAYER_FILTER_TYPES["Red Flag"].keyName].toLowerCase() === "r";
+      });
       break;
     case LAYER_FILTER_TYPES["Yellow Flag"].name:
       filteredData = data.filter((d) =>
@@ -671,27 +674,27 @@ export function getFilteredData(data, filterType) {
     case LAYER_FILTER_TYPES.MMS.name:
       filteredData = data.filter(
         (d) =>
-          d[LAYER_FILTER_TYPES.MMS.keyName].toLowerCase() !== "null" &&
-          d["flag"] === "N"
+          d[LAYER_FILTER_TYPES.MMS.keyName] !== "N / A" &&
+          d["flag"].toLowerCase() === "n"
       );
       break;
     case LAYER_FILTER_TYPES.RRI.name:
       filteredData = data.filter(
         (d) =>
-          d[LAYER_FILTER_TYPES.RRI.keyName].toLowerCase() !== "null" &&
-          d["flag"] === "N"
+          d[LAYER_FILTER_TYPES.RRI.keyName] !== "N / A" &&
+          d["flag"].toLowerCase() === "n"
       );
       break;
     case LAYER_FILTER_TYPES["No Issues"].name:
       filteredData = data.filter(
         (d) =>
-          d["damage_type"].toLowerCase() === "null" &&
-          d["road_related_issues"] === "null".toLowerCase() &&
+          d["damage_type"] === "N / A" &&
+          d["road_related_issues"] === "N / A" &&
           d["flag"].toLowerCase() === "n"
       );
       break;
     default:
-      filteredData = data.filter((d) => d[filterType].toLowerCase() !== "null");
+      filteredData = data.filter((d) => d[filterType] !== null);
   }
   return filteredData;
 }

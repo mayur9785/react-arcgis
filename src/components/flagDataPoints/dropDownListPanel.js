@@ -8,6 +8,7 @@ import Collapse from "@material-ui/core/Collapse";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import { MapContext } from "../../context/mapContext";
+import { isEmptyObject } from "../../utils/utilFunctions/utilFunctions";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -72,19 +73,17 @@ function DropDownList(props) {
   );
 }
 export default function DropDownListPanel(props) {
-  const [open, setOpen] = React.useState(true);
-
   const { values } = useContext(MapContext);
 
-  const [filteredGroupData, setFilteredGroupData] = useState(null);
+  const [filteredGroupData, setFilteredGroupData] = useState([]);
 
   const { dataPoints } = values;
   useEffect(() => {
     const filteredData = dataPoints.filter(
-      (data) => data[props.filterType] !== "null"
+      (data) => data[props.filterType] !== "N / A"
     );
     const groupedData = filteredData.reduce((acc, element) => {
-      const timeString = element["create_time"];
+      const timeString = element["create_time"].split("T")[0];
       const key = timeString.split(" ")[0];
       const currentValues = acc[key] || [];
       currentValues.push(element);
@@ -92,28 +91,28 @@ export default function DropDownListPanel(props) {
     }, {});
     setFilteredGroupData(groupedData);
   }, [dataPoints]);
-  const handleClick = () => {
-    setOpen(!open);
-  };
-  if (filteredGroupData === null) {
-    return null;
-  }
   return (
     <div>
       <img
         width="100%"
         src="https://s3.ca-central-1.amazonaws.com/iport-images/media/Hamilton/2020/5/22/1a23dea6b787da3a/2020522_10517_yolo_out_py.png"
       />
-      {Object.keys(filteredGroupData).map((keyName) => (
-        <div key={keyName}>
-          <DropDownList
-            title={keyName}
-            data={filteredGroupData[keyName]}
-            logo={props.logo}
-            filterType={props.filterType}
-          />
+      {isEmptyObject(filteredGroupData) ? (
+        <h1>No MMS data found</h1>
+      ) : (
+        <div>
+          {Object.keys(filteredGroupData).map((keyName) => (
+            <div key={keyName}>
+              <DropDownList
+                title={keyName}
+                data={filteredGroupData[keyName]}
+                logo={props.logo}
+                filterType={props.filterType}
+              />
+            </div>
+          ))}
         </div>
-      ))}
+      )}
     </div>
   );
 }

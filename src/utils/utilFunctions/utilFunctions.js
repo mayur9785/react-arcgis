@@ -1,4 +1,7 @@
-import { DATA_POINT_GROUP_TYPES } from "../../constants/mapConstants";
+import {
+  DATA_POINT_GROUP_TYPES,
+  LAYER_FILTER_TYPES,
+} from "../../constants/mapConstants";
 
 export function isValidObj(obj) {
   return obj !== null && obj !== undefined;
@@ -58,5 +61,53 @@ export function leftJoin(left, right) {
 }
 
 export function isEmptyObject(object) {
-  return Object.keys(object).length === 0 && object.constructor === Object;
+  return (
+    isValidObj(object) &&
+    Object.keys(object).length === 0 &&
+    object.constructor === Object
+  );
+}
+
+/**
+ * conver data points to be used for front end
+ * ie: make all MMS and RRI from array to a single string value
+ *     and convert all numbers that would be displayed on
+ *     Arcgis map into strng values snce Arcgis libaray complains
+ *     about that
+ *
+ * @param {Object} data // data point from our backend, used to display data on Arcgis map
+ */
+export function convertData(data) {
+  // arcgis prefer strings instead of numbers
+  // when it create attributes for data
+  const idString = data.id.toString();
+  const latString = data.latitude.toString();
+  const longString = data.longitude.toString();
+
+  const damageTypes = data[LAYER_FILTER_TYPES.MMS.keyName];
+  const roadRelatedIssue = data[LAYER_FILTER_TYPES.RRI.keyName];
+  let damageTypeString = "N / A";
+  let roadRelatedIssueString = "N / A";
+  if (damageTypes.length !== 0) {
+    const dTypes = [];
+    for (const type of damageTypes) {
+      dTypes.push(type.name);
+    }
+    damageTypeString = dTypes.join(", ");
+  }
+  if (roadRelatedIssue.length !== 0) {
+    const issueStrings = [];
+    for (const issue of roadRelatedIssue) {
+      issueStrings.push(issue.issue);
+    }
+    roadRelatedIssueString = issueStrings.join(", ");
+  }
+  return {
+    ...data,
+    id: idString,
+    latitude: latString,
+    longitude: longString,
+    [LAYER_FILTER_TYPES.RRI.keyName]: roadRelatedIssueString,
+    [LAYER_FILTER_TYPES.MMS.keyName]: damageTypeString,
+  };
 }

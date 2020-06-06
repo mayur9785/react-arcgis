@@ -11,7 +11,9 @@ import { MapContext } from "../../context/mapContext";
 import DropDownListPanel from "../flagDataPoints/dropDownListPanel";
 import redFlag from "../../assets/arcgisMapIcons/mms_warning.jpg";
 import yellowFlag from "../../assets/arcgisMapIcons/rri_warning.jpg";
-
+import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
+import SearchRoundedIcon from "@material-ui/icons/SearchRounded";
+import { IrisIcon } from "../icon/irisIcon";
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
 
@@ -48,9 +50,10 @@ const useStyles = makeStyles((theme) => ({
   },
 
   tabStyle: {
-    "@media (min-width: 600px)": {
-      minWidth: "125px",
-    },
+    minWidth: "120px",
+    // "@media (min-width: 600px)": {
+    //   minWidth: "110px",
+    // },
   },
 }));
 export default function RightPanelTabs(props) {
@@ -68,16 +71,40 @@ export default function RightPanelTabs(props) {
 
   return (
     <div className={classes.root}>
-      <AppBar position="static">
+      <AppBar position="static" color="default">
         <Tabs
           value={selectedPanelIndex}
           onChange={handleChange}
+          variant="scrollable"
+          scrollButtons="on"
+          indicatorColor="primary"
+          textColor="primary"
           aria-label="iris arcgis map panel label"
         >
-          <Tab label="Filters" className={classes.tabStyle} {...a11yProps(0)} />
-          <Tab label="MMS" className={classes.tabStyle} {...a11yProps(1)} />
-          <Tab label="RRI" className={classes.tabStyle} {...a11yProps(2)} />
-          <Tab label="Details" className={classes.tabStyle} {...a11yProps(3)} />
+          <Tab
+            icon={<SearchRoundedIcon />}
+            label="Filters"
+            className={classes.tabStyle}
+            {...a11yProps(0)}
+          />
+          <Tab
+            icon={<IrisIcon src={redFlag} size={25} />}
+            label="MMS"
+            className={classes.tabStyle}
+            {...a11yProps(1)}
+          />
+          <Tab
+            icon={<img src={yellowFlag} width="25" />}
+            label="RRI"
+            className={classes.tabStyle}
+            {...a11yProps(2)}
+          />
+          <Tab
+            icon={<InfoOutlinedIcon />}
+            label="Details"
+            className={classes.tabStyle}
+            {...a11yProps(3)}
+          />
         </Tabs>
       </AppBar>
       <TabPanel value={selectedPanelIndex} index={0}>

@@ -613,6 +613,12 @@ export const ArcgisMap = React.memo((props) => {
           map.remove(currentDataPointLayer);
         }
         map.add(updatedDataPointGroupLayer);
+        const updatedGroupLayers = allGroupLayers.filter(
+          (layer) => layer.id !== currentDataPointLayer.id
+        );
+        updatedGroupLayers.push(updatedDataPointGroupLayer);
+        setAllGroupLayers(updatedGroupLayers);
+        const a = 10;
       });
     }
   }, [dataGroupType]);
@@ -626,6 +632,7 @@ export const ArcgisMap = React.memo((props) => {
 
   useEffect(() => {
     console.log(TAG, "useEffect, layerFilterTypes: ", layerFilterTypes);
+    debugger;
     toggleSublayers(layerFilterTypes);
   }, [layerFilterTypes]);
   function getDataIdFromPopup(popup) {

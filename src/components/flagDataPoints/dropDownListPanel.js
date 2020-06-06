@@ -9,6 +9,7 @@ import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import { MapContext } from "../../context/mapContext";
 import { isEmptyObject } from "../../utils/utilFunctions/utilFunctions";
+import { IrisIcon } from "../icon/irisIcon";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -98,7 +99,13 @@ export default function DropDownListPanel(props) {
         src="https://s3.ca-central-1.amazonaws.com/iport-images/media/Hamilton/2020/5/22/1a23dea6b787da3a/2020522_10517_yolo_out_py.png"
       />
       {isEmptyObject(filteredGroupData) ? (
-        <h1>No MMS data found</h1>
+        <div>
+          <h1>No data found</h1>
+          <IrisIcon
+            src="https://irisradgroup.maps.arcgis.com/sharing/rest/content/items/1402078d37094752a3632510e7006123/data"
+            size={250}
+          />
+        </div>
       ) : (
         <div>
           {Object.keys(filteredGroupData).map((keyName) => (

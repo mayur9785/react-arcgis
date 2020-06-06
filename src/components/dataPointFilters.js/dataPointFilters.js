@@ -23,10 +23,14 @@ import { LAYER_TYPES } from "../../containers/mapUtils/mapUtils";
 import { MapContext } from "../../context/mapContext";
 import { Button } from "@material-ui/core";
 import { getDataByDate } from "../../utils/utilFunctions/backendUtils";
-import { convertData } from "../../utils/utilFunctions/utilFunctions";
+import {
+  convertData,
+  getReadableDate,
+} from "../../utils/utilFunctions/utilFunctions";
+import AlertDialog from "../dialog/dialog";
 export function DataPointFilters(props) {
   const { values, setters } = useContext(MapContext);
-
+  const [alertObject, setAlertObject] = useState(null);
   const {
     mapType,
     dataGroupType,
@@ -92,6 +96,10 @@ export function DataPointFilters(props) {
       let result = await getDataByDate(null, selectedDate);
       const count = result.count;
       if (count === 0) {
+        setAlertObject({
+          title: "No data found",
+          message: `No data found on ${getReadableDate(selectedDate)}`,
+        });
         return;
       }
       do {
@@ -106,6 +114,10 @@ export function DataPointFilters(props) {
       setters.setDataPoints(allData);
     } catch (error) {
       console.log("Error in searching data points", error);
+      setAlertObject({
+        title: "Error in searching data points",
+        message: `Error:  ${error.message}`,
+      });
     } finally {
       setters.setIsLoading(false);
       setters.setLoadingMessage(null);
@@ -113,6 +125,11 @@ export function DataPointFilters(props) {
   }
   return (
     <FormGroup>
+      <AlertDialog
+        open={alertObject !== null}
+        dialogOptions={alertObject}
+        closeDialog={() => setAlertObject(null)}
+      />
       <FormControl fullWidth style={{ marginBottom: "1rem" }}>
         <InputLabel id="arcgis-map-type-label">Map Type</InputLabel>
         <Select

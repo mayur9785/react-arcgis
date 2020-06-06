@@ -111,3 +111,10 @@ export function convertData(data) {
     [LAYER_FILTER_TYPES.MMS.keyName]: damageTypeString,
   };
 }
+
+export function getReadableDate(date) {
+  const monthString = new Intl.DateTimeFormat("en-US", {
+    month: "short",
+  }).format(date);
+  return `${monthString} ${date.getDate()}, ${date.getFullYear()}`;
+}

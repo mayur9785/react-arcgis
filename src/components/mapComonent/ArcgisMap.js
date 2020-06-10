@@ -3,7 +3,11 @@ import { loadModules } from "esri-loader";
 import shapeGeoJson from "../mapComonent/hamiltonDataFilterDemo/Muskoka_Road_Network.json";
 // import dataPointJson from "../mapComonent/hamiltonDataFilterDemo/data.json";
 
-import { LAYER_FILTER_TYPES } from "../../constants/mapConstants";
+import {
+  LAYER_FILTER_TYPES,
+  ROAD_LEGENT_COLORS,
+  ROAD_TYPES,
+} from "../../constants/mapConstants";
 import {
   getBaseMap,
   getMapView,
@@ -77,7 +81,8 @@ function getRoadFeatureLayerRenderer(legendName) {
       // autocasts as new SimpleMarkerSymbol()
       type: "simple-line",
       // color: [208, 2, 5, 0.8],
-      color: getRandomRGB(0.8),
+      // color: getRandomRGB(0.8),
+      color: ROAD_LEGENT_COLORS[legendName.toLowerCase()],
       width: 2,
     },
     label: legendName, // lagend name for renderer (legend)
@@ -87,23 +92,57 @@ function getRoadFeatureLayerRenderer(legendName) {
 // function for property listItemCreatedFunction
 // of layer list
 const panelFunction = (event) => {
-  // const item = event.item;
+  const item = event.item;
   // item.open = false;
   // // displays the legend for each layer list item
   // item.panel = {
   //   content: ["legend"],
   // };
+  Object.keys(LAYER_TYPES).map((key) => {
+    debugger;
+    if (LAYER_TYPES[key].toLowerCase() === item.layer.id.toLowerCase()) {
+      item.panel = {
+        content: ["legend"],
+      };
+    }
+  });
   // The event object contains an item property.
   // is is a ListItem referencing the associated layer
   // and other properties. You can control the visibility of the
   // item, its title, and actions using this object.
 
-  const item = event.item;
-  item.open = false;
+  item.open = true;
   // displays the legend for each layer list item
-  item.panel = {
-    content: ["legend"],
-  };
+  // item.panel = {
+  //   content: ["legend"],
+  // };
+  debugger;
+  if (
+    Object.keys(LAYER_FILTER_TYPES).indexOf(item.layer.id) > -1 ||
+    ROAD_TYPES.indexOf(item.layer.id.toLowerCase()) > -1
+  ) {
+    item.actionsSections = [
+      [
+        {
+          title: "Go to full extent",
+          className: "esri-icon-zoom-out-fixed",
+          id: "full-extent",
+        },
+      ],
+      [
+        {
+          title: "Increase opacity",
+          className: "esri-icon-up",
+          id: "increase-opacity",
+        },
+        {
+          title: "Decrease opacity",
+          className: "esri-icon-down",
+          id: "decrease-opacity",
+        },
+      ],
+    ];
+  }
 };
 
 export const ArcgisMap = React.memo((props) => {
@@ -114,17 +153,12 @@ export const ArcgisMap = React.memo((props) => {
     dataGroupType,
     layerFilterTypes,
     selectedData,
-    selectedDate,
     selectedLayers,
     zoomToSelectedData,
     dataPoints,
   } = values;
   const {
-    setMapType,
-    setDataGroupType,
     setSelectedData,
-    setSelectedDate,
-    setSelectedLayers,
     setZoomToSelectedData,
     setOpenPanel,
     setSelectedPanelIndex,
@@ -297,7 +331,7 @@ export const ArcgisMap = React.memo((props) => {
         }
         const subgroupLayer = new GroupLayerClass({
           id: key, // id for sub group layer
-          title: `${key}:\n(filter by ${filterType})`,
+          title: key,
           layers: featureLayers,
         });
         groupLayers.push(subgroupLayer);
@@ -326,11 +360,12 @@ export const ArcgisMap = React.memo((props) => {
         "esri/layers/FeatureLayer",
         "esri/widgets/LayerList",
         "esri/layers/GroupLayer",
+        "esri/widgets/Legend",
       ],
       {
         css: true,
       }
-    ).then(async ([Graphic, FeatureLayer, LayerList, GroupLayer]) => {
+    ).then(async ([Graphic, FeatureLayer, LayerList, GroupLayer, Legend]) => {
       console.log("arcgis rendering map itselve");
       const allLayers = [];
       // instantiate map
@@ -450,6 +485,45 @@ export const ArcgisMap = React.memo((props) => {
         // },
       });
 
+      roadTypesLayerList.on("trigger-action", function (event) {
+        // console.log("event", event);
+        // The layer visible in the view at the time of the trigger.
+        // var visibleLayer = USALayer.visible ? USALayer : censusLayer;
+
+        // Capture the action id.
+        var id = event.action.id;
+
+        const item = event.item;
+
+        // make layer visible if it is not
+        const visible = item.visible;
+        if (!visible) {
+          item.visible = true;
+        }
+
+        if (id === "full-extent") {
+          view.goTo(item.layer.fullExtent).catch(function (error) {
+            if (error.name != "AbortError") {
+              console.error(error);
+            }
+          });
+        } else if (id === "increase-opacity") {
+          // if the increase-opacity action is triggered, then
+          // increase the opacity of the GroupLayer by 0.25
+
+          if (item.layer.opacity < 1) {
+            item.layer.opacity += 0.25;
+          }
+        } else if (id === "decrease-opacity") {
+          // if the decrease-opacity action is triggered, then
+          // decrease the opacity of the GroupLayer by 0.25
+
+          if (item.layer.opacity > 0) {
+            item.layer.opacity -= 0.25;
+          }
+        }
+      });
+
       setLayerList(roadTypesLayerList);
 
       // put layer list on top-left corner on the map view
@@ -470,6 +544,17 @@ export const ArcgisMap = React.memo((props) => {
 
       setAllGroupLayers(allLayers);
       debugger;
+
+      var legend = new Legend({
+        view: view,
+        // layerInfos: [
+        //   {
+        //     layer: allLayers,
+        //     title: "Legend",
+        //   },
+        // ],
+      });
+      view.ui.add(legend, "bottom-right");
       return () => {
         if (view) {
           view.container = null;

@@ -6,7 +6,20 @@
       name="viewport"
       content="initial-scale=1, maximum-scale=1,user-scalable=no"
     />
-    <title>FeatureTable widget with a map - 4.15</title>
+
+    <title>LayerList widget with actions - 4.15</title>
+
+    <style>
+      html,
+      body,
+      #viewDiv {
+        padding: 0;
+        margin: 0;
+        height: 100%;
+        width: 100%;
+        overflow: hidden;
+      }
+    </style>
 
     <link
       rel="stylesheet"
@@ -14,104 +27,153 @@
     />
     <script src="https://js.arcgis.com/4.15/"></script>
 
-    <style>
-      html,
-      body {
-        height: 100%;
-        width: 100%;
-        margin: 0;
-        padding: 0;
-      }
-
-      #viewDiv {
-        height: 50%;
-        width: 100%;
-      }
-
-      #zoom {
-        margin-bottom: 5px;
-      }
-
-      #actions {
-        padding: 5px;
-      }
-
-      .container {
-        height: 50%;
-        width: 100%;
-      }
-    </style>
     <script>
       require([
-        "esri/WebMap",
+        "esri/Map",
         "esri/views/MapView",
-        "esri/layers/FeatureLayer",
-        "esri/widgets/FeatureTable",
-        "esri/geometry/Point",
-        "esri/geometry/Multipoint",
-      ], function (
-        WebMap,
-        MapView,
-        FeatureLayer,
-        FeatureTable,
-        Point,
-        Multipoint
-      ) {
-        const highlights = [];
-        const webmap = new WebMap({
-          portalItem: {
-            id: "3c245fe893234d4f85e4edaa41a9e0bf",
-          },
+        "esri/layers/GroupLayer",
+        "esri/layers/MapImageLayer",
+        "esri/widgets/LayerList",
+      ], function (Map, MapView, GroupLayer, MapImageLayer, LayerList) {
+        // Create layer showing sample data of the United States.
+
+        var USALayer = new MapImageLayer({
+          url:
+            "http://sampleserver6.arcgisonline.com/arcgis/rest/services/USA/MapServer",
+          title: "US Sample Data",
         });
 
-        let view = new MapView({
-          container: "viewDiv",
-          map: webmap,
-          popup: {
-            autoOpenEnabled: false,
-          }, //disable popups
+        // Create layer showing sample census data of the United States.
+        // Set visibility to false so it's not visible on startup.
+
+        var censusLayer = new MapImageLayer({
+          url:
+            "http://sampleserver6.arcgisonline.com/arcgis/rest/services/Census/MapServer",
+          title: "US Sample Census",
+          visible: false,
         });
+
+        // Create GroupLayer with the two MapImageLayers created above
+        // as children layers.
+
+        var demographicGroupLayer = new GroupLayer({
+          title: "US Demographics",
+          visible: true,
+          visibilityMode: "exclusive",
+          layers: [USALayer, censusLayer],
+          opacity: 0.75,
+        });
+
+        // Create a map and add the group layer to it
+
+        var map = new Map({
+          basemap: "dark-gray",
+          layers: [demographicGroupLayer],
+        });
+
+        // Add the map to a MapView
+
+        var view = new MapView({
+          center: [-98.5795, 39.8282],
+          zoom: 5,
+          container: "viewDiv",
+          map: map,
+        });
+
+        // Creates actions in the LayerList.
+
+        function defineActions(event) {
+          // The event object contains an item property.
+          // is is a ListItem referencing the associated layer
+          // and other properties. You can control the visibility of the
+          // item, its title, and actions using this object.
+
+          var item = event.item;
+
+          if (item.title === "US Demographics") {
+            // An array of objects defining actions to place in the LayerList.
+            // By making this array two-dimensional, you can separate similar
+            // actions into separate groups with a breaking line.
+
+            item.actionsSections = [
+              [
+                {
+                  title: "Go to full extent",
+                  className: "esri-icon-zoom-out-fixed",
+                  id: "full-extent",
+                },
+                {
+                  title: "Layer information",
+                  className: "esri-icon-description",
+                  id: "information",
+                },
+              ],
+              [
+                {
+                  title: "Increase opacity",
+                  className: "esri-icon-up",
+                  id: "increase-opacity",
+                },
+                {
+                  title: "Decrease opacity",
+                  className: "esri-icon-down",
+                  id: "decrease-opacity",
+                },
+              ],
+            ];
+          }
+        }
 
         view.when(function () {
-          const featureLayer = webmap.layers.getItemAt(0); //grabs the first layer in the map
-          featureLayer.title = "USFS Recreational areas";
+          // Create the LayerList widget with the associated actions
+          // and add it to the top-right corner of the view.
 
-          // Create the feature table
-          const featureTable = new FeatureTable({
-            layer: featureLayer,
-            // Autocast the FieldColumnConfigs
-            fieldConfigs: [
-              {
-                name: "RECAREANAM",
-                label: "Recreation area name",
-              },
-              {
-                name: "FORESTNAME",
-                label: "Forest name",
-                direction: "asc",
-              },
-              {
-                name: "OPENSTATUS",
-                label: "Open status",
-              },
-              {
-                name: "OPEN_SEASO",
-                label: "Season begins",
-              },
-              {
-                name: "RECAREADES",
-                label: "Recreation description",
-              },
-              {
-                name: "RESTRICTIO",
-                label: "Restrictions",
-              },
-            ],
-            container: document.getElementById("tableDiv"),
+          var layerList = new LayerList({
+            view: view,
+            // executes for each ListItem in the LayerList
+            listItemCreatedFunction: defineActions,
           });
 
-          // Add buttons to the mapView
-          view.ui.add(document.getElementById("actions"), "top-right");
+          // Event listener that fires each time an action is triggered
+
+          layerList.on("trigger-action", function (event) {
+            // The layer visible in the view at the time of the trigger.
+            var visibleLayer = USALayer.visible ? USALayer : censusLayer;
+
+            // Capture the action id.
+            var id = event.action.id;
+
+            if (id === "full-extent") {
+              // if the full-extent action is triggered then navigate
+              // to the full extent of the visible layer
+              view.goTo(visibleLayer.fullExtent).catch(function (error) {
+                if (error.name != "AbortError") {
+                  console.error(error);
+                }
+              });
+            } else if (id === "information") {
+              // if the information action is triggered, then
+              // open the item details page of the service layer
+              window.open(visibleLayer.url);
+            } else if (id === "increase-opacity") {
+              // if the increase-opacity action is triggered, then
+              // increase the opacity of the GroupLayer by 0.25
+
+              if (demographicGroupLayer.opacity < 1) {
+                demographicGroupLayer.opacity += 0.25;
+              }
+            } else if (id === "decrease-opacity") {
+              // if the decrease-opacity action is triggered, then
+              // decrease the opacity of the GroupLayer by 0.25
+
+              if (demographicGroupLayer.opacity > 0) {
+                demographicGroupLayer.opacity -= 0.25;
+              }
+            }
+          });
+
+          // Add widget to the top right corner of the view
+          view.ui.add(layerList, "top-right");
         });
       });
     </script>
@@ -119,12 +181,5 @@
 
   <body>
     <div id="viewDiv"></div>
-    <div class="container">
-      <div id="tableDiv"></div>
-    </div>
-    <div id="actions" class="esri-widget">
-      <button class="esri-button" id="zoom">Zoom to selected feature</button>
-      <button class="esri-button" id="fullextent">Full extent</button>
-    </div>
   </body>
 </html>

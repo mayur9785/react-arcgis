@@ -20,6 +20,23 @@ export const DATA_POINT_GROUP_TYPES = {
   PCI: "PCI",
 };
 
+// legend color for different road types
+export const ROAD_LEGENT_COLORS = {
+  township: [237, 81, 81],
+  private: [20, 158, 206],
+  district: [167, 198, 54],
+  provincial: [158, 85, 156],
+  proposed: [252, 146, 31],
+};
+
+export const ROAD_TYPES = [
+  "township",
+  "private",
+  "district",
+  "provincial",
+  "proposed",
+];
+
 /**
  * filter data on arcgis based on whether
  * there is deffects, road issues, marked with flas

@@ -4,12 +4,17 @@ import List from "@material-ui/core/List";
 import ListItem from "@material-ui/core/ListItem";
 import ListItemIcon from "@material-ui/core/ListItemIcon";
 import ListItemText from "@material-ui/core/ListItemText";
+
+import ListItemSecondaryAction from "@material-ui/core/ListItemSecondaryAction";
 import Collapse from "@material-ui/core/Collapse";
 import ExpandLess from "@material-ui/icons/ExpandLess";
 import ExpandMore from "@material-ui/icons/ExpandMore";
 import { MapContext } from "../../context/mapContext";
 import { isEmptyObject } from "../../utils/utilFunctions/utilFunctions";
 import { IrisIcon } from "../icon/irisIcon";
+import muskokaLakeLogo from "../../assets/logo/township_of_muskoka_lakes.jpg";
+import { Grid } from "@material-ui/core";
+import { LAYER_FILTER_TYPES } from "../../constants/mapConstants";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -47,7 +52,18 @@ function DropDownList(props) {
           <img src={logo} height={25} />
         </ListItemIcon>
         <ListItemText primary={`On ${title}`} />
-        {open ? <ExpandLess /> : <ExpandMore />}
+        <ListItemSecondaryAction>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <h3>{data.length}</h3>
+            {open ? <ExpandLess /> : <ExpandMore />}
+          </div>
+        </ListItemSecondaryAction>
       </ListItem>
       <Collapse in={open} timeout="auto" unmountOnExit>
         {data.map((d, index) => (
@@ -94,10 +110,21 @@ export default function DropDownListPanel(props) {
   }, [dataPoints]);
   return (
     <div>
-      <img
-        width="100%"
-        src="https://s3.ca-central-1.amazonaws.com/iport-images/media/Hamilton/2020/5/22/1a23dea6b787da3a/2020522_10517_yolo_out_py.png"
-      />
+      <Grid
+        container
+        justify="center"
+        alignItems="center"
+        style={{ background: "rgba(72,85,102,0.9)", padding: "1rem 2rem" }}
+      >
+        <img width="100%" src={muskokaLakeLogo} />
+        <p
+          style={{ fontSize: "1rem", color: "#ffffff", margin: "1rem 0 0 0 " }}
+        >
+          {props.filterType === LAYER_FILTER_TYPES.MMS.keyName
+            ? "MMS Defects"
+            : "Road Related Issues"}
+        </p>
+      </Grid>
       {isEmptyObject(filteredGroupData) ? (
         <div>
           <h1>No data found</h1>

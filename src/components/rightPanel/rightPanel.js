@@ -15,8 +15,7 @@ import InfoOutlinedIcon from "@material-ui/icons/InfoOutlined";
 import SearchRoundedIcon from "@material-ui/icons/SearchRounded";
 import { IrisIcon } from "../icon/irisIcon";
 function TabPanel(props) {
-  const { children, value, index, ...other } = props;
-
+  const { children, value, index, boxPadding, ...other } = props;
   return (
     <div
       role="tabpanel"
@@ -25,7 +24,9 @@ function TabPanel(props) {
       aria-labelledby={`simple-tab-${index}`}
       {...other}
     >
-      {value === index && <Box p={3}>{children}</Box>}
+      {value === index && (
+        <Box p={boxPadding === undefined ? 3 : boxPadding}>{children}</Box>
+      )}
     </div>
   );
 }
@@ -110,10 +111,10 @@ export default function RightPanelTabs(props) {
       <TabPanel value={selectedPanelIndex} index={0}>
         <DataPointFilters />
       </TabPanel>
-      <TabPanel value={selectedPanelIndex} index={1}>
+      <TabPanel boxPadding={0} value={selectedPanelIndex} index={1}>
         <DropDownListPanel logo={redFlag} filterType="damage_type" />
       </TabPanel>
-      <TabPanel value={selectedPanelIndex} index={2}>
+      <TabPanel boxPadding={0} value={selectedPanelIndex} index={2}>
         <DropDownListPanel logo={yellowFlag} filterType="road_related_issues" />
       </TabPanel>
 

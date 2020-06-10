@@ -108,7 +108,7 @@ export function DataPointFilters(props) {
         );
         allData = [...allData, ...transormedDataPoints];
         const updatedPercentage = ((allData.length * 100) / count).toFixed(2);
-        setters.setLoadingMessage(updatedPercentage);
+        setters.setLoadingMessage(`${updatedPercentage} %`);
         result = await getDataByDate(result.next);
       } while (result.next);
       setters.setDataPoints(allData);

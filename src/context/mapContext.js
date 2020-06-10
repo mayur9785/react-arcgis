@@ -25,6 +25,7 @@ export function MapContextProvider(props) {
   const [selectedDate, setSelectedDate] = useState(new Date());
 
   const [selectedLayers, setSelectedLayers] = useState([
+    LAYER_TYPES.ROAD_LAYER,
     LAYER_TYPES.DATA_POINT_LAYER,
   ]);
 

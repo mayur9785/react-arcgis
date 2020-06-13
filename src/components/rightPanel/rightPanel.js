@@ -72,7 +72,7 @@ export default function RightPanelTabs(props) {
 
   return (
     <div className={classes.root}>
-      <AppBar position="static" color="default">
+      <AppBar position="static" color="default" style = {{height: "64px"}}>
         <Tabs
           value={selectedPanelIndex}
           onChange={handleChange}

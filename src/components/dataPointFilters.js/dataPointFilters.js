@@ -229,7 +229,7 @@ export function DataPointFilters(props) {
           </FormControl>
 
           <InputLabel style={{ textAlign: "left" }} id="filterDateTypeLabel">
-            Sublayers
+            Data Point Sublayers
           </InputLabel>
           <FormGroup row>
             {Object.keys(LAYER_FILTER_TYPES).map((filterType) => (

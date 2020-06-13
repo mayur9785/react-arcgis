@@ -152,15 +152,26 @@ export default function Home() {
           <Typography variant="h6" noWrap className={classes.title}>
             Iris Arcgis Portal
           </Typography>
-          <IconButton
+         {!openPanel ? 
+         <IconButton
             color="inherit"
             aria-label="open drawer"
             edge="end"
             onClick={handleDrawerOpen}
-            className={clsx(open && classes.hide)}
-          >
-            <MenuIcon />
-          </IconButton>
+            // className={clsx(openPanel && classes.hide)}
+          > 
+          <MenuIcon /> 
+          </IconButton> 
+          :
+            <IconButton
+            color="inherit"
+            aria-label="close drawer"
+            edge="end"
+            onClick={handleDrawerClose}
+            // className={clsx(openPanel && classes.hide)}
+          > 
+          <ChevronRightIcon />
+          </IconButton>}
         </Toolbar>
       </AppBar>
       <main
@@ -184,7 +195,7 @@ export default function Home() {
           paper: classes.drawerPaper,
         }}
       >
-        <div className={classes.drawerHeader}>
+        {/* <div className={classes.drawerHeader}>
           <IconButton onClick={handleDrawerClose}>
             {theme.direction === "rtl" ? (
               <ChevronLeftIcon />
@@ -192,9 +203,8 @@ export default function Home() {
               <ChevronRightIcon />
             )}
           </IconButton>
-          <h1>filter</h1>
-        </div>
-        <Divider />
+          <p>filter</p>
+        </div> */}
         <RightPanelTabs
           updateSelectedLayers={setSelectedLayers}
           updateFilterType={setSelectedFilterType}

@@ -15,7 +15,6 @@ import {
   getReducedPaths,
   getGraphicObj,
   LAYER_TYPES,
-  getRandomRGB,
   getSimpleMarkerSymbol,
   getIconRenderer,
   getGroupedDataPoints,
@@ -38,15 +37,6 @@ const roadGraphicOptions = {
   },
 };
 
-// const getRoadGraphicOptions = () => ({
-//   graphicType: "polyline",
-//   graphicSymbol: {
-//     type: "simple-line",
-//     // color: [208, 2, 5, 0.8], // orange
-//     color: getRandomRGB(0.8),
-//     width: 2,
-//   },
-// });
 
 const getFieldTitles = (properties) => {
   const fieldInfos = [];
@@ -89,17 +79,20 @@ function getRoadFeatureLayerRenderer(legendName) {
   };
 }
 
-// function for property listItemCreatedFunction
-// of layer list
+/**
+ * defined panel function names for layer list widget
+ * note: only the names of the functions, functionalities
+ * are defined on its on("trigger-action") function
+ * 
+ * @param {Event} event 
+ */
 const panelFunction = (event) => {
   const item = event.item;
-  // item.open = false;
-  // // displays the legend for each layer list item
-  // item.panel = {
-  //   content: ["legend"],
-  // };
+
+  // add button to show legend ONLY for root group layer
+  // IE: road type later and data point layer
+  // not any of their sub layers
   Object.keys(LAYER_TYPES).map((key) => {
-    debugger;
     if (LAYER_TYPES[key].toLowerCase() === item.layer.id.toLowerCase()) {
       item.panel = {
         content: ["legend"],
@@ -112,11 +105,9 @@ const panelFunction = (event) => {
   // item, its title, and actions using this object.
 
   item.open = true;
-  // displays the legend for each layer list item
-  // item.panel = {
-  //   content: ["legend"],
-  // };
-  debugger;
+
+  // add actions buttons for each feature layers
+  // NOT their root group layer
   if (
     Object.keys(LAYER_FILTER_TYPES).indexOf(item.layer.id) > -1 ||
     ROAD_TYPES.indexOf(item.layer.id.toLowerCase()) > -1
@@ -146,7 +137,6 @@ const panelFunction = (event) => {
 };
 
 export const ArcgisMap = React.memo((props) => {
-  console.log(TAG, "METHOD is called");
   const { values, setters } = useContext(MapContext);
   const {
     mapType,
@@ -171,6 +161,19 @@ export const ArcgisMap = React.memo((props) => {
 
   const [allGroupLayers, setAllGroupLayers] = useState([]);
 
+  /**
+   * get a group layer which contains some sub group layers
+   * in which there are some feacture layers that have been 
+   * configured with graphics, legends and pop ups to be 
+   * display on the map view.
+   * 
+   * 
+   * @param {String} id
+   * @param {String} filterType 
+   * @param {Class} GraphicClass Graphic class to generate graphic
+   * @param {Class} FeatureLayerClass 
+   * @param {Class} GroupLayerClass 
+   */
   function getDataPointGroupLayer(
     id, // id for the root group layer
     filterType,
@@ -186,7 +189,7 @@ export const ArcgisMap = React.memo((props) => {
       return {};
     }
 
-    // get groupedDataPoints as
+    // groupd data points into the form of
     // {
     //   filterTypeKey0 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
     //   filterTypeKey1 : { no issues: [dataPoints], rri: [dataPoints] mms: [dataPoints] red flag: [dataPoints] yellow falg: [dataPoints] },
@@ -195,7 +198,7 @@ export const ArcgisMap = React.memo((props) => {
     // }
     // const groupedDataPoints = getGroupedDataPoints(filterType, dataPointJson);
     const groupedDataPoints = getGroupedDataPoints(filterType, dataPoints);
-    debugger;
+
     // get groupedDataPointsGraphics as
     // {
     //   filterTypeKey0 : { no issues: [graphicObjects], rri: [graphicObjects] mms: [graphicObjects] red flag: [graphicObjects] yellow falg: [graphicObjects] },
@@ -223,6 +226,8 @@ export const ArcgisMap = React.memo((props) => {
         for (const dataPointTitle in element) {
           if (element.hasOwnProperty(dataPointTitle)) {
             const pathsGraphics = element[dataPointTitle];
+            // renderer for feature layer to show datapoint on
+            // map
             let featureLayerRenderer = {};
             switch (dataPointTitle) {
               case LAYER_FILTER_TYPES["Red Flag"].name:
@@ -249,11 +254,21 @@ export const ArcgisMap = React.memo((props) => {
                 };
             }
 
+            // get feature layer for graphics
             const roadTypeFeatureLayer = new FeatureLayerClass({
               id: dataPointTitle,
               title: dataPointTitle,
               source: pathsGraphics,
               renderer: featureLayerRenderer,
+
+              // here all variables in form of {variable_name}
+              // corresponds to the key name of a datapoint
+              // that consist the pathGraphics as srouce of this
+              // feature layer, so that correspoinding value would 
+              // be render on the popup template.
+              // However, you have to specify all the varialbes that would
+              // be used on this popup template on this feature layer's fields
+              // property, otherwise, it would not be rendered.
               popupTemplate: {
                 title: "( {latitude}, {longitude} )",
                 content: [
@@ -279,6 +294,9 @@ export const ArcgisMap = React.memo((props) => {
                     ],
                   },
                 ],
+
+                // button on popup template that could be used to
+                // trigger custom functionality
                 actions: [
                   {
                     title: "Details",
@@ -287,6 +305,12 @@ export const ArcgisMap = React.memo((props) => {
                   },
                 ],
               },
+
+              // values to be dsiplay on the popup template. Name 
+              // is the key name of a property of a datapoint that is used
+              // to construct the pathsGraphics which is the source of the 
+              // feature layer, in this way, the corresponding value of the
+              // key name would be render on the popup template
               fields: [
                 {
                   name: "id",
@@ -360,12 +384,11 @@ export const ArcgisMap = React.memo((props) => {
         "esri/layers/FeatureLayer",
         "esri/widgets/LayerList",
         "esri/layers/GroupLayer",
-        "esri/widgets/Legend",
       ],
       {
         css: true,
       }
-    ).then(async ([Graphic, FeatureLayer, LayerList, GroupLayer, Legend]) => {
+    ).then(async ([Graphic, FeatureLayer, LayerList, GroupLayer]) => {
       console.log("arcgis rendering map itselve");
       const allLayers = [];
       // instantiate map
@@ -387,7 +410,7 @@ export const ArcgisMap = React.memo((props) => {
 
       // get values for roadPaths, boundary center and reducedPaths
       shapeGeoJson.features.map((feature, index) => {
-        const coordinates = feature.geometry.coordinates;
+        // const coordinates = feature.geometry.coordinates;
         roadsPaths.push({
           coordinates: feature.geometry.coordinates,
           properties: { ID: index, ...feature.properties },
@@ -451,7 +474,7 @@ export const ArcgisMap = React.memo((props) => {
 
       // a group layer contains all the road type
       // feature layers
-      const roadTypesGroupLayer = new GroupLayer({
+      const roadGroupLayer = new GroupLayer({
         id: LAYER_TYPES.ROAD_LAYER,
         title: LAYER_TYPES.ROAD_LAYER,
         layers: roadLayers,
@@ -466,26 +489,19 @@ export const ArcgisMap = React.memo((props) => {
         FeatureLayer,
         GroupLayer
       );
-      allLayers.push(roadTypesGroupLayer);
+      allLayers.push(roadGroupLayer);
       allLayers.push(dataPointGroupLayer);
 
       // generate layer list that shows basic info, layer's name,
       // each layer's legend names and associated legend colors
       // and icon for toggling visibility of each layer
-      const roadTypesLayerList = new LayerList({
+      const irisMapLayerList = new LayerList({
         view: view,
         listItemCreatedFunction: panelFunction,
-        // listItemCreatedFunction: function (event) {
-        //   const item = event.item;
-        //   item.open = true;
-        //   // displays the legend for each layer list item
-        //   item.panel = {
-        //     content: ["legend"],
-        //   };
-        // },
       });
 
-      roadTypesLayerList.on("trigger-action", function (event) {
+// define functions  for custom actions on layer list
+      irisMapLayerList.on("trigger-action", function (event) {
         // console.log("event", event);
         // The layer visible in the view at the time of the trigger.
         // var visibleLayer = USALayer.visible ? USALayer : censusLayer;
@@ -495,7 +511,7 @@ export const ArcgisMap = React.memo((props) => {
 
         const item = event.item;
 
-        // make layer visible if it is not
+        // make feature layer visible if it is not
         const visible = item.visible;
         if (!visible) {
           item.visible = true;
@@ -524,10 +540,10 @@ export const ArcgisMap = React.memo((props) => {
         }
       });
 
-      setLayerList(roadTypesLayerList);
+      // setLayerList(irisMapLayerList);
 
       // put layer list on top-left corner on the map view
-      view.ui.add(roadTypesLayerList, "top-left");
+      view.ui.add(irisMapLayerList, "top-left");
 
       // add custom actionable buttons on each popup
       view.popup.on("trigger-action", function (event) {
@@ -541,20 +557,9 @@ export const ArcgisMap = React.memo((props) => {
       // add or remove layers from map view based on
       // selected layers
       toggleFeatureLayers(map, allLayers, selectedLayers);
-
+debugger
       setAllGroupLayers(allLayers);
-      debugger;
 
-      var legend = new Legend({
-        view: view,
-        // layerInfos: [
-        //   {
-        //     layer: allLayers,
-        //     title: "Legend",
-        //   },
-        // ],
-      });
-      view.ui.add(legend, "bottom-right");
       return () => {
         if (view) {
           view.container = null;
@@ -619,7 +624,7 @@ export const ArcgisMap = React.memo((props) => {
   };
 
   useEffect(() => {
-    console.log(TAG, "useEffect, selectedLayers: ", selectedLayers);
+    debugger
     toggleFeatureLayers(map, allGroupLayers, selectedLayers);
   }, [selectedLayers]);
 
@@ -674,6 +679,8 @@ export const ArcgisMap = React.memo((props) => {
       setZoomToSelectedData(false);
     }
   }, [zoomToSelectedData, selectedData]);
+
+  
   useEffect(() => {
     console.log(TAG, "useEffect, dataGroupType: ", dataGroupType);
     if (map) {
@@ -703,7 +710,6 @@ export const ArcgisMap = React.memo((props) => {
         );
         updatedGroupLayers.push(updatedDataPointGroupLayer);
         setAllGroupLayers(updatedGroupLayers);
-        const a = 10;
       });
     }
   }, [dataGroupType]);

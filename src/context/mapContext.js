@@ -5,7 +5,6 @@ import {
   LAYER_FILTER_TYPES,
 } from "../constants/mapConstants";
 import { LAYER_TYPES } from "../containers/mapUtils/mapUtils";
-import data from "../components/mapComonent/hamiltonDataFilterDemo/data.json";
 export const MapContext = createContext();
 
 export function MapContextProvider(props) {
